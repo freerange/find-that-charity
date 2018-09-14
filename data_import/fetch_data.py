@@ -42,6 +42,8 @@ def main():
                         help='Don\'t fetch data from Office of the Scottish Charity Regulator.')
     parser.add_argument('--skip-ccew', action='store_true',
                         help='Don\'t fetch data from Charity Commission for England and Wales.')
+    parser.add_argument('--skip-ccni', action='store_true',
+                        help='Don\'t fetch data from Charity Commission for Northern Ireland.')
     parser.add_argument('--folder', type=str, default='data',
                         help='Root path of the data folder.')
     args = parser.parse_args()
@@ -56,10 +58,6 @@ def main():
         os.path.join(args.folder, "dual-registered-uk-charities.csv")
     )
     print("[Dual] Dual registered charities fetched")
-
-    # retrieve ni charity extra names
-    urllib.request.urlretrieve(args.ccni_extra, os.path.join(args.folder, "ccni_extra_names.csv"))
-    print("[CCNI Extra] Extra Northern Ireland charity names fetched")
 
     # get oscr data
     if not args.skip_oscr:
@@ -121,11 +119,17 @@ def main():
 
     # @TODO get charity commission register of mergers
 
-    # download Northern Ireland register of charities
-    if args.ccni:
-        print("[CCNI] Using url: %s" % args.ccni)
-        urllib.request.urlretrieve(args.ccni, os.path.join(args.folder, 'ccni.csv'))
-        print("[CCNI] CSV downloaded")
+    if not args.skip_ccni:
+        # retrieve ni charity extra names
+        urllib.request.urlretrieve(args.ccni_extra, os.path.join(
+            args.folder, "ccni_extra_names.csv"))
+        print("[CCNI Extra] Extra Northern Ireland charity names fetched")
+
+        # download Northern Ireland register of charities
+        if args.ccni:
+            print("[CCNI] Using url: %s" % args.ccni)
+            urllib.request.urlretrieve(args.ccni, os.path.join(args.folder, 'ccni.csv'))
+            print("[CCNI] CSV downloaded")
 
 if __name__ == '__main__':
     main()
