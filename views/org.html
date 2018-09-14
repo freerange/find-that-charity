@@ -1,0 +1,144 @@
+% rebase('base.html', title=org["name"], subtitle="Organisation ID: {}".format(org["id"]), status=org["active"] )
+<div class="columns">
+  <div class="column">
+    <div class="card">
+      <header class="card-header">
+        <p class="card-header-title">Registration details</p>
+      </header>
+      <div class="card-content">
+        <div class="content">
+          <table class="table">
+            <tbody>
+              <tr>
+                <th>Organisation Types</th>
+                <td>
+                  % for o in org.get("organisationType"):
+                    {{ o }}<br>
+                  % end
+                </td>
+              </tr>
+              <tr><th>Active</th><td>{{ org["active"] }}</td></tr>
+              % if org.get("dateRegistered"):
+              <tr><th>Registered</th><td>{{ "{:%d %B %Y}".format(org["dateRegistered"]) }}</td></tr>
+              % end
+              % if org.get("dateRemoved"):
+              <tr><th>Removed</th><td>{{ "{:%d %B %Y}".format(org["dateRemoved"]) }}</td></tr>
+              % end
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="card">
+      <header class="card-header">
+        <p class="card-header-title">Links</p>
+      </header>
+      <div class="card-content">
+        <div class="content">
+          <ul>
+            % if org.get("url"):
+            <li><a href="{{ org['url'] }}" target="_blank">Charity website</a></li>
+            % end
+            % for l in org.get("links", []):
+            <li><a href="{{ l['url'] }}" target="_blank">{{ l["name"] }}</a></li>
+            % end
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="column">
+    % if org["alternateName"]:
+    <div class="card">
+      <header class="card-header">
+        <p class="card-header-title">Alternative names</p>
+      </header>
+      <div class="card-content">
+        <div class="content">
+          <ul>
+            % for name in org["alternateName"]:
+            <li>{{ name }}</li>
+            % end
+          </ul>
+        </div>
+      </div>
+    </div>
+    <br>
+    % end
+    <div class="card">
+      <header class="card-header">
+        <p class="card-header-title">Other details</p>
+      </header>
+      <div class="card-content">
+        <div class="content">
+          <table class="table">
+            <tbody>
+              <tr>
+                <th>Postcode</th>
+                <td>{{ org.get("postalCode") }}</td>
+              </tr>
+              <tr>
+                <th>Website</th>
+                <td><a href="{{ org['url'] }}">{{ org["url"] }}</a></td>
+              </tr>
+              <tr>
+                <th>Latest income</th>
+                <td>
+                % if org["latestIncome"]:
+                  &pound;{{ "{:,.0f}".format(org["latestIncome"])}}
+                % else:
+                  <code>Unknown</code>
+                % end
+                </td>
+              </tr>
+              <tr>
+                <th>Org-ids<br /><a href="http://org-id.guide/about" target="_blank" class="has-text-weight-light">What is org-id?</a></th>
+                <td>
+                  % if org.get("orgIDs"):
+                    % for orgid in org["orgIDs"]:
+                        {{ orgid }}<br />
+                    % end
+                  % else:
+                    <code>None</code>
+                  % end
+                </td>
+              </tr>
+              % if org.get("lastModified"):
+              <tr>
+                <th>Last modified</th>
+                <td>{{ "{:%Y-%m-%d}".format(org["lastModified"]) }}</td>
+              </tr>
+              % end
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <br>
+    % if org["location"]:
+    <div class="card">
+      <header class="card-header">
+        <p class="card-header-title">Location</p>
+      </header>
+      <div class="card-content">
+        <div class="content">
+          <table class="table">
+            <tbody>
+              % for l in org["location"]:
+              <tr>
+                <th>{{l["geoCodeType"]}}</th>
+                <td>
+                  {{l["name"]}} (<code>{{l["geoCode"]}}</code>)
+                </td>
+              </tr>
+              % end
+              <tr><th>Postcode</th><td>{{ org.get("postalCode") }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    % end
+  </div>
+</div>

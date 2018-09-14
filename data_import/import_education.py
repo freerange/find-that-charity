@@ -1,7 +1,7 @@
 import argparse
 import os
 import csv
-from datetime import datetime
+import datetime
 
 from elasticsearch import Elasticsearch
 
@@ -120,7 +120,7 @@ def clean_gias(record):
     for f in date_fields:
         try:
             if record.get(f):
-                record[f] = datetime.strptime(record.get(f), "%d-%m-%Y")
+                record[f] = datetime.datetime.strptime(record.get(f), "%d-%m-%Y")
         except ValueError:
             record[f] = None
 
@@ -137,8 +137,6 @@ def clean_gias(record):
     return {
         "_id": "GB-EDU-{}".format(record.get("URN")),
         "name": record.get("EstablishmentName"),
-        "department": None,
-        "contactName": None,
         "charityNumber": None,
         "companyNumber": None,
         "streetAddress": record.get("Street"),
@@ -147,7 +145,7 @@ def clean_gias(record):
         "addressCountry": record.get("Country (name)"),
         "postalCode": record.get("Postcode"),
         "telephone": record.get("TelephoneNum"),
-        "alternateName": None,
+        "alternateName": [],
         "email": None,
         "description": None,
         "organisationType": [
@@ -157,7 +155,8 @@ def clean_gias(record):
         ],
         "url": record.get("SchoolWebsite"),
         "location": get_locations(record),
-        "dateModified": None,
+        "latestIncome": None,
+        "dateModified": datetime.datetime.now(),
         "dateRegistered": record.get("OpenDate"),
         "dateRemoved": record.get("CloseDate"),
         "active": record.get("EstablishmentStatus (name)") != "Closed",

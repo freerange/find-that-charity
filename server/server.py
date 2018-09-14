@@ -200,6 +200,8 @@ def orgid_json(orgid):
     """
     Fetch json representation based on a org-id for a record
     """
+
+    # first try the charity records
     query = {
         "query": {
             "match": {
@@ -218,9 +220,92 @@ def orgid_json(orgid):
     if res.get("hits", {}).get("hits", []):
         org = res["hits"]["hits"][0]["_source"]
         org.update({"id": res["hits"]["hits"][0]["_id"]})
+        return charity_to_org(org)
+
+    # then look in the organisation records
+    query["query"]["match"]["orgIDs"] = query["query"]["match"]["org-ids"]
+    del query["query"]["match"]["org-ids"]
+    res = app.config["es"].search(index=app.config["es_index"],
+                                  doc_type="organisation",
+                                  body=query,
+                                  ignore=[404])
+    if res.get("hits", {}).get("hits", []):
+        org = res["hits"]["hits"][0]["_source"]
+        org.update({"id": res["hits"]["hits"][0]["_id"]})
         return org
+
     bottle.abort(404, bottle.template(
         'Orgid {{orgid}} not found.', orgid=orgid))
+
+
+def charity_to_org(record):
+    org_types = ["Registered Charity"]
+    if record.get("ccew_number"):
+        org_types.append("Registered Charity (England and Wales)")
+    if record.get("ccni_number"):
+        org_types.append("Registered Charity (Northern Ireland)")
+    if record.get("oscr_number"):
+        org_types.append("Registered Charity (Scotland)")
+    if record.get("company_number", []):
+        org_types.append("Registered Company")
+
+    return {
+        "id": record.get("org-ids", [record.get("id")])[0],
+        "name": record.get("known_as"),
+        "charityNumber": record.get("id"),
+        "companyNumber": record.get("company_number", [{}])[0].get("number") if record.get("company_number") else None,
+        "streetAddress": None,
+        "addressLocality": None,
+        "addressRegion": None,
+        "addressCountry": None,
+        "postalCode": record.get("geo", {}).get("postcode"),
+        "telephone": None,
+        "alternateName": record.get("alt_names", []),
+        "email": None,
+        "description": None,
+        "organisationType": org_types,
+        "url": record.get("url"),
+        "location": [],
+        "dateModified": record.get("last_modified"),
+        "latestIncome": record.get("latest_income"),
+        "dateRegistered": record.get("date_registered"),
+        "dateRemoved": record.get("date_removed"),
+        "active": record.get("active"),
+        "parent": record.get("parent"),
+        "orgIDs": record.get("org-ids", []),
+    }
+
+def get_orgid_links(record):
+    links = []
+    for i in record["orgIDs"]:
+
+        if i.startswith("GB-CHC-"):
+            regno = i.replace("GB-CHC-", "")
+            links.append({"url": "http://apps.charitycommission.gov.uk/Showcharity/RegisterOfCharities/SearchResultHandler.aspx?RegisteredCharityNumber={}&SubsidiaryNumber=0&Ref=CO".format(regno), "name":"Charity Commission England and Wales"})
+            links.append({"url": "http://beta.charitycommission.gov.uk/charity-details/?regid={}&subid=0".format(regno), "name":"Charity Commission England and Wales (beta)"})
+            links.append({"url": "https://charitybase.uk/charities/{}".format(regno), "name": "CharityBase"})
+            links.append({"url": "http://opencharities.org/charities/{}".format(regno), "name":"OpenCharities"})
+            links.append({"url": "http://www.guidestar.org.uk/summary.aspx?CCReg={}".format(regno), "name":"GuideStar"})
+            links.append({"url": "http://www.charitychoice.co.uk/charities/search?t=qsearch&q={}".format(regno), "name":"Charities Direct"})
+            links.append({"url": "https://olib.uk/charity/html/{}".format(regno), "name":"CharityData by Olly Benson"})
+
+        elif i.startswith("GB-NIC-"):
+            regno = i.replace("GB-NIC-", "")
+            links.append({"url": "http://www.charitycommissionni.org.uk/charity-details/?regid={}&subid=0".format(regno), "name":"Charity Commission Northern Ireland"})
+
+        elif i.startswith("GB-SC-"):
+            regno = i.replace("GB-SC-", "")
+            links.append({"url": "https://www.oscr.org.uk/about-charities/search-the-register/charity-details?number={}".format(regno), "name":"Office of the Scottish Charity Register"})
+
+        elif i.startswith("GB-COH-"):
+            regno = i.replace("GB-COH-", "")
+            links.append({"url": "https://beta.companieshouse.gov.uk/company/{}".format(regno), "name":"Companies House"})
+
+        elif i.startswith("GB-EDU-"):
+            regno = i.replace("GB-EDU-", "")
+            links.append({"url": "https://get-information-schools.service.gov.uk/Establishments/Establishment/Details/{}".format(regno), "name":"Get information about schools"})
+
+    return links
 
 @app.route('/orgid/<orgid>')
 @app.route('/orgid/<orgid>.html')
@@ -229,7 +314,8 @@ def orgid_html(orgid):
     Redirect to a record based on the org-id
     """
     org = orgid_json(orgid)
-    bottle.redirect('/charity/{}'.format(org["id"]))
+    org["links"] = get_orgid_links(org)
+    return bottle.template('org', org=sort_out_date(org))
 
 
 @app.route('/feeds/ccew.<filetype>')
@@ -339,7 +425,8 @@ def sort_out_date(charity_record):
     """
     parse date fields in a charity record
     """
-    date_fields = ["date_registered", "date_removed", "last_modified"]
+    date_fields = ["date_registered", "date_removed", "last_modified", 
+                   "dateRegistered",  "dateRemoved",  "lastModified"]
     for date_field in date_fields:
         if charity_record.get(date_field):
             try:
