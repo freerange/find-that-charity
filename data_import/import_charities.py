@@ -618,7 +618,7 @@ def import_ccni(chars={},
                     "known_as": row["Charity name"].replace("`", "'"),
                     "geo": {
                         "areas": [],
-                        "postcode": re.sub(".*,\s", "", row["Public address"]),
+                        "postcode": re.sub(r".*,\s", "", row["Public address"]),
                         "location": None
                     },
                     "url": None,
@@ -721,12 +721,12 @@ def clean_char(char):
     return char
 
 
-def save_to_elasticsearch(chars, es, es_index):
+def save_to_elasticsearch(records, es, es_index):
 
-    print('\r', "[elasticsearch] %s charities to save" % len(chars))
-    print('\r', "[elasticsearch] saving %s charities to %s index" % (len(chars), es_index))
-    results = bulk(es, list(chars.values()), raise_on_error=False)
-    print('\r', "[elasticsearch] saved %s charities to %s index" % (results[0], es_index))
+    print('\r', "[elasticsearch] %s records to save" % len(records))
+    print('\r', "[elasticsearch] saving %s records to %s index" % (len(records), es_index))
+    results = bulk(es, list(records.values()), raise_on_error=False)
+    print('\r', "[elasticsearch] saved %s records to %s index" % (results[0], es_index))
     print('\r', "[elasticsearch] %s errors reported" % len(results[1]))
 
 
@@ -817,7 +817,6 @@ def main():
 
     if args.debug:
         import random
-        import json
         random_keys = random.choices(list(chars.keys()), k=10)
         for r in random_keys:
             print(r, chars[r])
