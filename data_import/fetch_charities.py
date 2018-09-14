@@ -17,12 +17,13 @@ OSCR_URL = "https://www.oscr.org.uk/about-charities/search-the-register/charity-
 CCEW_URL = "http://data.charitycommission.gov.uk/"
 CCNI_URL = "http://www.charitycommissionni.org.uk/charity-search/?q=&include=Linked&include=Removed&exportCSV=1"
 CCNI_EXTRA = "https://gist.githubusercontent.com/BobHarper1/2687545c562b47bc755aef2e9e0de537/raw/ac052c33fd14a08dd4c2a0604b54c50bc1ecc0db/ccni_extra"
+EDU_URL = "https://get-information-schools.service.gov.uk/Downloads"
 
 def main():
     """
     Function to fetch data from Charity regulators
     """
-    parser = argparse.ArgumentParser(description='Fetch needed data sources.')
+    parser = argparse.ArgumentParser(description='Fetch needed charity data sources.')
     parser.add_argument('--dual', type=str,
                         default=DUAL_CSV,
                         help='CSV with dual registered charities in')
@@ -130,6 +131,7 @@ def main():
             print("[CCNI] Using url: %s" % args.ccni)
             urllib.request.urlretrieve(args.ccni, os.path.join(args.folder, 'ccni.csv'))
             print("[CCNI] CSV downloaded")
+
 
 if __name__ == '__main__':
     main()

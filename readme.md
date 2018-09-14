@@ -67,8 +67,8 @@ On Dokku server run:
 ```bash
 # setup and run import
 dokku run find-that-charity python data_import/create_elasticsearch.py
-dokku run find-that-charity python data_import/fetch_data.py --folder '/data'
-dokku run find-that-charity python data_import/import_data.py --folder '/data'
+dokku run find-that-charity python data_import/fetch_charities.py --folder '/data'
+dokku run find-that-charity python data_import/import_charities.py --folder '/data'
 ```
 
 ### 4. Set up scheduled task for running tasks on a regular basis
@@ -105,11 +105,11 @@ SHELL=/bin/bash
 
 # fetch latest charity data from the regulators
 # run at 2am on the 13th of the month
-0 2 13 * * dokku dokku run find-that-charity python data_import/fetch_data.py --folder '/data'
+0 2 13 * * dokku dokku run find-that-charity python data_import/fetch_charities.py --folder '/data'
 
 # import latest charity data
 # run at 4am on the 13th of the month
-0 4 13 * * dokku dokku run find-that-charity python data_import/import_data.py --folder '/data'
+0 4 13 * * dokku dokku run find-that-charity python data_import/import_charities.py --folder '/data'
 
 ### PLACE ALL CRON TASKS ABOVE, DO NOT REMOVE THE WHITESPACE AFTER THIS LINE
 ```
@@ -120,13 +120,13 @@ Fetching data
 This step fetches data on charities in England, Wales and Scotland. The command
 is run using the following command:
 
-`python data_import/fetch_data.py --oscr <path/to/oscr/zip/file.zip>`
+`python data_import/fetch_charities.py --oscr <path/to/oscr/zip/file.zip>`
 
 ### Office of the Scottish Charity Regulator (OSCR)
 
 OSCR data needs to be manually downloaded from the [OSCR website](https://www.oscr.org.uk/about-charities/search-the-register/charity-register-download)
 in order to accept the terms and conditions. Once downloaded the path needs to
-be passed to `data_import/fetch_data.py` using the `--oscr` flag.
+be passed to `data_import/fetch_charities.py` using the `--oscr` flag.
 
 ### Charity Commission for England and Wales
 
@@ -139,7 +139,7 @@ will be converted from `.bcp` files to `.csv`.
 ### Charity Commission for Northern Ireland
 
 Data on charities in Northern Ireland will be fetched from <http://www.charitycommissionni.org.uk/charity-search/> (Open Government Licence)
-If a different URL is needed then pass it to the `--ccni` flag when running `import/fetch_data.py`
+If a different URL is needed then pass it to the `--ccni` flag when running `import/fetch_charities.py`
 
 The latest .CSV file (updated daily) will be downloaded to /data.
 
@@ -166,16 +166,16 @@ Postcode data
 
 You can also add postcode data from <https://github.com/drkane/es-postcodes> to
 allow for geographic-based searching. If you host the postcode elasticsearch
-index on the same host it can be used at the `import_data.py` stage.
+index on the same host it can be used at the `import_charities.py` stage.
 
 Importing data
 --------------
 
 Once the data has been fetched the needed files are stored `data/` directory.
-You can then run the `python data_import/import_data.py` script to import it.
+You can then run the `python data_import/import_charities.py` script to import it.
 
 By default the script will look for an elasticsearch instance at <localhost:9200>,
-use `python data_import/import_data.py --help` to see the available options. To use the
+use `python data_import/import_charities.py --help` to see the available options. To use the
 postcode elasticsearch index you need to pass `--es-pc-host localhost`.
 
 ### Data model

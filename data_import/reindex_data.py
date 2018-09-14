@@ -2,7 +2,7 @@ import argparse
 import os
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan
-from import_data import clean_char, save_to_elasticsearch
+from import_charities import clean_char, save_to_elasticsearch
 
 
 def main():

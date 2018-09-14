@@ -1,9 +1,5 @@
 import csv
 import re
-from elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk
-from elasticsearch.exceptions import NotFoundError
-import validators
 from urllib.parse import urlparse
 import argparse
 import os
@@ -11,6 +7,10 @@ import titlecase
 import datetime
 import math
 
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import bulk
+from elasticsearch.exceptions import NotFoundError
+import validators
 
 def title_exceptions(word, **kwargs):
 
@@ -757,6 +757,8 @@ def main():
                         help='Don\'t fetch data from Office of the Scottish Charity Regulator.')
     parser.add_argument('--skip-ccew', action='store_true',
                         help='Don\'t fetch data from Charity Commission for England and Wales.')
+    parser.add_argument('--skip-ccni', action='store_true',
+                        help='Don\'t fetch data from Charity Commission for Northern Ireland.')
 
     parser.add_argument('--debug', action='store_true', help='Only load first 10000 rows for ccew')
 
@@ -806,7 +808,10 @@ def main():
         dual = import_dual_reg(data_files["dual_registration"])
     if not args.skip_oscr:
         chars = import_oscr(chars, dual=dual, datafile=data_files["oscr"], es_index=args.es_index, es_type=args.es_type, debug=args.debug)
-    chars = import_ccni(chars, dual=dual, datafile=data_files["ccni"], extra_names=data_files["ccni_extra_names"], es_index=args.es_index, es_type=args.es_type, debug=args.debug)
+
+    if not args.skip_ccni:
+        chars = import_ccni(chars, dual=dual, datafile=data_files["ccni"], extra_names=data_files["ccni_extra_names"], es_index=args.es_index, es_type=args.es_type, debug=args.debug)
+    
     # @TODO include charity commission register of mergers
     chars = clean_chars(chars, pc_es, args.es_pc_index, args.es_pc_type)
 
