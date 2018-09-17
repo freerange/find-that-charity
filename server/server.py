@@ -374,7 +374,7 @@ def get_orgid_links(record):
             })
 
         elif i.startswith("GB-SCOTEDU-"):
-            regno = i.replace("GB-SCOTEDU", "")
+            regno = i.replace("GB-SCOTEDU-", "")
             la_slug = EDU_SCOTLAND_LINKS.get(record.get("location", [{}])[0].get("geoCode"))
             if la_slug:
                 links.append({
@@ -383,7 +383,7 @@ def get_orgid_links(record):
                 })
 
         elif i.startswith("GB-NIEDU-"):
-            regno = i.replace("GB-NIEDU", "")
+            regno = i.replace("GB-NIEDU-", "")
             links.append({
                 "url": "http://apps.education-ni.gov.uk/appinstitutes/default.aspx",
                 "name": "Department of Education - Institution Search (search for \"{}\")".format(regno)
