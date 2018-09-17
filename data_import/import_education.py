@@ -184,6 +184,31 @@ def import_scot(orgs,
 
     return orgs
 
+def import_ni(orgs,
+              datafile=os.path.join("data", "schools_ni.csv"),
+              es_index="charitysearch",
+              es_type="organisation",
+              debug=False):
+    with open(datafile) as a:
+        csvreader = csv.DictReader(a)
+        rcount = 0
+        for row in csvreader:
+            row = clean_ni(row)
+            if row["_id"] == "GB-NIEDU-UNKNOWN":
+                continue
+            row["_index"] = es_index
+            row["_type"] = es_type
+            row["_op_type"] = "index"
+            orgs[row["_id"]] = row
+            rcount += 1
+            if rcount % 10000 == 0:
+                print('\r', "[NI] {} organisations added or updated from {}".format(rcount, datafile), end='')
+            if debug and rcount > 500:
+                break
+    print('\r', "[NI] {} organisations added or updated from {}".format(rcount, datafile))
+
+    return orgs
+
 
 def slugify(value):
     value = value.lower()
@@ -309,7 +334,7 @@ def clean_scot(record):
         "streetAddress": record.get("address_1"),
         "addressLocality": record.get("address_2"),
         "addressRegion": record.get("address_3"),
-        "addressCountry": None,
+        "addressCountry": "Scotland",
         "postalCode": record.get("post_code"),
         "telephone": record.get("phone"),
         "alternateName": [],
@@ -327,6 +352,64 @@ def clean_scot(record):
         "orgIDs": [
             org_id
         ],
+    }
+
+
+def clean_ni(record):
+
+    # clean blank values
+    for f in record.keys():
+        record[f] = record[f].strip()
+        if record[f] == "":
+            record[f] = None
+
+    # dates
+    date_fields = ["Date Closed"]
+    for f in date_fields:
+        try:
+            if record.get(f):
+                record[f] = datetime.datetime.strptime(
+                    record.get(f), "%d-%m-%Y")
+        except ValueError:
+            record[f] = None
+
+    # org ids:
+    org_id = "GB-NIEDU-{}".format(record.get("Institution Reference Number"))
+
+    address = ", ".join([
+        record.get("Address Line {}".format(f))
+        for f in [1,2,3] 
+        if record.get("Address Line {}".format(f))
+    ])
+
+    return {
+        "_id": org_id,
+        "name": record.get("Institution Name").strip(),
+        "charityNumber": None,
+        "companyNumber": None,
+        "streetAddress": address,
+        "addressLocality": record.get("Town"),
+        "addressRegion": record.get("Count"),
+        "addressCountry": "Northern Ireland",
+        "postalCode": record.get("Postcode"),
+        "telephone": record.get("Telephone"),
+        "alternateName": [],
+        "email": record.get("Email"),
+        "description": None,
+        "organisationType": [
+            "Education",
+            record.get("Management"),
+            record.get("Type", "") + " School",
+        ],
+        "url": None,
+        "location": [],
+        "latestIncome": None,
+        "dateModified": datetime.datetime.now(),
+        "dateRegistered": None,
+        "dateRemoved": record.get("Date Closed"),
+        "active": record.get("Status") == "Open",
+        "parent": None,
+        "orgIDs": [org_id],
     }
 
 def get_locations(record):
@@ -375,6 +458,8 @@ def main():
                         help='Don\'t fetch data from English schools list.')
     parser.add_argument('--skip-scot', action='store_true',
                         help='Don\'t fetch data from Scottish schools list.')
+    parser.add_argument('--skip-ni', action='store_true',
+                        help='Don\'t fetch data from NI schools list.')
 
     parser.add_argument('--debug', action='store_true', help='')
 
@@ -398,6 +483,7 @@ def main():
     data_files = {
         "gias": os.path.join(args.folder, "gias_england.csv"),
         "scot": os.path.join(args.folder, "schools_scotland.xlsx"),
+        "ni": os.path.join(args.folder, "schools_ni.csv"),
     }
 
     orgs = {}
@@ -406,6 +492,9 @@ def main():
 
     if not args.skip_scot:
         orgs = import_scot(orgs, datafile=data_files["scot"], es_index=args.es_index, es_type=args.es_type, debug=args.debug)
+
+    if not args.skip_ni:
+        orgs = import_ni(orgs, datafile=data_files["ni"], es_index=args.es_index, es_type=args.es_type, debug=args.debug)
 
     if args.debug:
         import random

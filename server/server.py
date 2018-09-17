@@ -382,6 +382,13 @@ def get_orgid_links(record):
                     "name": "Parentzone Scotland"
                 })
 
+        elif i.startswith("GB-NIEDU-"):
+            regno = i.replace("GB-NIEDU", "")
+            links.append({
+                "url": "http://apps.education-ni.gov.uk/appinstitutes/default.aspx",
+                "name": "Department of Education - Institution Search (search for \"{}\")".format(regno)
+            })
+
     return links
 
 @app.route('/orgid/<orgid>')
