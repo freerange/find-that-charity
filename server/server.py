@@ -275,35 +275,112 @@ def charity_to_org(record):
         "orgIDs": record.get("org-ids", []),
     }
 
+EDU_SCOTLAND_LINKS = {
+    "S12000033": "aberdeen-city",
+    "S12000034": "aberdeenshire",
+    "S12000041": "angus",
+    "S12000035": "argyll-and-bute",
+    "S12000005": "clackmannanshire",
+    "S12000006": "dumfries-and-galloway",
+    "S12000042": "dundee-city",
+    "S12000008": "east-ayrshire",
+    "S12000045": "east-dunbartonshire",
+    "S12000010": "east-lothian",
+    "S12000011": "east-renfrewshire",
+    "S12000036": "edinburgh-city",
+    "S12000014": "falkirk",
+    "S12000015": "fife",
+    "S12000046": "glasgow-city",
+    "S12000017": "highland",
+    "S12000018": "inverclyde",
+    "S12000019": "midlothian",
+    "S12000020": "moray",
+    "S12000013": "eilean-siar-(western-isles)",
+    "S12000021": "north-ayrshire",
+    "S12000044": "north-lanarkshire",
+    "S12000023": "orkney-islands",
+    "S12000024": "perth-and-kinross",
+    "S12000038": "renfrewshire",
+    "S12000026": "scottish-borders",
+    "S12000027": "shetland-islands",
+    "S12000028": "south-ayrshire",
+    "S12000029": "south-lanarkshire",
+    "S12000030": "stirling",
+    "S12000039": "west-dunbartonshire",
+    "S12000040": "west-lothian",
+}
+
 def get_orgid_links(record):
     links = []
     for i in record["orgIDs"]:
 
         if i.startswith("GB-CHC-"):
             regno = i.replace("GB-CHC-", "")
-            links.append({"url": "http://apps.charitycommission.gov.uk/Showcharity/RegisterOfCharities/SearchResultHandler.aspx?RegisteredCharityNumber={}&SubsidiaryNumber=0&Ref=CO".format(regno), "name":"Charity Commission England and Wales"})
-            links.append({"url": "http://beta.charitycommission.gov.uk/charity-details/?regid={}&subid=0".format(regno), "name":"Charity Commission England and Wales (beta)"})
-            links.append({"url": "https://charitybase.uk/charities/{}".format(regno), "name": "CharityBase"})
-            links.append({"url": "http://opencharities.org/charities/{}".format(regno), "name":"OpenCharities"})
-            links.append({"url": "http://www.guidestar.org.uk/summary.aspx?CCReg={}".format(regno), "name":"GuideStar"})
-            links.append({"url": "http://www.charitychoice.co.uk/charities/search?t=qsearch&q={}".format(regno), "name":"Charities Direct"})
-            links.append({"url": "https://olib.uk/charity/html/{}".format(regno), "name":"CharityData by Olly Benson"})
+            links.append({
+                "url": "http://apps.charitycommission.gov.uk/Showcharity/RegisterOfCharities/SearchResultHandler.aspx?RegisteredCharityNumber={}&SubsidiaryNumber=0&Ref=CO".format(regno),
+                "name":"Charity Commission England and Wales"
+            })
+            links.append({
+                "url": "http://beta.charitycommission.gov.uk/charity-details/?regid={}&subid=0".format(regno),
+                "name":"Charity Commission England and Wales (beta)"
+            })
+            links.append({
+                "url": "https://charitybase.uk/charities/{}".format(regno),
+                "name": "CharityBase"
+            })
+            links.append({
+                "url": "http://opencharities.org/charities/{}".format(regno),
+                "name":"OpenCharities"
+            })
+            links.append({
+                "url": "http://www.guidestar.org.uk/summary.aspx?CCReg={}".format(regno),
+                "name":"GuideStar"
+            })
+            links.append({
+                "url": "http://www.charitychoice.co.uk/charities/search?t=qsearch&q={}".format(regno),
+                "name":"Charities Direct"
+            })
+            links.append({
+                "url": "https://olib.uk/charity/html/{}".format(regno),
+                "name":"CharityData by Olly Benson"
+            })
 
         elif i.startswith("GB-NIC-"):
             regno = i.replace("GB-NIC-", "")
-            links.append({"url": "http://www.charitycommissionni.org.uk/charity-details/?regid={}&subid=0".format(regno), "name":"Charity Commission Northern Ireland"})
+            links.append({
+                "url": "http://www.charitycommissionni.org.uk/charity-details/?regid={}&subid=0".format(regno), 
+                "name":"Charity Commission Northern Ireland"
+            })
 
         elif i.startswith("GB-SC-"):
             regno = i.replace("GB-SC-", "")
-            links.append({"url": "https://www.oscr.org.uk/about-charities/search-the-register/charity-details?number={}".format(regno), "name":"Office of the Scottish Charity Register"})
+            links.append({
+                "url": "https://www.oscr.org.uk/about-charities/search-the-register/charity-details?number={}".format(regno), 
+                "name":"Office of the Scottish Charity Register"
+            })
 
         elif i.startswith("GB-COH-"):
             regno = i.replace("GB-COH-", "")
-            links.append({"url": "https://beta.companieshouse.gov.uk/company/{}".format(regno), "name":"Companies House"})
+            links.append({
+                "url": "https://beta.companieshouse.gov.uk/company/{}".format(regno), 
+                "name":"Companies House"
+            })
 
         elif i.startswith("GB-EDU-"):
             regno = i.replace("GB-EDU-", "")
-            links.append({"url": "https://get-information-schools.service.gov.uk/Establishments/Establishment/Details/{}".format(regno), "name":"Get information about schools"})
+            links.append({
+                "url": "https://get-information-schools.service.gov.uk/Establishments/Establishment/Details/{}".format(regno), 
+                "name":"Get information about schools"
+            })
+
+        elif i.startswith("GB-SCOTEDU-"):
+            regno = i.replace("GB-SCOTEDU", "")
+            la_slug = EDU_SCOTLAND_LINKS.get(record.get("location", [{}])[0].get("geoCode"))
+            if la_slug:
+                links.append({
+                    "url": "https://education.gov.scot/parentzone/find-a-school/{}/{}".format(la_slug, regno),
+                    "name": "Parentzone Scotland"
+                })
 
     return links
 
