@@ -5,7 +5,7 @@ import { set_fields_to_add } from "../../../actions/Actions"
 export const potentialFieldsToAdd = [
     { slug: 'postcode', name: 'Postcode' },
     { slug: 'latest_income', name: 'Latest income' },
-    { slug: 'known_as', name: 'Name' },
+    { slug: 'name', name: 'Name' },
 ]
 
 class FieldsToAdd extends React.Component {

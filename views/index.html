@@ -5,7 +5,7 @@
       <p>A search engine for UK charities.</p>
     </div>
     <div  style="padding-top: 30px; padding-bottom: 160px;">
-      % include('search_form.html', term=term)
+      % include('search_form.html', term=term, org_types=org_types)
     </div>
 
     % if defined('res'):

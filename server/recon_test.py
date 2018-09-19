@@ -6,7 +6,7 @@ es = Elasticsearch()
 TEST_FILE = "data/grantnav_test_sample.csv"
 MISMATCH_FILE = "data/test_mismatches.csv"
 ES_INDEX = "charitysearch"
-ES_TYPE = "charity"
+ES_TYPE = "organisation"
 
 
 def get_test_set():

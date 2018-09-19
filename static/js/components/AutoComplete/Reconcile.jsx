@@ -17,7 +17,7 @@ export default class AutoComplete extends React.Component {
         this.props.selectInput({
             "id": e.target.closest("a").dataset.value,
             "source": {
-                "known_as": e.target.closest("a").dataset.label
+                "name": e.target.closest("a").dataset.label
             }
         });
     }

@@ -6,30 +6,22 @@ import os
 INDEXES = [
     {
         "name": "charitysearch",
-        "mapping": [
-            "charity", {
+        "mapping": {
+            "organisation": {
                 "properties": {
-                    "geo": {
-                        "properties": {
-                            "location": {
-                                "type": "geo_point"
-                            }
-                        }
-                    },
-                    "names": {
-                        "type": "nested",
-                        "properties": {
-                            "type": {"type": "string"},
-                            "source": {"type": "string"},
-                            "name": {"type": "string"}
-                        }
-                    },
                     "complete_names": {
-                        "type": "completion"
+                        "type": "completion",
+                        "contexts": [
+                            {
+                                "name": "place_type",
+                                "type": "category",
+                                "path": "organisationType"
+                            }
+                        ]
                     }
                 }
             }
-        ]
+        }
     }
 ]
 
@@ -46,7 +38,6 @@ def main():
     parser.add_argument('--es-url-prefix', default='', help='Elasticsearch url prefix')
     parser.add_argument('--es-use-ssl', action='store_true', help='Use ssl to connect to elasticsearch')
     parser.add_argument('--es-index', default='charitysearch', help='index used to store charity data')
-    parser.add_argument('--es-type', default='charity', help='type used to store charity data')
 
     args = parser.parse_args()
 
@@ -63,7 +54,6 @@ def main():
             break
 
     INDEXES[0]["name"] = args.es_index
-    INDEXES[0]["mapping"][0] = args.es_type
 
     for i in INDEXES:
         if es.indices.exists(i["name"]) and args.reset:
@@ -75,8 +65,9 @@ def main():
             res = es.indices.create(index=i["name"])
 
         if "mapping" in i:
-            res = es.indices.put_mapping(i["mapping"][0], i["mapping"][1], index=i["name"])
-            print("[elasticsearch] set mapping on %s index" % (i["name"]))
+            for es_type, mapping in i["mapping"].items():
+                res = es.indices.put_mapping(es_type, mapping, index=i["name"])
+                print("[elasticsearch] set mapping on {} index (type: {})".format(i["name"], es_type))
 
 if __name__ == '__main__':
     main()

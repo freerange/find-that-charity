@@ -2,6 +2,11 @@
   <article class="message is-success">
     <div class="message-body">
     {{ "{:,}".format(res["total"]) }} result{{"s" if res["total"] > 1 else ""}} found for "{{term}}"
+    <ul>
+      % for o in org_types:
+      <li><small>- {{ "{:,.0f}".format(o["doc_count"])}} <strong>{{o['key']}}</strong></small></li>
+      % end
+    </ul>
     </div>
   </article>
 % else:
@@ -11,26 +16,37 @@
     </div>
   </article>
 % end
-
 <div class="content">
   <table class="table">
     <thead>
       <tr>
         <th>Name</th>
+        <th>Type</th>
         <th>Status</th>
-        <th>Charity Number</th>
+        <th>Organisation Identifiers</th>
       </tr>
     </thead>
     <tbody>
     % for result in res["hits"]:
       <tr>
-        <td><a href={{result["_link"]}}>{{result["_source"]["known_as"]}}</a></td>
+        <td>
+          <a href={{result["_link"]}}>{{result["_source"]["name"]}}</a><br>{{result["_id"]}}
+        </td>
+        <td>
+          % for orgType in result["_source"]["organisationType"]:
+          <span class="tag">{{orgType}}</span>
+          % end
+        </td>
         % if result["_source"]["active"]:
         <td><span class="tag is-success">Active</span></td>
         % else:
         <td><span class="tag is-danger">Inactive</span></td>
         % end
-        <td>{{result["_id"]}}</td>
+        <td>
+          % for orgID in result["_source"].get("orgIDs", []):
+            <span class="tag">{{orgID}}</span><br>
+          % end
+        </td>
       </tr>
     % end
     </tbody>

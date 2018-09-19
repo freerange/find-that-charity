@@ -32,7 +32,7 @@ for e_v in POTENTIAL_ENV_VARS:
     if os.environ.get(e_v):
         app.config["es"] = Elasticsearch(os.environ.get(e_v))
         app.config["es_index"] = 'charitysearch'
-        app.config["es_type"] = 'charity'
+        app.config["es_type"] = 'organisation'
         break
 
 if os.environ.get("GA_TRACKING_ID"):
@@ -44,9 +44,12 @@ if os.environ.get("ADMIN_PASSWORD"):
 csv_app.config.update(app.config)
 
 
-def search_return(query):
+def search_return(query, term):
     """
     Fetch search results and display on a template
+
+    @TODO: allow for selection of organisation type
+    @TODO: pagination of search results
     """
     res = app.config["es"].search_template(
         index=app.config["es_index"],
@@ -54,11 +57,17 @@ def search_return(query):
         body=query,
         ignore=[404]
     )
+    res_org_types = res.get("aggregations", {}).get("org_types", {}).get("buckets", [])
     res = res["hits"]
     for result in res["hits"]:
-        result["_link"] = "/charity/" + result["_id"]
+        result["_link"] = "/orgid/" + result["_id"]
         result["_source"] = sort_out_date(result["_source"])
-    return bottle.template('search', res=res, term=json.loads(query)["params"]["name"])
+    return bottle.template('search',
+                           res=res,
+                           term=term,
+                           res_org_types=res_org_types,
+                           org_types=get_org_types()
+                           )
 
 
 @app.route('/')
@@ -68,9 +77,9 @@ def home():
     """
     query = bottle.request.query.get('q')
     if query:
-        query = search_query(query)
-        return search_return(query)
-    return bottle.template('index', term='')
+        s_query = search_query(query)
+        return search_return(s_query, query)
+    return bottle.template('index', term='', org_types=get_org_types())
 
 
 @app.route('/random')
@@ -89,6 +98,9 @@ def random(filetype="html"):
                         }
                     }
                 ]
+            },
+            "match": {
+                "organisationType": "Registered Charity"
             }
         }
     }
@@ -171,14 +183,48 @@ def charity(regno, filetype='html'):
         return bottle.abort(404, bottle.template(
             'Charity {{regno}} not found.', regno=regno))
 
+    org_id = "GB-CHC-{}".format(regno_cleaned)
+    if regno_cleaned.startswith("SC"):
+        org_id = "GB-SC-{}".format(regno_cleaned)
+    elif regno_cleaned.startswith("NI"):
+        org_id = "GB-NIC-{}".format(re.sub(r'[^0-9]', '', regno_cleaned))
+
     res = app.config["es"].get(index=app.config["es_index"],
-                               doc_type=app.config["es_type"], id=regno_cleaned, ignore=[404])
+                               doc_type=app.config["es_type"], 
+                               id=org_id,
+                               ignore=[404])
     if "_source" in res:
         if filetype == "html":
-            return bottle.template('charity', charity=sort_out_date(res["_source"]), charity_id=res["_id"])
+            return bottle.template('org', org=sort_out_date(res["_source"]))
         return res["_source"]
-    else:
-        return bottle.abort(404, bottle.template('Charity {{regno}} not found.', regno=regno))
+    
+    return bottle.abort(404, bottle.template('Charity {{regno}} not found.', regno=regno))
+
+@app.route('/org_types')
+def org_types():
+    return {"org_types": get_org_types()}
+
+
+def get_org_types():
+    res = app.config["es"].search(index=app.config["es_index"],
+                                  doc_type=app.config["es_type"],
+                                  _source=False,
+                                  size=0,
+                                  body={
+                                        "aggs": {
+                                            "org_types": {
+                                                "terms": {
+                                                    "field": "organisationType.keyword",
+                                                    "size": 10
+                                                }
+                                            }
+                                        }
+                                    }
+                                 )
+    return {
+        r["key"]: r["doc_count"] for r in 
+        res["aggregations"]["org_types"]["buckets"]
+    }
 
 
 @app.route('/preview/charity/<regno>')
@@ -212,21 +258,13 @@ def orgid_json(orgid):
             }
         }
     }
-    res = app.config["es"].search(index=app.config["es_index"],
-                                  doc_type=app.config["es_type"],
-                                  body=query,
-                                  _source_exclude=["complete_names"],
-                                  ignore=[404])
-    if res.get("hits", {}).get("hits", []):
-        org = res["hits"]["hits"][0]["_source"]
-        org.update({"id": res["hits"]["hits"][0]["_id"]})
-        return charity_to_org(org)
 
-    # then look in the organisation records
+    # look in the organisation records
+    # @TODO: deal with multiple matching organisations
     query["query"]["match"]["orgIDs"] = query["query"]["match"]["org-ids"]
     del query["query"]["match"]["org-ids"]
     res = app.config["es"].search(index=app.config["es_index"],
-                                  doc_type="organisation",
+                                  doc_type=app.config["es_type"],
                                   body=query,
                                   ignore=[404])
     if res.get("hits", {}).get("hits", []):
@@ -236,44 +274,6 @@ def orgid_json(orgid):
 
     bottle.abort(404, bottle.template(
         'Orgid {{orgid}} not found.', orgid=orgid))
-
-
-def charity_to_org(record):
-    org_types = ["Registered Charity"]
-    if record.get("ccew_number"):
-        org_types.append("Registered Charity (England and Wales)")
-    if record.get("ccni_number"):
-        org_types.append("Registered Charity (Northern Ireland)")
-    if record.get("oscr_number"):
-        org_types.append("Registered Charity (Scotland)")
-    if record.get("company_number", []):
-        org_types.append("Registered Company")
-
-    return {
-        "id": record.get("org-ids", [record.get("id")])[0],
-        "name": record.get("known_as"),
-        "charityNumber": record.get("id"),
-        "companyNumber": record.get("company_number", [{}])[0].get("number") if record.get("company_number") else None,
-        "streetAddress": None,
-        "addressLocality": None,
-        "addressRegion": None,
-        "addressCountry": None,
-        "postalCode": record.get("geo", {}).get("postcode"),
-        "telephone": None,
-        "alternateName": record.get("alt_names", []),
-        "email": None,
-        "description": None,
-        "organisationType": org_types,
-        "url": record.get("url"),
-        "location": [],
-        "dateModified": record.get("last_modified"),
-        "latestIncome": record.get("latest_income"),
-        "dateRegistered": record.get("date_registered"),
-        "dateRemoved": record.get("date_removed"),
-        "active": record.get("active"),
-        "parent": record.get("parent"),
-        "orgIDs": record.get("org-ids", []),
-    }
 
 EDU_SCOTLAND_LINKS = {
     "S12000033": "aberdeen-city",
@@ -364,6 +364,10 @@ def get_orgid_links(record):
             links.append({
                 "url": "https://beta.companieshouse.gov.uk/company/{}".format(regno), 
                 "name":"Companies House"
+            })
+            links.append({
+                "url": "https://opencorporates.com/companies/gb/{}".format(regno),
+                "name":"Open Corporates"
             })
 
         elif i.startswith("GB-EDU-"):
@@ -472,8 +476,11 @@ def about():
 def autocomplete():
     """
     Endpoint for autocomplete queries
+
+    @TODO: allow for selection of different types of organisations
     """
     search = bottle.request.params.q
+    orgtype = bottle.request.params.orgtype
     doc = {
         "suggest": {
             "suggest-1": {
@@ -487,12 +494,23 @@ def autocomplete():
             }
         }
     }
+
+    if orgtype != 'all':
+        doc["suggest"]["suggest-1"]["completion"]["contexts"] = {
+            "organisationType": orgtype
+        }
+    print(doc)
+    
     res = app.config["es"].search(
-        index=app.config["es_index"], doc_type="csv_data", body=doc,
-        _source_include=['known_as'])
+        index=app.config["es_index"],
+        doc_type="csv_data",
+        body=doc,
+        _source_include=['name', 'organisationType'])
+    print(res)
     return {"results": [
         {
-            "label": x["_source"]["known_as"],
+            "label": x["_source"]["name"],
+            "orgtypes": x["_source"]["organisationType"],
             "value": x["_id"]
         } for x in res.get("suggest", {}).get("suggest-1", [])[0]["options"]
     ]}
@@ -552,7 +570,7 @@ def main():
     parser_args.add_argument('--es-url-prefix', default='', help='Elasticsearch url prefix')
     parser_args.add_argument('--es-use-ssl', action='store_true', help='Use ssl to connect to elasticsearch')
     parser_args.add_argument('--es-index', default='charitysearch', help='index used to store charity data')
-    parser_args.add_argument('--es-type', default='charity', help='type used to store charity data')
+    parser_args.add_argument('--es-type', default='organisation', help='type used to store charity data')
 
     parser_args.add_argument('--ga-tracking-id', help='Google Analytics Tracking ID')
 

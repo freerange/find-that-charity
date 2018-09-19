@@ -10,28 +10,24 @@ inline:
           - multi_match:
               query: "{{name}}"
               fields:
-              - known_as^3
-              - alt_names
+              - alternativeName
           - match_phrase:
-              known_as: "{{name}}"
+              name: "{{name}}"
           - multi_match:
               query: "{{name}}"
               fields:
-              - ccni_number
-              - ccew_number
-              - oscr_number
-              - company_number.number
+              - charityNumber
+              - companyNumber
       functions:
       - filter:
           match_phrase_prefix:
-            known_as: "{{name}}"
+            name: "{{name}}"
         weight: 200
       - filter:
           multi_match:
             query: "{{name}}"
             fields:
-            - known_as^3
-            - alt_names
+            - alternativeName
             operator: and
         weight: 10
       - filter:
@@ -39,9 +35,14 @@ inline:
             active: false
         weight: 0.9
       - field_value_factor:
-          field: latest_income
+          field: latestIncome
           modifier: log2p
           missing: 1
+  aggs:
+    org_types:
+      terms:
+        field: organisationType.keyword
+        size: 10
 params:
   name: term
   charity_number: term
