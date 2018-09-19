@@ -13,7 +13,7 @@ INDEXES = [
                         "type": "completion",
                         "contexts": [
                             {
-                                "name": "place_type",
+                                "name": "organisationType",
                                 "type": "category",
                                 "path": "organisationType"
                             }
