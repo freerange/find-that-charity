@@ -323,7 +323,7 @@ def clean_scot(record):
             "id": code,
             "name": record.get("la_name"),
             "geoCode": code,
-            "geoCodeType": AREA_TYPES.get(code[0:3], f),
+            "geoCodeType": AREA_TYPES.get(code[0:3], code),
         })
     
     return {
