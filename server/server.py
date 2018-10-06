@@ -126,13 +126,13 @@ def random(filetype="html"):
 
 
 
-@app.route('/reconcile')
+@app.get('/reconcile')
 @app.post('/reconcile')
 def reconcile():
     """ Index of the server. If ?query or ?queries used then search,
                 otherwise return the default response as JSON
     """
-    query = recon_query(bottle.request.query.query) or None
+    query = recon_query(bottle.request.params.query) or None
     queries = bottle.request.params.queries or None
 
     service_url = "{}://{}".format(
@@ -141,31 +141,21 @@ def reconcile():
     )
 
     # if we're doing a callback request then do that
-    if bottle.request.query.callback:
-        if bottle.request.query.query:
+    if bottle.request.params.callback:
+        if bottle.request.params.query:
             bottle.response.content_type = "application/javascript"
-            return "%s(%s)" % (bottle.request.query.callback, esdoc_orresponse(query, app))
-        else:
-            return "%s(%s)" % (bottle.request.query.callback, service_spec(app, service_url))
+            return "%s(%s)" % (bottle.request.params.callback, esdoc_orresponse(query, app))
+        return "%s(%s)" % (bottle.request.params.callback, service_spec(app, service_url))
 
     # try fetching the query as json data or a string
-    if bottle.request.query.query:
+    if bottle.request.params.query:
         return esdoc_orresponse(query, app)
 
     if queries:
-        queries_json = json.loads(queries)
-        queries_dict = json.loads(queries, object_pairs_hook=OrderedDict)
-        # print(queries)
-        results = {}
-        counter = 0
-        for query in queries_dict:
-            query_id = "q" + str(counter)
-            # print(queries_json[q], queries_json[q]["query"])
-            result = esdoc_orresponse(recon_query(
-                queries_json[query_id]["query"]), app)["result"]
-            results.update({query_id: {"result": result}})
-            counter += 1
-        return results
+        return {
+            query_id: esdoc_orresponse(recon_query(query), app)
+            for query_id, query in json.loads(queries).items()
+        }
 
     # otherwise just return the service specification
     return service_spec(app, service_url)
@@ -499,7 +489,6 @@ def autocomplete():
         doc["suggest"]["suggest-1"]["completion"]["contexts"] = {
             "organisationType": orgtype
         }
-    print(doc)
     
     res = app.config["es"].search(
         index=app.config["es_index"],
