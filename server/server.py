@@ -111,7 +111,7 @@ def random(filetype="html"):
     }
 
     if "active" in bottle.request.query:
-        query["query"]["function_score"]["query"] = {"match": {"active": True}}
+        query["query"]["bool"]["must"]["function_score"]["query"] = {"match": {"active": True}}
 
     res = app.config["es"].search(
         index=app.config["es_index"],
