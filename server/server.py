@@ -605,7 +605,6 @@ def autocomplete():
         doc_type="csv_data",
         body=doc,
         _source_include=['name', 'organisationType'])
-    print(res)
     return {"results": [
         {
             "label": x["_source"]["name"],

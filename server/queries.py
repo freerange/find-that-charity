@@ -56,7 +56,7 @@ def recon_query(query):
     # set the limit parameter
     json_q["inline"]["size"] = "{{limit}}"
     json_q["params"]["limit"] = recon_object.get("limit", 3)
-    
+
     # set any query properties
     # dict where keys = the parameter/property name, and the value is an object
     # showing what should be added to the elasticsearch query.
@@ -155,7 +155,6 @@ def recon_data_extension(query, app):
     columns = [c["id"] for c in query.get("properties") if c.get("id")]
     rows = OrderedDict()
     for org_id in query.get("ids", []):
-        print(org_id, columns)
         res = app.config["es"].get(
             index=app.config["es_index"],
             doc_type=app.config["es_type"],
@@ -166,7 +165,7 @@ def recon_data_extension(query, app):
         if res and res.get("found"):
             rows[org_id] = OrderedDict([
                 (c, [get_field_type(res["_source"].get(c))])
-            for c in columns])
+                for c in columns])
         else:
             rows[org_id] = OrderedDict([(c, []) for c in columns])
     return {
