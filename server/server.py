@@ -5,7 +5,6 @@ from __future__ import print_function
 import os
 import argparse
 import json
-from collections import OrderedDict
 import time
 from datetime import datetime, timezone
 import re
@@ -67,7 +66,7 @@ def search_return(query, term):
                            term=term,
                            res_org_types=res_org_types,
                            org_types=get_org_types()
-                           )
+                          )
 
 
 @app.route('/')
@@ -312,18 +311,18 @@ def get_org_types():
                                   _source=False,
                                   size=0,
                                   body={
-                                        "aggs": {
-                                            "org_types": {
-                                                "terms": {
-                                                    "field": "organisationType.keyword",
-                                                    "size": 10
-                                                }
-                                            }
-                                        }
-                                    }
+                                      "aggs": {
+                                          "org_types": {
+                                              "terms": {
+                                                  "field": "organisationType.keyword",
+                                                  "size": 10
+                                              }
+                                          }
+                                      }
+                                  }
                                  )
     return {
-        r["key"]: r["doc_count"] for r in 
+        r["key"]: r["doc_count"] for r in
         res["aggregations"]["org_types"]["buckets"]
     }
 
@@ -449,21 +448,21 @@ def get_orgid_links(record):
         elif i.startswith("GB-NIC-"):
             regno = i.replace("GB-NIC-", "")
             links.append({
-                "url": "http://www.charitycommissionni.org.uk/charity-details/?regid={}&subid=0".format(regno), 
+                "url": "http://www.charitycommissionni.org.uk/charity-details/?regid={}&subid=0".format(regno),
                 "name":"Charity Commission Northern Ireland"
             })
 
         elif i.startswith("GB-SC-"):
             regno = i.replace("GB-SC-", "")
             links.append({
-                "url": "https://www.oscr.org.uk/about-charities/search-the-register/charity-details?number={}".format(regno), 
+                "url": "https://www.oscr.org.uk/about-charities/search-the-register/charity-details?number={}".format(regno),
                 "name":"Office of the Scottish Charity Register"
             })
 
         elif i.startswith("GB-COH-"):
             regno = i.replace("GB-COH-", "")
             links.append({
-                "url": "https://beta.companieshouse.gov.uk/company/{}".format(regno), 
+                "url": "https://beta.companieshouse.gov.uk/company/{}".format(regno),
                 "name":"Companies House"
             })
             links.append({
@@ -474,7 +473,7 @@ def get_orgid_links(record):
         elif i.startswith("GB-EDU-"):
             regno = i.replace("GB-EDU-", "")
             links.append({
-                "url": "https://get-information-schools.service.gov.uk/Establishments/Establishment/Details/{}".format(regno), 
+                "url": "https://get-information-schools.service.gov.uk/Establishments/Establishment/Details/{}".format(regno),
                 "name":"Get information about schools"
             })
 
@@ -600,7 +599,7 @@ def autocomplete():
         doc["suggest"]["suggest-1"]["completion"]["contexts"] = {
             "organisationType": orgtype
         }
-    
+
     res = app.config["es"].search(
         index=app.config["es_index"],
         doc_type="csv_data",
@@ -627,8 +626,8 @@ def sort_out_date(charity_record):
     """
     parse date fields in a charity record
     """
-    date_fields = ["date_registered", "date_removed", "last_modified", 
-                   "dateRegistered",  "dateRemoved",  "lastModified"]
+    date_fields = ["date_registered", "date_removed", "last_modified",
+                   "dateRegistered", "dateRemoved", "lastModified"]
     for date_field in date_fields:
         if charity_record.get(date_field):
             try:

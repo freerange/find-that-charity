@@ -1,6 +1,6 @@
 import argparse
-from elasticsearch import Elasticsearch
 import os
+from elasticsearch import Elasticsearch
 
 
 INDEXES = [
@@ -74,7 +74,7 @@ def main():
                     }
                 })
                 print("[elasticsearch] response: '%s'" % (res))
-        
+
             if args.reset:
                 print("[elasticsearch] deleting '%s' index..." % (i["name"]))
                 res = es.indices.delete(index=i["name"])
@@ -90,21 +90,21 @@ def main():
                 print("[elasticsearch] set mapping on {} index (type: {})".format(i["name"], es_type))
 
         if args.reindex and es.indices.exists(temp_index):
-                print("[elasticsearch] copying '%s' index to temporary index '%s'" % (
-                    temp_index, i["name"]))
-                res = es.reindex(body={
-                    "source": {
-                        "index": temp_index
-                    },
-                    "dest": {
-                        "index": i["name"],
-                        "version_type": "external"
-                    }
-                })
-                print("[elasticsearch] response: '%s'" % (res))
-                print("[elasticsearch] deleting temporary '%s' index..." % (temp_index))
-                res = es.indices.delete(index=temp_index)
-                print("[elasticsearch] response: '%s'" % (res))
+            print("[elasticsearch] copying '%s' index to temporary index '%s'" % (
+                temp_index, i["name"]))
+            res = es.reindex(body={
+                "source": {
+                    "index": temp_index
+                },
+                "dest": {
+                    "index": i["name"],
+                    "version_type": "external"
+                }
+            })
+            print("[elasticsearch] response: '%s'" % (res))
+            print("[elasticsearch] deleting temporary '%s' index..." % (temp_index))
+            res = es.indices.delete(index=temp_index)
+            print("[elasticsearch] response: '%s'" % (res))
 
 
 if __name__ == '__main__':
