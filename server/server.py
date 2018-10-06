@@ -16,7 +16,7 @@ from elasticsearch import Elasticsearch
 import requests
 from bs4 import BeautifulSoup
 
-from queries import search_query, recon_query, service_spec, esdoc_orresponse
+from queries import search_query, recon_query, service_spec, esdoc_orresponse, recon_data_extension
 from csv_upload import csv_app
 
 app = bottle.default_app()
@@ -129,37 +129,84 @@ def random(filetype="html"):
 @app.get('/reconcile')
 @app.post('/reconcile')
 def reconcile():
-    """ Index of the server. If ?query or ?queries used then search,
+    """ Reconciliation query. If ?query or ?queries used then search,
                 otherwise return the default response as JSON
     """
     query = recon_query(bottle.request.params.query) or None
     queries = bottle.request.params.queries or None
+    extend = bottle.request.params.extend or None
 
     service_url = "{}://{}".format(
         bottle.request.urlparts.scheme,
         bottle.request.urlparts.netloc,
     )
 
-    # if we're doing a callback request then do that
-    if bottle.request.params.callback:
-        if bottle.request.params.query:
-            bottle.response.content_type = "application/javascript"
-            return "%s(%s)" % (bottle.request.params.callback, esdoc_orresponse(query, app))
-        return "%s(%s)" % (bottle.request.params.callback, service_spec(app, service_url))
+    def return_result(result):
+        if bottle.request.params.callback:
+            return "%s(%s)" % (bottle.request.params.callback, json.dumps(result))
+        return result
 
     # try fetching the query as json data or a string
     if bottle.request.params.query:
-        return esdoc_orresponse(query, app)
+        return return_result(esdoc_orresponse(query, app))
 
     if queries:
-        return {
+        return return_result({
             query_id: esdoc_orresponse(recon_query(query), app)
             for query_id, query in json.loads(queries).items()
-        }
+        })
+
+    if extend:
+        return return_result(recon_data_extension(json.loads(extend), app))
 
     # otherwise just return the service specification
-    return service_spec(app, service_url)
+    return return_result(service_spec(app, service_url))
 
+
+@app.route('/propose_properties')
+def propose_properties():
+    """
+    Properties that can be added via reconcilation
+    see https://github.com/OpenRefine/OpenRefine/wiki/Data-Extension-API
+    """
+    properties = [
+        "name",
+        "charityNumber",
+        "companyNumber",
+        "streetAddress",
+        "addressLocality",
+        "addressRegion",
+        "addressCountry",
+        "postalCode",
+        "telephone",
+        "alternateName",
+        "email",
+        "description",
+        "organisationType",
+        "url",
+        "location",
+        "name",
+        "geoCode",
+        "geoCodeType",
+        "latestIncome",
+        "dateModified",
+        "dateRegistered",
+        "dateRemoved",
+        "active",
+        "parent",
+        "orgIDs",
+        "sources",
+    ]
+    return {
+        "properties": [
+            {
+                "id": p,
+                "name": p
+            } for p in properties
+        ],
+        "type": bottle.request.params.get("type"),
+        "limit": bottle.request.params.get("limit", 3)
+    }
 
 @app.route('/charity/<regno>')
 @app.route('/charity/<regno>.<filetype>')

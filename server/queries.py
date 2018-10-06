@@ -2,6 +2,8 @@
 Useful functions for creating queries
 """
 from copy import deepcopy
+from collections import OrderedDict
+import datetime
 import json
 import yaml
 
@@ -149,6 +151,59 @@ def esdoc_orresponse(query, app):
     }
 
 
+def recon_data_extension(query, app):
+    columns = [c["id"] for c in query.get("properties") if c.get("id")]
+    rows = OrderedDict()
+    for org_id in query.get("ids", []):
+        print(org_id, columns)
+        res = app.config["es"].get(
+            index=app.config["es_index"],
+            doc_type=app.config["es_type"],
+            id=org_id,
+            ignore=[404],
+            _source_include=columns
+        )
+        if res and res.get("found"):
+            rows[org_id] = OrderedDict([
+                (c, [get_field_type(res["_source"].get(c))])
+            for c in columns])
+        else:
+            rows[org_id] = OrderedDict([(c, []) for c in columns])
+    return {
+        "rows": rows,
+        "meta": [{
+            "id": c, "name": c
+        } for c in columns]
+    }
+
+def get_field_type(result):
+    # an empty object {} represents an empty cell
+    if result is None or result == "":
+        return {}
+
+    # an object with "id" and "name" represents a reconciled value(from the same reconciliation service). It will be stored as a matched cell(with maximum reconciliation score). Example: {"name": "Warsaw", "id": "Q270"}
+    # IGNORED
+
+    # an object with "date" and an ISO-formatted date string represents a point in time. Example: {"date": "1987-02-01T00:00:00+00:00"}
+    if isinstance(result, (datetime.date, datetime.datetime)):
+        return {"date": result.isoformat()}
+
+    # an object with "float" and a numerical value represents a quantity. Example: {"float": 48.2736}
+    if isinstance(result, float):
+        return {"float": result}
+
+    # an object with "int" and an integer represents a number. Example: {"int": 54}
+    if isinstance(result, int):
+        return {"int": result}
+
+    # an object with "bool" and true or false represents a boolean. Example: {"bool": false}
+    if isinstance(result, bool):
+        return {"bool": result}
+
+    # an object with a single "str" key and a string value for it represents a cell with a(bare) string in it. Example: {"str": "193.54.0.0/15"}
+    return {"str": result}
+
+
 def service_spec(app, service_url):
     """Return the default service specification
 
@@ -169,5 +224,12 @@ def service_spec(app, service_url):
         "defaultTypes": [{
             "id": "/" + app.config["es_type"],
             "name": app.config["es_type"]
-        }]
+        }],
+        "extend": {
+            "propose_properties": {
+                "service_url": service_url,
+                "service_path": "/propose_properties"
+            },
+            "property_settings": []
+        }
     }
