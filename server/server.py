@@ -90,17 +90,23 @@ def random(filetype="html"):
     query = {
         "size": 1,
         "query": {
-            "function_score": {
-                "functions": [
-                    {
-                        "random_score": {
-                            "seed": str(time.time())
-                        }
+            "bool": {
+                "must": {
+                    "function_score": {
+                        "functions": [
+                            {
+                                "random_score": {
+                                    "seed": str(time.time())
+                                }
+                            }
+                        ]
+                    },
+                },
+                "filter": {
+                    "term": {
+                        "organisationType.keyword": "Registered Charity"
                     }
-                ]
-            },
-            "match": {
-                "organisationType": "Registered Charity"
+                }
             }
         }
     }
@@ -122,7 +128,7 @@ def random(filetype="html"):
     if char:
         if filetype == "html":
             bottle.redirect("/charity/{}".format(char["_id"]))
-        return char["_source"]
+        return convert_to_v1(char["_source"])
 
 
 
@@ -227,15 +233,73 @@ def charity(regno, filetype='html'):
         org_id = "GB-NIC-{}".format(re.sub(r'[^0-9]', '', regno_cleaned))
 
     res = app.config["es"].get(index=app.config["es_index"],
-                               doc_type=app.config["es_type"], 
+                               doc_type=app.config["es_type"],
                                id=org_id,
                                ignore=[404])
     if "_source" in res:
+        res["_source"]["id"] = res["_id"]
         if filetype == "html":
             return bottle.template('org', org=sort_out_date(res["_source"]))
-        return res["_source"]
-    
+        return convert_to_v1(res["_source"])
+
     return bottle.abort(404, bottle.template('Charity {{regno}} not found.', regno=regno))
+
+
+def convert_to_v1(char):
+    """
+    Conversion of organisation-type API response to charity type response for
+    compatability with old api
+    """
+    reg_numbers = {}
+    for i in char.get("orgIDs", []):
+        if i.startswith("GB-CHC-"):
+            reg_numbers["ccew"] = {
+                "regno": i.replace("GB-CHC-", ""),
+                "url": "http://apps.charitycommission.gov.uk/Showcharity/RegisterOfCharities/SearchResultHandler.aspx?RegisteredCharityNumber={}&SubsidiaryNumber=0&Ref=CO".format(i.replace("GB-CHC-", "")),
+            }
+        elif i.startswith("GB-SC-"):
+            reg_numbers["oscr"] = {
+                "regno": i.replace("GB-SC-", ""),
+                "url": "https://www.oscr.org.uk/about-charities/search-the-register/charity-details?number={}".format(i.replace("GB-SC-", "")),
+            }
+        elif i.startswith("GB-NIC-"):
+            reg_numbers["ccni"] = {
+                "regno": i.replace("GB-NIC-", ""),
+                "url": "http://www.charitycommissionni.org.uk/charity-details/?regid={}&subid=0".format(i.replace("GB-NIC-", "")),
+            }
+
+    return {
+        "ccew_number": reg_numbers.get("ccew", {}).get("regno"),
+        "oscr_number": reg_numbers.get("oscr", {}).get("regno"),
+        "ccni_number": reg_numbers.get("ccni", {}).get("regno"),
+        "active": char.get("active", True),
+        "names": ([{"name": char.get("name")}] if char.get("name") not in char.get("alternateName", []) else []) + [
+            {"name": n} for n in char.get("alternateName", [])
+        ],
+        "known_as": char.get("name"),
+        "geo": {
+            "areas": [],
+            "postcode": char.get("postalCode"),
+            "location": None
+        },
+        "url": char.get("url"),
+        "domain": char.get("url"), # @TODO: extract domain from url
+        "latest_income": char.get("latestIncome"),
+        "company_number": [{
+            "number": char.get("companyNumber"),
+            "url": "http://beta.companieshouse.gov.uk/company/{}".format(char.get("companyNumber")),
+            "source": char.get("sources", [""])[0]
+        }] if char.get("companyNumber") else [],
+        "parent": char.get("parent"),
+        "ccew_link": reg_numbers.get("ccew", {}).get("url"),
+        "oscr_link": reg_numbers.get("oscr", {}).get("url"),
+        "ccni_link": reg_numbers.get("ccni", {}).get("url"),
+        "date_registered": char.get("dateRegistered"),
+        "date_removed": char.get("dateRemoved"),
+        "org-ids": char.get("orgIDs"),
+        "alt_names": char.get("alternateName"),
+        "last_modified": char.get("dateModified"),
+    }
 
 @app.route('/org_types')
 def org_types():
