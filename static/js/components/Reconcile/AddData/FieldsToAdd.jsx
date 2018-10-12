@@ -2,16 +2,40 @@ import React from 'react'
 
 import { set_fields_to_add } from "../../../actions/Actions"
 
-export const potentialFieldsToAdd = [
-    { slug: 'postcode', name: 'Postcode' },
-    { slug: 'latest_income', name: 'Latest income' },
-    { slug: 'name', name: 'Name' },
+export const defaultPotentialFieldsToAdd = [
+    { id: 'postalCode', name: 'Postcode' },
+    { id: 'latestIncome', name: 'Latest income' },
+    { id: 'name', name: 'Name' },
 ]
 
 class FieldsToAdd extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+            isLoaded: false,
+            potentialFieldsToAdd: []
+        }
         this.handleChange = this.handleChange.bind(this);
+    }
+
+    componentDidMount() {
+        fetch("/propose_properties")
+          .then(res => res.json())
+          .then(result => {
+              this.setState({
+                  potentialFieldsToAdd: result.properties,
+                  isLoaded: true
+              });
+            },
+            // Note: it's important to handle errors here
+            // instead of a catch() block so that we don't swallow
+            // exceptions from actual bugs in components.
+            error => {
+                this.setState({
+                    isLoaded: true,
+                    potentialFieldsToAdd: defaultPotentialFieldsToAdd
+                });
+            });
     }
 
     handleChange(event) {
@@ -27,23 +51,27 @@ class FieldsToAdd extends React.Component {
     }
 
     render() {
-        return (
-            <div className="field">
-                <label className="label">Select fields to add</label>
-                <div className="control">
-                    {potentialFieldsToAdd.map((field, i) =>
-                        <div key={i}>
-                            <label className="checkbox">
-                                <input type="checkbox" 
-                                    value={field.slug} 
-                                    checked={this.props.fieldsToAdd.includes(field.slug)}
-                                    onChange={this.handleChange} /> {field.name}
-                            </label>
-                        </div>
-                    )}
+        if(!this.state.isLoaded) {
+            return <div>Loading...</div>;
+        } else {
+            return (
+                <div className="field">
+                    <label className="label">Select fields to add</label>
+                    <div className="control">
+                        {this.state.potentialFieldsToAdd.map((field, i) =>
+                            <div key={i}>
+                                <label className="checkbox">
+                                    <input type="checkbox" 
+                                        value={field.id} 
+                                        checked={this.props.fieldsToAdd.includes(field.id)}
+                                        onChange={this.handleChange} /> {field.name}
+                                </label>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
-        )
+            )
+        }
     }
 }
 
