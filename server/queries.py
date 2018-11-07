@@ -14,13 +14,28 @@ with open('./recon_config.yml', 'rb') as yaml_file:
     ES_RECONCILE_QUERY = yaml.load(yaml_file)
 
 
-def search_query(term):
+def search_query(term, orgtype=None):
     """
     Fetch the search query and insert the query term
     """
     json_q = deepcopy(ES_SEARCH_QUERY)
     for param in json_q["params"]:
         json_q["params"][param] = term
+
+    # check for organisation type
+    if orgtype and orgtype!="all":
+        if not isinstance(orgtype, list):
+            orgtype = [orgtype]
+        dis_max = json_q["inline"]["query"]["function_score"]["query"]
+        json_q["inline"]["query"]["function_score"]["query"] = {
+            "bool": {
+                "must": dis_max,
+                "filter": {
+                    "terms": {"organisationType.keyword": orgtype}
+                }
+            }
+        }
+
     return json.dumps(json_q)
 
 

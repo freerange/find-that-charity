@@ -43,7 +43,7 @@ if os.environ.get("ADMIN_PASSWORD"):
 csv_app.config.update(app.config)
 
 
-def search_return(query, term):
+def search_return(query, term, orgtype=None):
     """
     Fetch search results and display on a template
 
@@ -64,6 +64,7 @@ def search_return(query, term):
     return bottle.template('search',
                            res=res,
                            term=term,
+                           selected_org_type=orgtype,
                            res_org_types=res_org_types,
                            org_types=get_org_types()
                           )
@@ -76,8 +77,9 @@ def home():
     """
     query = bottle.request.query.get('q')
     if query:
-        s_query = search_query(query)
-        return search_return(s_query, query)
+        orgtype = bottle.request.query.get('orgtype')
+        s_query = search_query(query, orgtype)
+        return search_return(s_query, query, orgtype)
     return bottle.template('index', term='', org_types=get_org_types())
 
 

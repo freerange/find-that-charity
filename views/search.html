@@ -1,10 +1,10 @@
 % rebase('base.html', title="{} | Find that charity".format(term), heading="Search results" )
 <div class="columns">
   <div class="column">
-    % include('search_form.html', term=term, org_types=org_types)
+    % include('search_form.html', term=term, org_types=org_types, selected_org_type=selected_org_type)
     <br>
     % if defined('res'):
-      % include('search_results.html', res=res, term=term, org_types=res_org_types)
+      % include('search_results.html', res=res, term=term, org_types=res_org_types, selected_org_type=selected_org_type)
     % end
   </div>
 </div>

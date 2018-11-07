@@ -3,12 +3,7 @@ import React from "react";
 export default class SearchAutoComplete extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            "results": [],
-            "loading": false,
-            "q": props.value,
-            "orgtype": 'all'
-        }
+        this.state = { results: [], loading: false, q: props.value, orgtype: props.selected_org_type };
         this.handleChange = this.handleChange.bind(this);
     }
 

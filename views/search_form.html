@@ -6,10 +6,14 @@
     </div>
     <div class="control">
       <span class="select is-large">
-        <select>
+        <select name="orgtype">
           <option>All organisation types</option>
           % for org_type in  org_types:
-          <option>{{ org_type }}  </option>
+            % if org_type == selected_org_type:
+            <option selected="selected">{{ org_type }}  </option>
+            % else:
+            <option>{{ org_type }}  </option>
+            % end
           % end
         </select>
       </span>

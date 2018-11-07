@@ -1,14 +1,29 @@
+% import urllib.parse
 % if res["total"] > 0:
   <article class="message is-success">
     <div class="message-body">
-    {{ "{:,}".format(res["total"]) }} result{{"s" if res["total"] > 1 else ""}} found for "{{term}}"
-    <ul>
-      % for o in org_types:
-      <li><small>- {{ "{:,.0f}".format(o["doc_count"])}} <strong>{{o['key']}}</strong></small></li>
-      % end
-    </ul>
+      {{ "{:,}".format(res["total"]) }} result{{"s" if res["total"] > 1 else ""}} found for "{{term}}"
     </div>
   </article>
+      <div class="field is-grouped is-grouped-multiline">
+        % for o in org_types:
+        <div class="control">
+          <div class="tags has-addons">
+            <a class="tag is-link" href="/?{{ urllib.parse.urlencode((('q', term), ('orgtype', o['key']))) }}">{{o['key']}}</a>
+            <span class="tag">
+            {{ "{:,.0f}".format(o["doc_count"])}}
+            </span>
+          </div>
+        </div>
+        % end
+        % if selected_org_type != 'all':
+        <div class="control">
+          <div class="tags has-addons">
+            <a class="tag is-link" href="/?{{ urllib.parse.urlencode((('q', term), ('orgtype', 'all'))) }}">Search all organisations</a>
+          </div>
+        </div>
+        % end
+    </div>
 % else:
   <article class="message is-error">
     <div class="message-body">
@@ -30,7 +45,11 @@
     % for result in res["hits"]:
       <tr>
         <td>
-          <a href={{result["_link"]}}>{{result["_source"]["name"]}}</a><br>{{result["_id"]}}
+          <a href={{result["_link"]}}>{{result["_source"]["name"]}}</a>
+          % if result["_source"]["postalCode"]:
+          ({{result["_source"]["postalCode"].split()[0]}})
+          % end
+          <br>{{result["_id"]}}
         </td>
         <td>
           % for orgType in result["_source"]["organisationType"]:
