@@ -11,6 +11,7 @@ inline:
               query: "{{name}}"
               fields:
               - alternativeName
+              - complete_names
           - match_phrase:
               name: "{{name}}"
           - multi_match:
