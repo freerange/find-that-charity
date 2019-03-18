@@ -14,6 +14,12 @@ def test_charity_inactive():
     assert response.status_code == 200
     assert "inactive" in response.text.lower()
 
+def test_charity_preview():
+    client = TestClient(app)
+    response = client.get('/charity/225922/preview')
+    assert response.status_code == 200
+    assert "National Council for Voluntary Organisations".lower() in response.text.lower()
+
 def test_charity_json():
     client = TestClient(app)
     response = client.get('/charity/225922.json')

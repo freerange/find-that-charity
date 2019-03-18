@@ -40,3 +40,32 @@ async def index(request):
         return JSONResponse({
             "error": 'Charity {} not found.'.format(regno)
         }, status_code=404)
+
+
+@app.route('/{regno}/preview')
+async def preview(request):
+    regno = request.path_params['regno']
+
+    regno_cleaned = clean_regno(regno)
+    if regno_cleaned == "":
+        return JSONResponse({
+            "error": 'Charity {} not found.'.format(regno)
+        }, status_code=404)
+
+    res = es.get(
+        index=settings.ES_INDEX,
+        doc_type=settings.ES_TYPE,
+        id=regno_cleaned,
+        _source_exclude=["complete_names"],
+        ignore=[404]
+    )
+    if "_source" in res:
+        return templates.TemplateResponse('charity_preview.html', {
+            'request': request,
+            'charity': sort_out_date(res["_source"]),
+            'charity_id': res["_id"]
+        })
+    else:
+        return JSONResponse({
+            "error": 'Charity {} not found.'.format(regno)
+        }, status_code=404)
