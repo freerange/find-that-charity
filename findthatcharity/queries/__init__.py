@@ -2,6 +2,7 @@ import os
 import yaml
 import copy
 import json
+import time
 
 with open(os.path.join(os.path.dirname(__file__), './es_config.yml'), 'rb') as yaml_file:
     ES_CONFIG = yaml.load(yaml_file)
@@ -59,3 +60,23 @@ def orgid_query(term):
             }
         }
     }
+
+def random_query(active=False):
+    query = {
+        "size": 1,
+        "query": {
+            "function_score": {
+                "functions": [
+                    {
+                        "random_score": {
+                            "seed": str(time.time())
+                        }
+                    }
+                ]
+            }
+        }
+    }
+    if active:
+        query["query"]["function_score"]["query"] = {"match": {"active": True}}
+    return query
+

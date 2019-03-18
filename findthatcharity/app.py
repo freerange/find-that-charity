@@ -14,7 +14,8 @@ from .apps import randcharity, reconcile, charity, autocomplete, orgid, feeds
 app = Starlette()
 app.debug = settings.DEBUG
 app.mount('/static', StaticFiles(directory="static"))
-app.mount('/random', randcharity.app)
+app.add_route('/random', randcharity.random)
+app.add_route('/random.{filetype}', randcharity.random)
 app.mount('/reconcile', reconcile.app)
 app.mount('/charity', charity.app)
 app.mount('/autocomplete', autocomplete.app)
