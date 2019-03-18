@@ -9,7 +9,7 @@ from .queries import search_query
 from .db import es
 from . import settings
 from .utils import sort_out_date
-from .apps import randcharity, reconcile, charity, autocomplete, orgid, feeds
+from .apps import randcharity, reconcile, charity, autocomplete, orgid, feeds, csvdata
 
 app = Starlette()
 app.debug = settings.DEBUG
@@ -21,6 +21,7 @@ app.mount('/charity', charity.app)
 app.mount('/autocomplete', autocomplete.app)
 app.mount('/feeds', feeds.app)
 app.mount('/orgid', orgid.app)
+app.mount('/adddata', csvdata.app)
 
 templates = Jinja2Templates(directory='templates')
 
