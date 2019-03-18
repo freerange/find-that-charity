@@ -1,0 +1,15 @@
+{% extends 'index.html' %}
+
+{% set heading = 'Search results' %}
+
+{% block content %}
+<div class="columns">
+    <div class="column">
+        {% include '_search_form.html' %}
+        <br>
+        {% if res %}
+        {% include '_search_results.html' %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

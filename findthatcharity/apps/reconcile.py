@@ -1,20 +1,15 @@
 import json
-import yaml
-import copy
-import os
 from urllib.parse import unquote
 from collections import OrderedDict
 
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, Response
 
+from ..queries import recon_query
 from ..db import es
 from .. import settings
 
 app = Starlette()
-
-with open(os.path.join(os.path.dirname(__file__), '../queries/recon_config.yml'), 'rb') as yaml_file:
-    RECON_CONFIG = yaml.load(yaml_file)
 
 @app.route('/', methods=['GET', 'POST'])
 async def index(request):
@@ -59,9 +54,6 @@ async def index(request):
     else:
         result = service_spec(service_url)
 
-    print(query)
-    print(queries)
-
     if callback:
         return Response("%s(%s);" % (callback, json.dumps(result)), media_type='application/javascript')
     return JSONResponse(result)
@@ -88,17 +80,6 @@ def service_spec(service_url):
             "name": settings.ES_TYPE
         }]
     }
-    
-
-def recon_query(term):
-    """
-    Fetch the reconciliation query and insert the query term
-    """
-    json_q = copy.deepcopy(RECON_CONFIG)
-    for param in json_q["params"]:
-        json_q["params"][param] = term
-    return json.dumps(json_q)
-
 
 def esdoc_orresponse(query):
     """Decorate the elasticsearch document to the OpenRefine response API
@@ -110,18 +91,21 @@ def esdoc_orresponse(query):
         body=query,
         ignore=[404]
     )
-    res["hits"]["result"] = res["hits"].pop("hits")
-    for i in res["hits"]["result"]:
-        i["id"] = i.pop("_id")
-        i["type"] = [i.pop("_type")]
-        i["score"] = i.pop("_score")
-        i["index"] = i.pop("_index")
-        i["source"] = i.pop("_source")
-        i["name"] = i["source"]["known_as"] + " (" + i["id"] + ")"
-        if not i["source"]["active"]:
-            i["name"] += " [INACTIVE]"
-        if i["source"]["known_as"].lower() == json.loads(query)["params"]["name"].lower() and i["score"] == res["hits"]["max_score"]:
-            i["match"] = True
-        else:
-            i["match"] = False
-    return res["hits"]
+    hits = []
+    for i in res["hits"]["hits"]:
+        name = i["_source"]["known_as"] + " (" + i["_id"] + ")"
+        if not i["_source"]["active"]:
+            name += " [INACTIVE]"
+        hits.append({
+            "id": i["_id"],
+            "type": [i["_type"]],
+            "score": i["_score"],
+            "index": i["_index"],
+            "name": name,
+            "source": i["_source"],
+            "match": i["_source"]["known_as"].lower() == json.loads(query)["params"]["name"].lower() and i["_score"] == res["hits"]["max_score"]
+        })
+    return {
+        "total": len(hits),
+        "result": hits,
+    }
