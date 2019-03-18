@@ -7,6 +7,13 @@ def test_charity_missing():
     response = client.get('/charity/ABCDASD')
     assert response.status_code == 404
     assert "not found" in response.text.lower()
+from findthatcharity.app import app
+
+def test_charity_inactive():
+    client = TestClient(app)
+    response = client.get('/charity/1143497')
+    assert response.status_code == 200
+    assert "inactive" in response.text.lower()
 
 def test_charity_json():
     client = TestClient(app)

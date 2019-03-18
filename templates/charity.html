@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
-{% block title %}{{ charity["known_as"] }}{% endblock %} 
-{% set heading = "Charity number: {}".format(charity_id) %}
-{% set status=charity["active"] %}
+{% set heading = charity["known_as"] %} 
+{% set subtitle = "Charity number: {}{}".format(
+    charity_id,
+    "" if charity.active else " | Inactive"
+) %}
 {% set sources = {
     "ccew": "Charity Commission for England and Wales",
     "oscr": "Office of Scottish Charity Regulator",
