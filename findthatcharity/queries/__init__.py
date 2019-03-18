@@ -26,3 +26,21 @@ def recon_query(term):
     for param in json_q["params"]:
         json_q["params"][param] = term
     return json.dumps(json_q)
+
+def autocomplete_query(term):
+    """
+    Look up an organisation using the first part of the name
+    """
+    return {
+        "suggest": {
+            "suggest-1": {
+                "prefix": term,
+                "completion": {
+                    "field": "complete_names",
+                    "fuzzy" : {
+                        "fuzziness" : 1
+                    }
+                }
+            }
+        }
+    }
