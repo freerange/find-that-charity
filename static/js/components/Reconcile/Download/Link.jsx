@@ -96,6 +96,35 @@ class ReconcileDownloadData extends React.Component {
 
     }
 
+    value_to_string(value){
+        switch(typeof value){
+            case "string":
+                return value;
+
+            case "object":
+                if (!value || Object.getOwnPropertyNames(value).length == 0){
+                    return <span className="has-text-grey-light is-size-7">[empty]</span>
+                }
+                if (Array.isArray(value)){
+                    return value.join(", ");
+                }
+                console.log(value);
+                // console.log(value.constructor);
+                break;
+
+            case "number":
+                return value.toString();
+                
+            case "boolean":
+                if(value){
+                    return "Yes"
+                }
+                return "No"
+            default:
+                return value;
+        };
+    }
+
     render() {
         let preview_rows = 10;
         let number_format = new Intl.NumberFormat().format
@@ -143,7 +172,7 @@ class ReconcileDownloadData extends React.Component {
                                             {this.state.allFields.map((f, i) =>
                                                 <td key={i}>
                                                     <div style={{maxHeight: '48px', overflowY: 'hidden'}}>
-                                                        {org[f]}
+                                                        {this.value_to_string(org[f])}
                                                     </div>
                                                 </td>
                                             )}

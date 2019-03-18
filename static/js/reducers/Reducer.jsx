@@ -12,7 +12,7 @@ const initialState = {
     hidden_fields: [],
     file: null,
     charity_numbers: null,
-    fields_to_add: ['postcode'],
+    fields_to_add: [],
     org_data: {},
     progress: 0,
     loading: false,

@@ -13,7 +13,7 @@ class Progress extends React.Component {
     render() {
         return (
             <div>
-                <h2 class="title is-3">Progress</h2>
+                <h2 className="title is-3">Progress</h2>
                 <div>
                     {this.props.maxProgress} unique values in the
                     <code>{this.props.charity_number_field}</code>

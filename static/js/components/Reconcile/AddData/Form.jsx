@@ -71,10 +71,15 @@ class ReconcileAddData extends React.Component {
         if(charity_numbers){
 
             // Promise which will return when all the charity data has been fetched
-            Promise.all([...charity_numbers].map(charity_number => {
+            Promise.all([...charity_numbers].map(charity_number_chunk => {
 
                 // work out the URL to fetch charity data from
-                let charity_url = encodeURI(`/charity/${charity_number}.json`);
+                let extend_query = {
+                    "ids": charity_number_chunk,
+                    "properties": this.props.fields_to_add.map(x => {return {"id": x}})
+                }
+                let charity_url = encodeURI(`/reconcile?extend=${JSON.stringify(extend_query)}`);
+                console.log(charity_url);
 
                 // do the actual fetching of the data
                 // @TODO handle errors here
@@ -89,13 +94,16 @@ class ReconcileAddData extends React.Component {
                     })
                     .then(function (charity_data) {
                         // when the data has been fetched store the record
-                        comp.props.addOrgRecord(
-                            charity_number, 
-                            comp.processCharity(charity_data)
-                        )
-                        comp.setState(function (prevState) {
-                            return {organisationsFound: prevState.organisationsFound + 1}
+                        Object.keys(charity_data.rows).forEach(function (charity_number) {
+                            comp.props.addOrgRecord(
+                                charity_number,
+                                comp.processCharity(charity_data.rows[charity_number])
+                            );
+                            comp.setState(function (prevState) {
+                                return { organisationsFound: prevState.organisationsFound + 1 }
+                            });
                         });
+
                     })
                     .catch(function(error){
                         comp.setState(function (prevState) {
@@ -112,11 +120,21 @@ class ReconcileAddData extends React.Component {
     }
 
     getCharityNumbers(){
-        return new Set(this.props.data.map((record, i) => {
-            if (record[this.props.charity_number_field] != "") {
-                return record[this.props.charity_number_field]
-            }
-        }).filter((k) => k != undefined));
+        let perChunk = 100;
+        let data = new Set(
+            this.props.data.map((record, i) => {
+                if (record[this.props.charity_number_field] != "") {
+                    return record[this.props.charity_number_field]
+                }
+            }).filter((k) => k != undefined)
+        );
+        // from: https://stackoverflow.com/a/37826698
+        data = Array.from(data).reduce((all, one, i) => {
+            const ch = Math.floor(i / perChunk);
+            all[ch] = [].concat((all[ch] || []), one);
+            return all
+        }, []);
+        return data;
     }
 
     processCharity(charity_data){
@@ -126,6 +144,9 @@ class ReconcileAddData extends React.Component {
                 new_fields[f] = charity_data["geo"]["postcode"];
             } else {
                 new_fields[f] = charity_data[f];
+            }
+            if(!new_fields[f]){
+                new_fields[f] = null;
             }
         });
         return new_fields;

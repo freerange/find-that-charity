@@ -11,7 +11,30 @@ export const potentialFieldsToAdd = [
 class FieldsToAdd extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {
+            loaded: false,
+            potentialFieldsToAdd: potentialFieldsToAdd
+        }
         this.handleChange = this.handleChange.bind(this);
+        this.selectAllFields = this.selectAllFields.bind(this);
+    }
+
+    componentDidMount() {
+        this.setState({ loaded: false });
+        let properties_url = `/reconcile/propose_properties`
+
+        fetch(properties_url)
+            .then(function (response) {
+                return response.json();
+            })
+            .then(result => this.setState({
+                potentialFieldsToAdd: result.properties,
+                loaded: true
+            }))
+            .catch(error => this.setState({
+                error,
+                loaded: true
+            }));
     }
 
     handleChange(event) {
@@ -26,17 +49,22 @@ class FieldsToAdd extends React.Component {
         this.props.dispatch(set_fields_to_add(fieldsToAdd));
     }
 
+    selectAllFields() {
+        this.props.dispatch(set_fields_to_add(this.state.potentialFieldsToAdd.map((f) => f.id)));
+    }
+
     render() {
         return (
             <div className="field">
                 <label className="label">Select fields to add</label>
+                <a onClick={this.selectAllFields} style={{ cursor: 'pointer' }}>Select all fields</a>
                 <div className="control">
-                    {potentialFieldsToAdd.map((field, i) =>
+                    {this.state.loaded && this.state.potentialFieldsToAdd.map((field, i) =>
                         <div key={i}>
                             <label className="checkbox">
                                 <input type="checkbox" 
-                                    value={field.slug} 
-                                    checked={this.props.fieldsToAdd.includes(field.slug)}
+                                    value={field.id} 
+                                    checked={this.props.fieldsToAdd.includes(field.id)}
                                     onChange={this.handleChange} /> {field.name}
                             </label>
                         </div>
