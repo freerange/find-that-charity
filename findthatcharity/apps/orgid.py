@@ -7,13 +7,8 @@ from .. import settings
 
 app = Starlette()
 
-@app.route('/')
-async def index(request):
-    return JSONResponse({'hello': 'world'})
-
-
 @app.route('/{orgid}.json')
-def orgid_json(request):
+async def orgid_json(request):
     """
     Fetch json representation based on a org-id for a record
     """
@@ -28,7 +23,7 @@ def orgid_json(request):
 
 @app.route('/{orgid}')
 @app.route('/{orgid}.html')
-def orgid_html(request):
+async def orgid_html(request):
     """
     Redirect to a record based on the org-id
     """
