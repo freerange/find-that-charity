@@ -21,7 +21,13 @@ async def index(request):
             "error": 'Charity {} not found.'.format(regno)
         }, status_code=404)
 
-    res = es.get(index=settings.ES_INDEX, doc_type=settings.ES_TYPE, id=regno_cleaned, ignore=[404])
+    res = es.get(
+        index=settings.ES_INDEX,
+        doc_type=settings.ES_TYPE,
+        id=regno_cleaned,
+        _source_exclude=["complete_names"],
+        ignore=[404]
+    )
     if "_source" in res:
         if filetype == "html":
             return templates.TemplateResponse('charity.html', {

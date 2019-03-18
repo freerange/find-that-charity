@@ -44,3 +44,18 @@ def autocomplete_query(term):
             }
         }
     }
+
+def orgid_query(term):
+    """
+    Fetch a charity based on their org id
+    """
+    return {
+        "query": {
+            "match": {
+                "org-ids": {
+                    "query": term,
+                    "operator": "and",
+                }
+            }
+        }
+    }
