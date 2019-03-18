@@ -5,10 +5,10 @@ import json
 import time
 
 with open(os.path.join(os.path.dirname(__file__), './es_config.yml'), 'rb') as yaml_file:
-    ES_CONFIG = yaml.load(yaml_file)
+    ES_CONFIG = yaml.safe_load(yaml_file)
 
 with open(os.path.join(os.path.dirname(__file__), './recon_config.yml'), 'rb') as yaml_file:
-    RECON_CONFIG = yaml.load(yaml_file)
+    RECON_CONFIG = yaml.safe_load(yaml_file)
 
 def search_query(term):
     """
