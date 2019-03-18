@@ -218,10 +218,12 @@ The data is imported into elasticsearch in the following format:
 Server
 ------
 
-The server uses [bottle](http://bottlepy.org/docs/dev/). Run it with the
+The server uses [starlette](https://www.starlette.io/) and [uvicorn](https://www.uvicorn.org/). Run it with the
 following command:
 
-`python server/server.py --host localhost --port 8080`
+```
+uvicorn findthatcharity.app:app --debug
+```
 
 The server offers the following API endpoints:
 
@@ -229,6 +231,15 @@ The server offers the following API endpoints:
   conforming to the OpenRefine reconciliation API specification.
 
 - `/charity/12345`: Look up information about a particular charity
+
+Tests
+-----
+
+Run tests with
+
+```
+python -m pytest tests
+```
 
 Todo
 ----
