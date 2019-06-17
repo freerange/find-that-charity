@@ -49,7 +49,7 @@ def search_return(query, request):
     )
     res = res["hits"]
     for result in res["hits"]:
-        result["_link"] = "/charity/" + result["_id"]
+        result["_link"] = "/orgid/" + result["_id"]
         result["_source"] = sort_out_date(result["_source"])
     
     return templates.TemplateResponse('search.html', {

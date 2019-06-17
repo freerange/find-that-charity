@@ -16,13 +16,13 @@ async def index(request):
         index=settings.ES_INDEX,
         doc_type=settings.ES_TYPE,
         body=autocomplete_query(request.query_params.get("q", "")),
-        _source_include=['known_as']
+        _source_include=['name']
     )
-    return {
+    return JSONResponse({
         "results": [
             {
-                "label": x["_source"]["known_as"],
+                "label": x["_source"]["name"],
                 "value": x["_id"]
             } for x in res.get("suggest", {}).get("suggest-1", [])[0]["options"]
         ]
-    }
+    })

@@ -13,7 +13,7 @@ def random(request):
     res = es.search(
         index=settings.ES_INDEX,
         doc_type=settings.ES_TYPE,
-        body=random_query(active),
+        body=random_query(active, "Registered Charity"),
         ignore=[404]
     )
     char = None
@@ -23,5 +23,5 @@ def random(request):
 
     if char:
         if filetype == "html":
-            return RedirectResponse('/charity/{}'.format(char["_id"]))
+            return RedirectResponse('/orgid/{}'.format(char["_id"]))
     return JSONResponse(char["_source"])

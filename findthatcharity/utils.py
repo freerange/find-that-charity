@@ -8,18 +8,22 @@ def clean_regno(regno):
     regno = str(regno)
     regno = regno.upper()
     regno = re.sub(r'^[^0-9SCNI]+|[^0-9]+$', '', regno)
-    return regno
 
-def sort_out_date(charity_record):
+    if regno.startswith("S"):
+        return "GB-SC-{}".format(regno)
+    if regno.startswith("N"):
+        return "GB-NIC-{}".format(re.sub(r'^[^0-9]+|[^0-9]+$', '', regno))
+    return "GB-CHC-{}".format(regno)
+
+def sort_out_date(record, date_fields=["dateRegistered", "dateRemoved", "dateModified"]):
     """
-    parse date fields in a charity record
+    parse date fields in a organisation record
     """
-    date_fields = ["date_registered", "date_removed", "last_modified"]
     for date_field in date_fields:
-        if charity_record.get(date_field):
+        if record.get(date_field):
             try:
-                charity_record[date_field] = parser.parse(
-                    charity_record[date_field])
+                record[date_field] = parser.parse(
+                    record[date_field])
             except ValueError:
                 pass
-    return charity_record
+    return record

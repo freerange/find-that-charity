@@ -17,19 +17,30 @@
         <thead>
             <tr>
                 <th>Name</th>
+                <th>Type</th>
                 <th>Status</th>
-                <th>Charity Number</th>
+                <th>
+                    Org ID 
+                    <a href="http://org-id.guide/about" target="_blank" class="has-text-weight-light">What is org-id?</a>
+                </th>
             </tr>
         </thead>
         <tbody>
             {% for result in res.hits %}
             <tr>
-                <td><a href={{ result._link }}>{{result._source.known_as }}</a></td>
-                {% if result._source.active %}
-                <td><span class="tag is-success">Active</span></td>
-                {% else %}
-                <td><span class="tag is-danger">Inactive</span></td>
-                {% endif %}
+                <td><a href={{ result._link }}>{{result._source.name }}</a></td>
+                <td>
+                <div class="tags are-small">
+                    {% for t in result._source.organisationType %}
+                    <span class="tag is-small">{{ t }}</span>
+                    {% endfor %}
+                </div>
+                </td>
+                <td>
+                    {% if result._source.active %}<span class="tag is-success">Active</span>
+                    {% else %}<span class="tag is-danger">Inactive</span>
+                    {% endif %}
+                </td>
                 <td>{{ result._id }}</td>
             </tr>
             {% endfor %}

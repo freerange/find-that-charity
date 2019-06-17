@@ -50,33 +50,49 @@ def orgid_query(term):
     """
     Fetch a charity based on their org id
     """
+
+    if not isinstance(term, list):
+        term = [term]
+
     return {
         "query": {
-            "match": {
-                "org-ids": {
-                    "query": term,
-                    "operator": "and",
-                }
+            "terms": {
+                "orgIDs.keyword": term
             }
         }
     }
 
-def random_query(active=False):
+def random_query(active=False, orgtype=None):
     query = {
         "size": 1,
         "query": {
             "function_score": {
-                "functions": [
-                    {
-                        "random_score": {
-                            "seed": str(time.time())
-                        }
+                "query": {
+                    "bool": {
+                        "must": []
                     }
-                ]
+                },
+                "boost": "5",
+                "random_score": {}, 
+                "boost_mode":"multiply"
             }
         }
     }
     if active:
-        query["query"]["function_score"]["query"] = {"match": {"active": True}}
+        query["query"]["function_score"]["query"]["bool"]["must"].append({
+            "match": {
+                "active": True
+            }
+        })
+
+    if orgtype:
+        if not isinstance(orgtype, list):
+            orgtype = [orgtype]
+        query["query"]["function_score"]["query"]["bool"]["must"].append({
+            "terms": {
+                "organisationType.keyword": orgtype
+            }
+        })
+    
     return query
 
