@@ -8,7 +8,7 @@ import jinja2
 from ..queries import orgid_query, random_query
 from ..db import es, fetch_all_sources
 from .. import settings
-from ..utils import sort_out_date
+from ..utils import sort_out_date, get_links
 
 app = Starlette()
 
@@ -156,4 +156,5 @@ def merge_orgs(orgs):
         "orgs": orgs,
         "data": data,
         "sources": list(sources),
+        "links": get_links(data["orgIDs"].keys())
     }
