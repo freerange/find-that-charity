@@ -1,11 +1,11 @@
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
-from starlette.templating import Jinja2Templates
 
 from ..db import es
 from ..utils import clean_regno, sort_out_date
 from .. import settings
-from .orgid import get_orgs_from_orgid, merge_orgs, templates
+from .orgid import get_orgs_from_orgid, merge_orgs
+from ..templates import templates
 
 app = Starlette()
 
@@ -16,7 +16,6 @@ async def index(request):
     filetype = request.path_params.get('filetype', 'html')
 
     orgid = clean_regno(regno)
-    print(orgid)
     
     orgs = get_orgs_from_orgid(orgid)
     if orgs:

@@ -1,7 +1,6 @@
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
 from starlette.staticfiles import StaticFiles
-from starlette.templating import Jinja2Templates
 import uvicorn
 
 
@@ -10,6 +9,7 @@ from .db import es, fetch_all_sources
 from . import settings
 from .utils import sort_out_date
 from .apps import randcharity, reconcile, charity, autocomplete, orgid, feeds, csvdata
+from .templates import templates
 
 app = Starlette()
 app.debug = settings.DEBUG
@@ -23,8 +23,6 @@ app.mount('/feeds', feeds.app)
 app.mount('/orgid', orgid.app)
 app.mount('/adddata', csvdata.app)
 
-templates = Jinja2Templates(directory='templates')
-
 @app.route('/')
 async def homepage(request):
     query = request.query_params.get("q")
@@ -34,8 +32,6 @@ async def homepage(request):
     return templates.TemplateResponse('index.html', {
         'request': request,
         'value_counts': value_counts(),
-        'sources': fetch_all_sources(),
-        'key_types': settings.KEY_TYPES,
     })
 
 @app.route('/about')

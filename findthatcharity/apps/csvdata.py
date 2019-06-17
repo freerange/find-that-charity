@@ -1,7 +1,6 @@
 from starlette.applications import Starlette
-from starlette.templating import Jinja2Templates
 
-templates = Jinja2Templates(directory='templates')
+from ..templates import templates
 
 app = Starlette()
 

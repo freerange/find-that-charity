@@ -3,14 +3,14 @@ from datetime import datetime, timezone
 from dateutil import parser
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
-from starlette.templating import Jinja2Templates
 import requests
 from bs4 import BeautifulSoup
+
+from ..templates import templates
 
 CCEW_URL = 'http://data.charitycommission.gov.uk/'
 
 app = Starlette()
-templates = Jinja2Templates(directory='templates')
 
 @app.route('/ccew.{filetype}')
 async def ccew_rss(request):

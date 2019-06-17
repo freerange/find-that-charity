@@ -2,24 +2,15 @@ from datetime import datetime
 
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, RedirectResponse
-from starlette.templating import Jinja2Templates
 import jinja2
 
 from ..queries import orgid_query, random_query
-from ..db import es, fetch_all_sources
+from ..db import es
 from .. import settings
 from ..utils import sort_out_date, get_links
+from ..templates import templates
 
 app = Starlette()
-
-SOURCES = fetch_all_sources()
-
-def sources_to_string(sources):
-    return ", ".join(sources)
-    
-templates = Jinja2Templates(directory='templates')
-templates.env.filters["sources_to_string"] = sources_to_string
-templates.env.globals["sources"] = SOURCES
 
 @app.route('/{orgid}.json')
 async def orgid_json(request):
