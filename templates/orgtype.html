@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% set heading = term %}
+{% set subtitle = "10 random organisations" %}
+
+{% block content %}
+<div class="columns">
+  <div class="column">
+        {% include '_search_results.html' %}
+  </div>
+  <div class="column is-one-third">
+    <h3>Related organisation types</h3>
+    <div class="field is-grouped is-grouped-multiline">
+        {% for t in aggs.group_by_type.buckets if t.key != term %}
+            <div class="control">
+                <div class="tags has-addons">
+                    <a class="tag is-light is-medium" href="/orgid/type/{{ t.key }}">{{ t.key }}</a>
+                    <span class="tag is-info is-medium">{{ "{:,.0f}".format(t.doc_count) }}</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <h3>Data sources</h3>
+    <div class="field is-grouped is-grouped-multiline">
+        {% for t in aggs.group_by_source.buckets %}
+            <div class="control">
+                <div class="tags has-addons">
+                    <span class="tag is-light is-medium">{{ t.key }}</span>
+                    <span class="tag is-info is-medium">{{ "{:,.0f}".format(t.doc_count) }}</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

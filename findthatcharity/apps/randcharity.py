@@ -13,6 +13,7 @@ def random(request):
     res = es.search(
         index=settings.ES_INDEX,
         doc_type=settings.ES_TYPE,
+        size=1,
         body=random_query(active, "Registered Charity"),
         ignore=[404]
     )

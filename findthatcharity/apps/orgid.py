@@ -5,7 +5,7 @@ from starlette.responses import JSONResponse, RedirectResponse
 from starlette.templating import Jinja2Templates
 import jinja2
 
-from ..queries import orgid_query
+from ..queries import orgid_query, random_query
 from ..db import es, fetch_all_sources
 from .. import settings
 from ..utils import sort_out_date
@@ -34,6 +34,33 @@ async def orgid_json(request):
         "error": 'Orgid {} not found.'.format(orgid),
         "query": {"orgid": orgid}
     }, 404)
+
+@app.route('/type/{orgtype}')
+@app.route('/type/{orgtype}.html')
+async def orgid_type(request):
+    """
+    Show some examples from the type of organisation
+    """
+    orgtype = request.path_params['orgtype'].split("+")
+    res = es.search(
+        index=settings.ES_INDEX,
+        doc_type=settings.ES_TYPE,
+        body=random_query(active=True, orgtype=orgtype, aggregate=True),
+        _source_exclude=["complete_names"],
+        ignore=[404]
+    )
+    if res.get("hits", {}).get("hits", []):
+        for org in res["hits"]["hits"]:
+            org["_source"].update({"id": res["hits"]["hits"][0]["_id"]})
+            org["_source"] = sort_out_date(org["_source"])
+
+    return templates.TemplateResponse('orgtype.html', {
+        'request': request,
+        'term': orgtype,
+        'res': res["hits"],
+        'aggs': res["aggregations"],
+    })
+
 
 @app.route('/{orgid:path}')
 @app.route('/{orgid:path}.html')

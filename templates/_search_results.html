@@ -28,11 +28,11 @@
         <tbody>
             {% for result in res.hits %}
             <tr>
-                <td><a href={{ result._link }}>{{result._source.name }}</a></td>
+                <td><a href="/orgid/{{ result._id }}">{{result._source.name }}</a></td>
                 <td>
                 <div class="tags are-small">
                     {% for t in result._source.organisationType %}
-                    <span class="tag is-small">{{ t }}</span>
+                    <span class="tag is-small"><a href="/orgid/type/{{t}}">{{ t }}</a></span>
                     {% endfor %}
                 </div>
                 </td>

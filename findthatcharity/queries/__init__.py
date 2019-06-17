@@ -62,9 +62,8 @@ def orgid_query(term):
         }
     }
 
-def random_query(active=False, orgtype=None):
+def random_query(active=False, orgtype=None, aggregate=False):
     query = {
-        "size": 1,
         "query": {
             "function_score": {
                 "query": {
@@ -93,6 +92,22 @@ def random_query(active=False, orgtype=None):
                 "organisationType.keyword": orgtype
             }
         })
+
+    if aggregate:
+        query["aggs"] = {
+            "group_by_type": {
+                "terms": {
+                    "field": "organisationType.keyword",
+                    "size": 500
+                }
+            },
+            "group_by_source": {
+                "terms": {
+                    "field": "sources.keyword",
+                    "size": 500
+                }
+            }
+        }
     
     return query
 
