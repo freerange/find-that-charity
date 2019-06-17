@@ -32,10 +32,10 @@
             <div class="column">
                 <h3>Types of organisation available</h3>
                 <div class="field is-grouped is-grouped-multiline">
-                {% for o in value_counts["group_by_type"]["buckets"] %}
+                {% for o in value_counts["group_by_type"]["buckets"] if o.key in key_types %}
                     <div class="control">
                         <div class="tags has-addons">
-                            <span class="tag is-light is-medium">{{ o.key }}</span>
+                            <a href="/orgid/type/{{ o.key }}" class="tag is-light is-medium">{{ o.key }}</a>
                             <span class="tag is-info is-medium">{{ "{:,.0f}".format(o.doc_count) }}</span>
                         </div>
                     </div>

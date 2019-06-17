@@ -15,8 +15,13 @@
 <div class="columns">
   <div class="column">
     <div class="tags are-medium">
-      {% for k, v in orgs.data.organisationType.items() %}
-      <span class="tag is-medium is-info">{{ v.value }}</span>
+      {% for k, v in orgs.data.organisationType.items() if k in key_types %}
+      <a class="tag is-medium is-info" href="/orgid/type/{{ v.value }}">{{ v.value }}</a>
+      {% endfor %}
+    </div>
+    <div class="tags are-medium">
+      {% for k, v in orgs.data.organisationType.items() if k not in key_types %}
+      <a class="tag is-small is-light" href="/orgid/type/{{ v.value }}">{{ v.value }}</a>
       {% endfor %}
     </div>
     {% if orgs.data.description.keys()|length %}

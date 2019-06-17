@@ -35,6 +35,7 @@ async def homepage(request):
         'request': request,
         'value_counts': value_counts(),
         'sources': fetch_all_sources(),
+        'key_types': settings.KEY_TYPES,
     })
 
 @app.route('/about')

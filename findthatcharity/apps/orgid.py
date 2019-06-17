@@ -39,14 +39,15 @@ async def orgid_json(request):
 @app.route('/{orgid:path}.html')
 async def orgid_html(request):
     """
-    Redirect to a record based on the org-id
+    Find a record based on the org-id
     """
     orgid = request.path_params['orgid']
     orgs = get_orgs_from_orgid(orgid)
     if orgs:
         return templates.TemplateResponse('org.html', {
             'request': request,
-            'orgs': merge_orgs(orgs)
+            'orgs': merge_orgs(orgs),
+            'key_types': settings.KEY_TYPES,
         })
     
     # @TODO: this should be a proper 404 page
