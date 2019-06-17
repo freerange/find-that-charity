@@ -7,9 +7,9 @@
   <div class="column is-three-quarters">
     <div class="content">
       <p>
-        The site is a tool for finding charities by name. It brings together data from 
-        <a href="#data-sources">a number of sources</a> to include a record for every 
-        charity.
+        The site is a tool for finding non profit organisations by name. It brings together data from 
+        <a href="#data-sources">a number of sources</a> to include a record for a large number of
+        non profit organisations in the UK, including every registered charity.
       </p>
       <p>
         The site was initially put together by <a href="https://twitter.com/kanedr">David Kane</a>.
@@ -19,6 +19,10 @@
       <p>
         The data is used directly from regulatory sources. Any corrections needed to the
         data should be directed to the regulators themselves, using the links below.
+      </p>
+      <h2>Support</h2>
+      <p>
+        The site is supported by <a href="http://www.threesixtygiving.org/" target="_blank">360Giving</a>.
       </p>
       <h2>Using the data</h2>
       <p>
@@ -37,19 +41,24 @@
       <h2 id="data-sources">Data sources</h2>
       <p>Uses data from the following sources:</p>
       <ul>
+      {% for publisher, sources in publishers.items()|sort %}
+        {% for s in sources %}
         <li>
-          <strong><a href="http://data.charitycommission.gov.uk/" target="_blank">Charity Commission for England and Wales</a></strong>
-          - data used under the <a href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/">Open Government Licence v3.0</a>.
-        </li>
-        <li>
-          <strong><a href="https://www.oscr.org.uk/about-charities/search-the-register/charity-register-download" target="_blank">Office of the Scottish Charity Regulator</a></strong>
-          - data used under the <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/2/">Open Government Licence v2.0</a>.<br>
-           © Crown Copyright and database right {{ this_year }}. Contains information from the Scottish Charity Register supplied by the Office
+          {% if sources|length > 1 %}
+          <strong><a href="{{ s.publisher.website }}" target="_blank">{{ s.publisher.name }}</a></strong>
+          ({{ s.title }})
+          {% else %}
+          <strong><a href="{{ s.publisher.website }}" target="_blank">{{ s.publisher.name }}</a></strong>
+          ({{ s.title }})
+          {% endif %}
+          - data used under the <a href="{{ s.license }}" target="_blank">{{ s.license_name }}</a>.
+          {% if s.identifier=='oscr' %}
+          <br>© Crown Copyright and database right {{ this_year }}. Contains information from the Scottish Charity Register supplied by the Office
           of the Scottish Charity Regulator and licensed under the Open Government Licence v.2.0.
+          {% endif %}
         </li>
-        <li>
-          <strong><a href="http://www.charitycommissionni.org.uk/charity-search/" target="_blank">Charity Commission for Northern Ireland</a></strong>
-        </li>
+        {% endfor %}
+      {% endfor %}
       </ul>
       <p>
         The detection of <a href="https://gist.github.com/drkane/22d62e07346084fafdcc7d9f5e1cd661" target="_blank">duplicate charities</a> is based on a list maintained on github.
@@ -65,7 +74,8 @@
         <li>Styles from <a href="https://bulma.io/" target="_blank">Bulma</a></li>
         <li>Powered by
           <a href="https://www.python.org/" target="_blank">Python</a>, 
-          <a href="https://www.starlette.io/" target="_blank">Starlette</a> and 
+          <a href="https://www.starlette.io/" target="_blank">Starlette</a>,
+          <a href="https://scrapy.org/" target="_blank">Scrapy</a> and 
           <a href="https://www.elastic.co/products/elasticsearch" target="_blank">Elasticsearch</a>.
         </li>
       </ul>

@@ -6,7 +6,7 @@ import uvicorn
 
 
 from .queries import search_query
-from .db import es
+from .db import es, fetch_all_sources
 from . import settings
 from .utils import sort_out_date
 from .apps import randcharity, reconcile, charity, autocomplete, orgid, feeds, csvdata
@@ -31,11 +31,26 @@ async def homepage(request):
     if query:
         query = search_query(query)
         return search_return(query, request)
-    return templates.TemplateResponse('index.html', {'request': request})
+    return templates.TemplateResponse('index.html', {
+        'request': request,
+        'value_counts': value_counts(),
+        'sources': fetch_all_sources(),
+    })
 
 @app.route('/about')
 async def about_page(request):
-    return templates.TemplateResponse('about.html', {'request': request})
+    sources = fetch_all_sources()
+    publishers = {}
+    for s in sources.values():
+        print(s)
+        if s["publisher"]["name"] not in publishers:
+            publishers[s["publisher"]["name"]] = []
+        publishers[s["publisher"]["name"]].append(s)
+
+    return templates.TemplateResponse('about.html', {
+        'request': request,
+        'publishers': publishers,
+    })
 
 def search_return(query, request):
     """
@@ -57,3 +72,33 @@ def search_return(query, request):
         'res': res,
         'term': request.query_params.get("q")
     })
+
+def value_counts():
+    res = es.search(
+        index=settings.ES_INDEX,
+        doc_type=settings.ES_TYPE,
+        size=0,
+        body={
+            "query": {
+                "match": {
+                    "active": True
+                }
+            },
+            "aggs" : {
+                "group_by_type": {
+                    "terms": {
+                        "field": "organisationType.keyword",
+                        "size": 500
+                    }
+                },
+                "group_by_source": {
+                    "terms": {
+                        "field": "sources.keyword",
+                        "size": 500
+                    }
+                }
+            }
+        },
+        ignore=[404]
+    )
+    return res["aggregations"]
