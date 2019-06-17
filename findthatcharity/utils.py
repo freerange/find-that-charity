@@ -28,8 +28,16 @@ def sort_out_date(record, date_fields=["dateRegistered", "dateRemoved", "dateMod
                 pass
     return record
 
-def sources_to_string(sources):
-    return ", ".join(sources)
+def list_to_string(l):
+    if not isinstance(l, list):
+        return l
+    
+    if len(l)==1:
+        return l[0]
+    elif len(l)==2:
+        return " and ".join(l)
+    else:
+        return ", ".join(l[0:-1]) + " and " + l[-1]
 
 def get_links(orgids):
     links = []

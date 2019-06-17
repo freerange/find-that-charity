@@ -7,7 +7,7 @@
 
 {% macro show_sources(v) %}
 <span class="has-text-weight-light is-size-7">
-  [{{ v["sources"]|sources_to_string }}]
+  [{{ v["sources"]|list_to_string }}]
 </span>
 {% endmacro %}
 
