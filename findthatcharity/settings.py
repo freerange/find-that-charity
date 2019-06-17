@@ -17,18 +17,18 @@ ORGID_JSON = config('ORGID_JSON', default='http://org-id.guide/download.json')
 
 # key organisation types to highlight
 KEY_TYPES = [
-    "Registered Company",
-    "Registered Charity",
+    # "Registered Charity",
     "Registered Charity (England and Wales)",
-    "Company Limited by Guarantee",
+    "Registered Charity (Scotland)",
+    "Registered Charity (Northern Ireland)",
+    "Registered Company",
+    # "Company Limited by Guarantee",
     "Charitable Incorporated Organisation",
     "Education",
-    "Registered Charity (Scotland)",
     "Community Interest Company",
     "Health",
     "Registered Society",
     "Community Amateur Sports Club",
-    "Registered Charity (Northern Ireland)",
     "Registered Provider of Social Housing",
     "Government Organisation",
     "Local Authority",

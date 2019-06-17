@@ -140,12 +140,25 @@ def merge_orgs(orgs):
                 data[f][str(v)]["sources"].extend(org["sources"])
                 sources.update(org["sources"])
 
+    main_name = list(data["name"].values())[0]["value"]
+    names = {}
+    for f in ["name", "alternateName"]:
+        for k, v in data[f].items():
+            if v["value"] == main_name:
+                continue
+            if k in names:
+                names[k]["sources"].extend(v["sources"])
+                names[k]["sources"] = list(set(names[k]["sources"]))
+            else:
+                names[k] = v
+
     return {
         "id": list(data["id"].values())[0]["value"],
-        "name": list(data["name"].values())[0]["value"],
+        "name": main_name,
+        "names": names,
         "active": list(data["active"].values())[0]["value"] if data["active"] else None,
         "orgs": orgs,
         "data": data,
         "sources": list(sources),
-        "links": get_links(data["orgIDs"].keys())
+        "links": get_links(data["orgIDs"].keys()),
     }
