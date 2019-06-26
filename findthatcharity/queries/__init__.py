@@ -4,6 +4,8 @@ import copy
 import json
 import time
 
+from ..templates import templates
+
 with open(os.path.join(os.path.dirname(__file__), './es_config.yml'), 'rb') as yaml_file:
     ES_CONFIG = yaml.safe_load(yaml_file)
 
@@ -61,10 +63,12 @@ def autocomplete_query(term, orgtype='all'):
         }
     }
     
-    if orgtype != 'all':
-        doc["suggest"]["suggest-1"]["completion"]["contexts"] = {
-            "organisationType": orgtype
-        }
+    if not orgtype or orgtype == 'all':
+        orgtype = [o['key'] for o in templates.env.globals["org_types"]]
+
+    doc["suggest"]["suggest-1"]["completion"]["contexts"] = {
+        "organisationType": orgtype
+    }
 
     return doc
 
