@@ -3,11 +3,12 @@ from urllib.parse import unquote
 from collections import OrderedDict
 
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse, Response
+from starlette.responses import Response
 
 from ..queries import recon_query
 from ..db import es
 from ..utils import clean_regno
+from ..utils import JSONResponseDate as JSONResponse
 from .. import settings
 from ..templates import templates
 

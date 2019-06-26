@@ -1,8 +1,8 @@
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse
 
 from ..db import es
 from ..utils import clean_regno, sort_out_date
+from ..utils import JSONResponseDate as JSONResponse
 from .. import settings
 from .orgid import get_orgs_from_orgid, merge_orgs
 from ..templates import templates

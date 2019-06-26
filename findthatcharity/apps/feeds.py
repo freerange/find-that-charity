@@ -2,10 +2,10 @@ from datetime import datetime, timezone
 
 from dateutil import parser
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse
 import requests
 from bs4 import BeautifulSoup
 
+from ..utils import JSONResponseDate as JSONResponse
 from ..templates import templates
 
 CCEW_URL = 'http://data.charitycommission.gov.uk/'

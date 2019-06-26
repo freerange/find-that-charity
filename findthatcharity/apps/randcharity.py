@@ -1,9 +1,10 @@
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse, RedirectResponse
+from starlette.responses import RedirectResponse
 
 from ..queries import random_query
 from ..db import es
 from .. import settings
+from ..utils import JSONResponseDate as JSONResponse
 
 def random(request):
     """ Get a random charity record

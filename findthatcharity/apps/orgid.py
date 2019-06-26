@@ -1,30 +1,17 @@
 from datetime import datetime
 
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse, RedirectResponse
+from starlette.responses import RedirectResponse
 import jinja2
 
 from ..queries import orgid_query, random_query
 from ..db import es
 from .. import settings
 from ..utils import sort_out_date, get_links
+from ..utils import JSONResponseDate as JSONResponse
 from ..templates import templates
 
 app = Starlette()
-
-@app.route('/{orgid}.json')
-async def orgid_json(request):
-    """
-    Fetch json representation based on a org-id for a record
-    """
-    orgid = request.path_params['orgid']
-    org = get_charity_from_orgid(orgid)
-    if org:
-        return JSONResponse(org)
-    return JSONResponse({
-        "error": 'Orgid {} not found.'.format(orgid),
-        "query": {"orgid": orgid}
-    }, 404)
 
 @app.route('/type/{orgtype}')
 @app.route('/type/{orgtype}.html')
@@ -54,6 +41,21 @@ async def orgid_type(request):
         'query': orgtype + [templates.env.globals["sources"].get(s, {"publisher": {"name": s}}).get("publisher", {}).get("name", s) for s in source],
         'aggs': res["aggregations"],
     })
+
+
+@app.route('/{orgid}.json')
+async def orgid_json(request):
+    """
+    Fetch json representation based on a org-id for a record
+    """
+    orgid = request.path_params['orgid']
+    orgs = get_orgs_from_orgid(orgid)
+    if orgs:
+        return JSONResponse(merge_orgs(orgs))
+    return JSONResponse({
+        "error": 'Orgid {} not found.'.format(orgid),
+        "query": {"orgid": orgid}
+    }, 404)
 
 
 @app.route('/{orgid:path}')

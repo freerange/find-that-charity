@@ -1,9 +1,9 @@
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse
 
 from ..db import es
 from .. import settings
 from ..queries import autocomplete_query
+from ..utils import JSONResponseDate as JSONResponse
 
 app = Starlette()
 

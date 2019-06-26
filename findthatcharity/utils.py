@@ -1,5 +1,10 @@
 import re
+import typing
+from datetime import date, datetime
+import json
+
 from dateutil import parser
+from starlette.responses import JSONResponse
 
 def clean_regno(regno):
     """
@@ -77,3 +82,23 @@ def get_links(orgids):
                     links.append((l[0].format(regno), l[1]))
 
     return links
+
+
+class JSONResponseDate(JSONResponse):
+    def render(self, content: typing.Any) -> bytes:
+        return json.dumps(
+            content,
+            ensure_ascii=False,
+            allow_nan=False,
+            indent=None,
+            separators=(",", ":"),
+            default=self.json_serial
+        ).encode("utf-8")
+
+    @staticmethod
+    def json_serial(obj):
+        """JSON serializer for objects not serializable by default json code"""
+
+        if isinstance(obj, (datetime, date)):
+            return obj.isoformat()
+        raise TypeError ("Type %s not serializable" % type(obj))

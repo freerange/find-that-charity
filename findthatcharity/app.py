@@ -1,5 +1,4 @@
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse
 from starlette.staticfiles import StaticFiles
 import uvicorn
 
@@ -8,6 +7,7 @@ from .queries import search_query
 from .db import es, fetch_all_sources
 from . import settings
 from .utils import sort_out_date
+from .utils import JSONResponseDate as JSONResponse
 from .apps import randcharity, reconcile, charity, autocomplete, orgid, feeds, csvdata
 from .templates import templates
 
