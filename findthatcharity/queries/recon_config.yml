@@ -10,21 +10,21 @@ inline:
           - multi_match:
               query: "{{name}}"
               fields:
-              - known_as^3
-              - alt_names
+              - name^3
+              - alternateName
           - match_phrase:
-              known_as: "{{name}}"
+              name: "{{name}}"
       functions:
       - filter:
           match_phrase_prefix:
-            known_as: "{{name}}"
+            name: "{{name}}"
         weight: 200
       - filter:
           multi_match:
             query: "{{name}}"
             fields:
-            - known_as^3
-            - alt_names
+            - name^3
+            - alternateName
             operator: and
         weight: 10
       - filter:

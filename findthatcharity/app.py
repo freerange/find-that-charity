@@ -16,6 +16,7 @@ app.debug = settings.DEBUG
 app.mount('/static', StaticFiles(directory="static"))
 app.add_route('/random', randcharity.random)
 app.add_route('/random.{filetype}', randcharity.random)
+app.add_route('/reconcile', reconcile.index, methods=['GET', 'POST'])
 app.mount('/reconcile', reconcile.app)
 app.mount('/charity', charity.app)
 app.mount('/autocomplete', autocomplete.app)

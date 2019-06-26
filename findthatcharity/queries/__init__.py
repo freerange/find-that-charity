@@ -21,7 +21,7 @@ def search_query(term, orgtype='all'):
         json_q["params"][param] = term
 
     # check for organisation type
-    if orgtype and orgtype!="all":
+    if orgtype and orgtype != "all":
         if not isinstance(orgtype, list):
             orgtype = [orgtype]
         dis_max = json_q["inline"]["query"]["function_score"]["query"]
@@ -36,13 +36,28 @@ def search_query(term, orgtype='all'):
 
     return json.dumps(json_q)
 
-def recon_query(term):
+def recon_query(term, orgtype='all'):
     """
     Fetch the reconciliation query and insert the query term
     """
     json_q = copy.deepcopy(RECON_CONFIG)
     for param in json_q["params"]:
         json_q["params"][param] = term
+
+    # check for organisation type
+    if orgtype and orgtype != "all":
+        if not isinstance(orgtype, list):
+            orgtype = [orgtype]
+        dis_max = json_q["inline"]["query"]["function_score"]["query"]
+        json_q["inline"]["query"]["function_score"]["query"] = {
+            "bool": {
+                "must": dis_max,
+                "filter": {
+                    "terms": {"organisationType.keyword": orgtype}
+                }
+            }
+        }
+    
     return json.dumps(json_q)
 
 def autocomplete_query(term, orgtype='all'):

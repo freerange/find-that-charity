@@ -9,11 +9,111 @@ from ..queries import recon_query
 from ..db import es
 from ..utils import clean_regno
 from .. import settings
+from ..templates import templates
 
 app = Starlette()
 
+@app.route('/propose_properties')
+async def propose_properties(request):
+    properties = {
+        "properties": [
+            {
+                "id": "active",
+                "name": "Active (True/False)"
+            },
+            {
+                "id": "alternateName",
+                "name": "List of alternative names"
+            },
+            # {
+            #     "id": "ccew_link",
+            #     "name": "Charity Commission URL"
+            # },
+            {
+                "id": "charityNumber",
+                "name": "Charity Number"
+            },
+            # {
+            #     "id": "ccni_link",
+            #     "name": "Charity Commission for Northern Ireland URL"
+            # },
+            # {
+            #     "id": "ccni_number",
+            #     "name": "Charity Commission for Northern Ireland Number"
+            # },
+            # {
+            #     "id": "oscr_link",
+            #     "name": "Scottish Charity Regulator URL"
+            # },
+            # {
+            #     "id": "oscr_number",
+            #     "name": "Scottish Charity Regulator Number"
+            # },
+            {
+                "id": "companyNumber",
+                "name": "Company numbers"
+            },
+            {
+                "id": "dateRegistered",
+                "name": "Date of registration"
+            },
+            {
+                "id": "dateRemoved",
+                "name": "Date of removal from the register"
+            },
+            # @TODO: Include postcodes
+            # {
+            #     "id": "geo.postcode",
+            #     "name": "Postcode"
+            # },
+            # {
+            #     "id": "domain",
+            #     "name": "Web domain"
+            # },
+            {
+                "id": "name",
+                "name": "Name"
+            },
+            {
+                "id": "dateModified",
+                "name": "Last modified date"
+            },
+            {
+                "id": "latestIncome",
+                "name": "Latest income"
+            },
+            {
+                "id": "orgIDs",
+                "name": "Organisation identifiers"
+            },
+            {
+                "id": "parent",
+                "name": "Parent organisation identifier"
+            },
+            {
+                "id": "url",
+                "name": "Website"
+            },
+        ],
+        "type": "nonprofit",
+        # "limit": 3
+    }
+    
+    if request.query_params.get("callback"):
+        return Response("%s(%s);" % (request.query_params.get("callback"), json.dumps(properties)), media_type='application/javascript')
+    return JSONResponse(properties)
+
 @app.route('/', methods=['GET', 'POST'])
+@app.route('/{orgtype}', methods=['GET', 'POST'])
 async def index(request):
+
+    orgtypes = request.path_params.get("orgtype", "charity")
+    if orgtypes == 'all':
+        orgtypes = None
+    if orgtypes:
+        if orgtypes == 'charity':
+            orgtypes = 'registered-charity'
+        orgtypes = orgtypes.split("+")
     
     query = None
     queries = None
@@ -49,136 +149,64 @@ async def index(request):
         request.url.netloc,
     )
         
-    # if we're doing a callback request then do that
     if queries:
         result = {}
         counter = 0
         for query_id, query in queries.items():
-            r = esdoc_orresponse(recon_query(query["query"]))["result"]
+            r = esdoc_orresponse(
+                    recon_query(
+                        query["query"],
+                        [s["key"] for s in templates.env.globals["org_types"] if s["slug"] in orgtypes]
+                    )
+                )["result"]
             result.update({query_id: {"result": r}})
             counter += 1
     elif query:
-        result = esdoc_orresponse(recon_query(query))
+        result = esdoc_orresponse(
+                    recon_query(
+                        query,
+                        [s["key"] for s in templates.env.globals["org_types"] if s["slug"] in orgtypes]
+                    )
+                )
     elif extend:
         result = extend_with_fields(extend["ids"], extend["properties"])
     else:
-        result = service_spec(service_url)
+        result = service_spec(service_url, orgtypes)
 
+    # if we're doing a callback request then do that
     if callback:
         return Response("%s(%s);" % (callback, json.dumps(result)), media_type='application/javascript')
     return JSONResponse(result)
-    
-
-@app.route('/propose_properties')
-async def propose_properties(request):
-    properties = {
-        "properties": [
-            {
-                "id": "active",
-                "name": "Active (True/False)"
-            },
-            {
-                "id": "alt_names",
-                "name": "List of alternative names"
-            },
-            {
-                "id": "ccew_link",
-                "name": "Charity Commission URL"
-            },
-            {
-                "id": "ccew_number",
-                "name": "Charity Commission Number"
-            },
-            {
-                "id": "ccni_link",
-                "name": "Charity Commission for Northern Ireland URL"
-            },
-            {
-                "id": "ccni_number",
-                "name": "Charity Commission for Northern Ireland Number"
-            },
-            {
-                "id": "oscr_link",
-                "name": "Scottish Charity Regulator URL"
-            },
-            {
-                "id": "oscr_number",
-                "name": "Scottish Charity Regulator Number"
-            },
-            {
-                "id": "company_number",
-                "name": "Company numbers"
-            },
-            {
-                "id": "date_registered",
-                "name": "Date of registration"
-            },
-            {
-                "id": "date_removed",
-                "name": "Date of removal from the register"
-            },
-            {
-                "id": "geo.postcode",
-                "name": "Postcode"
-            },
-            {
-                "id": "domain",
-                "name": "Web domain"
-            },
-            {
-                "id": "known_as",
-                "name": "Name"
-            },
-            {
-                "id": "last_modified",
-                "name": "Last modified date"
-            },
-            {
-                "id": "latest_income",
-                "name": "Latest income"
-            },
-            {
-                "id": "org-ids",
-                "name": "OrgIDs"
-            },
-            {
-                "id": "parent",
-                "name": "Parent charity ID"
-            },
-            {
-                "id": "url",
-                "name": "Website"
-            },
-        ],
-        "type": "charity",
-        # "limit": 3
-    }
-    
-    if request.query_params.get("callback"):
-        return Response("%s(%s);" % (request.query_params.get("callback"), json.dumps(properties)), media_type='application/javascript')
-    return JSONResponse(properties)
 
 
-def service_spec(service_url):
+def service_spec(service_url, orgtypes=None):
     """Return the default service specification
     Specification found here: https://github.com/OpenRefine/OpenRefine/wiki/Reconciliation-Service-API#service-metadata
     """
+    if orgtypes:
+        orgtypes = [{
+            "id": "/{}".format(s["slug"]),
+            "name": s["key"]
+        } for s in templates.env.globals["org_types"] if s["slug"] in orgtypes]
+    else:
+        orgtypes = [{
+            "id": "/{}".format(s["slug"]),
+            "name": s["key"]
+        } for s in templates.env.globals["org_types"]]
+
     return {
         "name": "findthatcharity",
         "identifierSpace": "http://rdf.freebase.com/ns/type.object.id",
         "schemaSpace": "http://rdf.freebase.com/ns/type.object.id",
         "view": {
-            "url": service_url + "/charity/{{id}}"
+            "url": service_url + "/orgid/{{id}}"
         },
         "preview": {
-            "url": service_url + "/preview/charity/{{id}}",
+            "url": service_url + "/preview/orgid/{{id}}",
             "width": 430,
             "height": 300
         },
-        "defaultTypes": [{
-            "id": "/{}".format(settings.ES_TYPE),
-            "name": settings.ES_TYPE
-        }],
+        "defaultTypes": orgtypes,
         "extend": {
             "propose_properties": {
                 "service_url": service_url,
@@ -200,7 +228,7 @@ def esdoc_orresponse(query):
     )
     hits = []
     for i in res["hits"]["hits"]:
-        name = i["_source"]["known_as"] + " (" + i["_id"] + ")"
+        name = i["_source"]["name"] + " (" + i["_id"] + ")"
         if not i["_source"]["active"]:
             name += " [INACTIVE]"
         hits.append({
@@ -210,7 +238,7 @@ def esdoc_orresponse(query):
             "index": i["_index"],
             "name": name,
             "source": i["_source"],
-            "match": i["_source"]["known_as"].lower() == json.loads(query)["params"]["name"].lower() and i["_score"] == res["hits"]["max_score"]
+            "match": i["_source"]["name"].lower() == json.loads(query)["params"]["name"].lower() and i["_score"] == res["hits"]["max_score"]
         })
     return {
         "total": len(hits),
