@@ -90,7 +90,7 @@ def orgid_query(term):
         }
     }
 
-def random_query(active=False, orgtype=None, aggregate=False):
+def random_query(active=False, orgtype=None, aggregate=False, source=None):
     query = {
         "query": {
             "function_score": {
@@ -112,12 +112,21 @@ def random_query(active=False, orgtype=None, aggregate=False):
             }
         })
 
-    if orgtype:
+    if orgtype and orgtype!=['']:
         if not isinstance(orgtype, list):
             orgtype = [orgtype]
         query["query"]["function_score"]["query"]["bool"]["must"].append({
             "terms": {
                 "organisationType.keyword": orgtype
+            }
+        })
+
+    if source and source!=['']:
+        if not isinstance(source, list):
+            source = [source]
+        query["query"]["function_score"]["query"]["bool"]["must"].append({
+            "terms": {
+                "sources.keyword": source
             }
         })
 

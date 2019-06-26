@@ -28,15 +28,18 @@ async def orgid_json(request):
 
 @app.route('/type/{orgtype}')
 @app.route('/type/{orgtype}.html')
+@app.route('/source/{source}')
+@app.route('/source/{source}.html')
 async def orgid_type(request):
     """
     Show some examples from the type of organisation
     """
-    orgtype = request.path_params['orgtype'].split("+")
+    orgtype = [o for o in request.path_params.get('orgtype', "").split("+") if o]
+    source = [o for o in request.path_params.get('source', "").split("+") if o]
     res = es.search(
         index=settings.ES_INDEX,
         doc_type=settings.ES_TYPE,
-        body=random_query(active=True, orgtype=orgtype, aggregate=True),
+        body=random_query(active=True, orgtype=orgtype, aggregate=True, source=source),
         _source_exclude=["complete_names"],
         ignore=[404]
     )
@@ -47,8 +50,8 @@ async def orgid_type(request):
 
     return templates.TemplateResponse('orgtype.html', {
         'request': request,
-        'term': orgtype,
         'res': res["hits"],
+        'query': orgtype + [templates.env.globals["sources"].get(s, {"publisher": {"name": s}}).get("publisher", {}).get("name", s) for s in source],
         'aggs': res["aggregations"],
     })
 

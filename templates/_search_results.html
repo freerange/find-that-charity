@@ -1,10 +1,10 @@
-{% if res.total > 0 %}
+{% if res.total > 0 and term %}
 <article class="message is-success">
     <div class="message-body">
         {{ "{:,}".format(res.total) }} result{{"s" if res.total > 1 else ""}} found for "{{term}}"
     </div>
 </article>
-{% else %}
+{% elif term %}
 <article class="message is-error">
     <div class="message-body">
         No results found for "{{term}}"

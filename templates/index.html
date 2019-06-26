@@ -48,7 +48,7 @@
                 {% for o in sources_count %}
                     <div class="control">
                         <div class="tags has-addons">
-                            <span class="tag is-light is-medium">{{ sources.get(o.key, {}).get("publisher", {}).get("name", o.key) }}</span>
+                            <a href="/orgid/source/{{ o.key }}" class="tag is-light is-medium">{{ sources.get(o.key, {}).get("publisher", {}).get("name", o.key) }}</a>
                             <span class="tag is-info is-medium">{{ "{:,.0f}".format(o.doc_count) }}</span>
                         </div>
                     </div>
