@@ -112,9 +112,14 @@
       <div class="card-content">
         <div class="content">
           <p>
-            <strong>{{ org.name }}</strong> ({{ org.id }})
+            <strong>{{ org.name }}</strong> ({{ org.orgIDs[0] }})
           </p>
           <div class="tags are-small">
+            {% if org.active %}
+            <span class="tag is-small is-success">Active</span>
+            {% else %}
+            <span class="tag is-small is-danger">Inactive</span>
+            {% endif %}
             {% for t in org.organisationType %}
             <span class="tag is-small">{{ t }}</span>
             {% endfor %}
@@ -165,10 +170,6 @@
                   {{orgid}}<br>
                 {% endfor %}
                 </td>
-              </tr>
-              <tr>
-                <td>Active</td>
-                <td>{% if org.active %}Yes{% else %}No{% endif %}</td>
               </tr>
               {% if org.dateRegistered %}
               <tr>

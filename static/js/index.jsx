@@ -16,7 +16,9 @@ require('../css/styles.css');
 const search_form = document.querySelector('#search-autocomplete')
 if(search_form){
     ReactDOM.render(
-        <AutoCompleteSearch value={search_form.q.value} />,
+        <AutoCompleteSearch value={search_form.q.value}
+            selected_org_type={search_form.orgtype.value}
+            org_types={JSON.parse(search_form.dataset.orgtypes)} />,
         search_form.querySelector(".field")
     );
 }

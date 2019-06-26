@@ -15,14 +15,18 @@ async def index(request):
     res = es.search(
         index=settings.ES_INDEX,
         doc_type=settings.ES_TYPE,
-        body=autocomplete_query(request.query_params.get("q", "")),
-        _source_include=['name']
+        body=autocomplete_query(
+            request.query_params.get("q", ""),
+            orgtype=request.query_params.get("orgtype", "all"),
+        ),
+        _source_include=['name', 'organisationType']
     )
     return JSONResponse({
         "results": [
             {
                 "label": x["_source"]["name"],
-                "value": x["_id"]
+                "value": x["_id"],
+                "orgtypes": x["_source"]["organisationType"],
             } for x in res.get("suggest", {}).get("suggest-1", [])[0]["options"]
         ]
     })

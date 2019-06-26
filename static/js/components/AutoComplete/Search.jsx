@@ -4,56 +4,85 @@ export default class SearchAutoComplete extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            "results": [],
-            "loading": false,
-            "q": props.value
-        }
+            results: [],
+            loading: false,
+            q: props.value,
+            orgtype: props.selected_org_type
+        };
         this.handleChange = this.handleChange.bind(this);
     }
 
     handleChange(e) {
-        const element = this;
-        this.setState({ "q": e.target.value });
-        if (this.state.q.length > 2) {
-            this.setState({ "loading": true });
-            fetch(`/autocomplete?q=${this.state.q}`)
-                .then(function (response) {
-                    return response.json();
-                })
-                .then(function (myJson) {
-                    element.setState({
-                        "results": myJson["results"],
-                        "loading": false
-                    });
-                });
-        } else {
+        this.setState({
+            [e.target.name]: e.target.value,
+            "results": [],
+            "loading": true,
+        });
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (this.state.q.length > 2 && this.state.loading == true && (prevState.q != this.state.q || prevState.orgtype != this.state.orgtype)) {
+            this._fetchAutocomplete(this.state.q, this.state.orgtype);
+        } else if(this.state.loading == true) {
             this.setState({
-                "results": []
-            })
+                "loading": false
+            });
         }
+        return true;
+    }
+
+    _fetchAutocomplete(q, orgtype) {
+        var element = this;
+        fetch(`/autocomplete/?q=${encodeURIComponent(q)}&orgtype=${encodeURIComponent(orgtype)}`)
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (resultJson) {
+                element.setState({
+                    "results": resultJson["results"],
+                    "loading": false
+                });
+            });
     }
 
     getHighlightedText(text, highlight) {
         // Split text on higlight term, include term itself into parts, ignore case
         // https://stackoverflow.com/questions/29652862/highlight-text-using-reactjs
+        if (!highlight) {
+            return <span>{text}</span>
+        }
         var parts = text.split(new RegExp(`(${highlight})`, 'gi'));
         return <span>{parts.map((part, i) => part.toLowerCase() === highlight.toLowerCase() ? <b key={i}>{part}</b> : part)}</span>;
     }
 
     render() {
+        var element = this;
         return (
             <div className="dropdown is-active" style={{ display: 'block', width: '100%' }}>
                 <div className="dropdown-trigger field has-addons has-addons-centered">
-                    <div className={(this.state.loading ? "is-loading" : "") + " control is-expanded"}>
+                    <div className={(this.state.loading ? "is-loading" : "") + " control is-expanded is-large"}>
                         <input value={this.state.q}
+                            onChange={this.handleChange}
                             name="q"
                             className="input is-large is-fullwidth"
                             placeholder="Search for a charity name or number"
                             type="text"
-                            onChange={this.handleChange}
                             aria-haspopup="true"
                             aria-controls="dropdown-menu"
                             autoComplete="off" />
+                    </div>
+                    <div className="control">
+                        <span className="select is-large">
+                            <select value={this.state.orgtype}
+                                onChange={this.handleChange}
+                                name="orgtype">
+                                <option value="all">All organisation types</option>
+                                <option readOnly>----------</option>
+                                {Object.keys(this.props.org_types).map((org_type, i) =>
+                                    <option key={i} value={this.props.org_types[org_type]}>{this.props.org_types[org_type]}</option>
+                                )}
+                            </select>
+                        </span>
                     </div>
                     <div className="control">
                         <input type="submit" value="Search" className="button is-info is-large" />
@@ -65,9 +94,16 @@ export default class SearchAutoComplete extends React.Component {
                             {this.state.results.map((result, i) =>
                                 <React.Fragment key={i}>
                                     {i > 0 && <hr className="dropdown-divider" />}
-                                    <a href={"/charity/" + result.value} data-value={result.value} data-label={result.label} className="dropdown-item">
+                                    <a href={"/orgid/" + result.value} data-value={result.value} data-label={result.label} className="dropdown-item">
                                         <div className="columns">
-                                            <div className="column">{this.getHighlightedText(result.label, this.state.q)}</div>
+                                            <div className="column">
+                                                {this.getHighlightedText(result.label, this.state.q)}
+                                                {result.orgtypes.map((orgtype, i) =>
+                                                    <span key={i} 
+                                                          className={(element.props.org_types.includes(orgtype) ? "" : "is-hidden") + " tag is-small"} 
+                                                          style={{ marginLeft: '5px' }}>{orgtype}</span>
+                                                )}
+                                            </div>
                                             <div className="column is-italic has-text-grey is-narrow">{result.value}</div>
                                         </div>
                                     </a>

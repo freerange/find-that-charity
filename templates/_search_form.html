@@ -1,8 +1,25 @@
-<form method="get" action="/" id="search-autocomplete">
+{% set org_type_key = org_types|select("in", key_types)|list %}
+<form method="get" action="/" id="search-autocomplete" data-orgtypes='{{org_type_key|tojson}}'>
     <div class="field has-addons has-addons-centered">
-        <div class="control is-expanded">
+        <div class="control is-expanded is-large">
             <input name="q" class="input is-large" type="text" placeholder="Search for a charity name or number"
                 value="{{term}}">
+        </div>
+        
+        <div class="control">
+            <span class="select is-large">
+                <select name="orgtype">
+                    <option value="all">All organisation types</option>
+                    <option disabled>----------</option>
+                    {% for org_type in org_type_key %}
+                        {% if org_type == selected_org_type %}
+                        <option selected="selected">{{ org_type }}  </option>
+                        {% else %}
+                        <option>{{ org_type }}  </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </span>
         </div>
         <div class="control">
             <input type="submit" value="Search" class="button is-info is-large">

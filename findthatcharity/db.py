@@ -15,3 +15,24 @@ def fetch_all_sources():
     return {
         s["_id"]: sort_out_date(s["_source"], ["modified", "issued"]) for s in res["hits"]["hits"]
     }
+
+def get_org_types():
+    res = es.search(index=settings.ES_INDEX,
+                    doc_type=settings.ES_TYPE,
+                    _source=False,
+                    size=0,
+                    body={
+                        "aggs": {
+                            "org_types": {
+                                "terms": {
+                                    "field": "organisationType.keyword",
+                                    "size": 500
+                                }
+                            }
+                        }
+                    }
+                    )
+    return {
+        r["key"]: r["doc_count"] for r in
+        res["aggregations"]["org_types"]["buckets"]
+    }

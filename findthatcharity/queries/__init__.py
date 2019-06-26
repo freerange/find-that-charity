@@ -10,13 +10,28 @@ with open(os.path.join(os.path.dirname(__file__), './es_config.yml'), 'rb') as y
 with open(os.path.join(os.path.dirname(__file__), './recon_config.yml'), 'rb') as yaml_file:
     RECON_CONFIG = yaml.safe_load(yaml_file)
 
-def search_query(term):
+def search_query(term, orgtype='all'):
     """
     Fetch the search query and insert the query term
     """
     json_q = copy.deepcopy(ES_CONFIG)
     for param in json_q["params"]:
         json_q["params"][param] = term
+
+    # check for organisation type
+    if orgtype and orgtype!="all":
+        if not isinstance(orgtype, list):
+            orgtype = [orgtype]
+        dis_max = json_q["inline"]["query"]["function_score"]["query"]
+        json_q["inline"]["query"]["function_score"]["query"] = {
+            "bool": {
+                "must": dis_max,
+                "filter": {
+                    "terms": {"organisationType.keyword": orgtype}
+                }
+            }
+        }
+
     return json.dumps(json_q)
 
 def recon_query(term):
@@ -28,11 +43,11 @@ def recon_query(term):
         json_q["params"][param] = term
     return json.dumps(json_q)
 
-def autocomplete_query(term):
+def autocomplete_query(term, orgtype='all'):
     """
     Look up an organisation using the first part of the name
     """
-    return {
+    doc = {
         "suggest": {
             "suggest-1": {
                 "prefix": term,
@@ -45,6 +60,15 @@ def autocomplete_query(term):
             }
         }
     }
+    
+    if orgtype != 'all':
+        doc["suggest"]["suggest-1"]["completion"]["contexts"] = {
+            "organisationType": orgtype
+        }
+
+    return doc
+
+
 
 def orgid_query(term):
     """

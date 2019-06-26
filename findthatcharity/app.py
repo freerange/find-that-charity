@@ -27,7 +27,7 @@ app.mount('/adddata', csvdata.app)
 async def homepage(request):
     query = request.query_params.get("q")
     if query:
-        query = search_query(query)
+        query = search_query(query, orgtype=request.query_params.get("orgtype"))
         return search_return(query, request)
     return templates.TemplateResponse('index.html', {
         'request': request,
@@ -67,7 +67,8 @@ def search_return(query, request):
     return templates.TemplateResponse('search.html', {
         'request': request,
         'res': res,
-        'term': request.query_params.get("q")
+        'term': request.query_params.get("q"),
+        'selected_org_type': request.query_params.get("orgtype"),
     })
 
 def value_counts():
