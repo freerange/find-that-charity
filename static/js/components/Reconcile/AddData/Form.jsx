@@ -167,7 +167,7 @@ class ReconcileAddData extends React.Component {
                 <div className="column is-one-third">
                     <div className="content">
                         <form>
-                            <FieldSelector label="Select charity number field"
+                            <FieldSelector label="Select field containing charity number or organisation identifier"
                                 name="charity_number_field"
                                 field_value={this.props.charity_number_field}
                                 fields={this.props.fields}

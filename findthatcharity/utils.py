@@ -5,6 +5,9 @@ def clean_regno(regno):
     """
     Clean up a charity registration number
     """
+    if regno.startswith("GB-"):
+        return regno
+
     regno = str(regno)
     regno = regno.upper()
     regno = re.sub(r'^[^0-9SCNI]+|[^0-9]+$', '', regno)
