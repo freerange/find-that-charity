@@ -4,7 +4,7 @@
 <div class="columns">
     <div class="column">
         <div class="content is-large">
-            <p>A search engine for UK charities.</p>
+            <p>A search engine for non profit organisations working in the UK</p>
         </div>
         <div style="padding-top: 30px; padding-bottom: 60px;">
             {% include '_search_form.html' %}
@@ -13,15 +13,27 @@
         {# <div class="columns"> #}
             <div class="column" style="padding-top: 30px; padding-bottom: 60px;">
                 <div class="content is-medium">
-                    <p>Other ways to use:</p>
                     <ul>
-                        <li>Find details for an individual charity via <code>/charity/1234567</code>. Examples:
+                        <li>Lookup individual charities based on their charity number:
                             <ul>
-                                <li>Charity registered in England and Wales: <a href="/charity/225922">225922</a></li>
-                                <li>Charity registered in Scotland: <a href="/charity/SC003558">SC003558</a></li>
-                                <li>Charity registered in Northern Ireland: <a href="/charity/NIC100012">NIC100012</a></li>
+                                <li>Charity registered in England and Wales: <a href="/charity/225922">/charity/225922</a></li>
+                                <li>Charity registered in Scotland: <a href="/charity/SC003558">/charity/SC003558</a></li>
+                                <li>Charity registered in Northern Ireland: <a href="/charity/NIC100012">/charity/NIC100012</a></li>
                             </ul>
                             These can also be accessed as json data by adding <code>.json</code> to the end of the url
+                        </li>
+                        <li>Lookup other types of organisations with an <a href="http://org-id.guide/" target="_blank">OrgID</a>:
+                            <ul>
+                                <li>Community Interest Company: <a href="/orgid/GB-COH-11040152">/orgid/GB-COH-11040152</a></li>
+                                <li>Local Authority: <a href="/orgid/GB-LAE-VAL">/orgid/GB-LAE-VAL</a></li>
+                                <li>University: <a href="/orgid/GB-EDU-133817">/orgid/GB-EDU-133817</a></li>
+                            </ul>
+                            These can also be accessed as json data by adding <code>.json</code> to the end of the url
+                        </li>
+                        <li>
+                            <a href="/adddata/">
+                                Add data about organisations to a CSV file
+                            </a>    
                         </li>
                         <li>As an <a href="https://github.com/OpenRefine/OpenRefine/wiki/Reconciliation">OpenRefine
                                 reconciliation service</a> via <code>/reconcile</code>.</li>
