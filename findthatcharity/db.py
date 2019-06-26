@@ -36,3 +36,34 @@ def get_org_types():
         r["key"]: r["doc_count"] for r in
         res["aggregations"]["org_types"]["buckets"]
     }
+
+
+def value_counts():
+    res = es.search(
+        index=settings.ES_INDEX,
+        doc_type=settings.ES_TYPE,
+        size=0,
+        body={
+            "query": {
+                "match": {
+                    "active": True
+                }
+            },
+            "aggs" : {
+                "group_by_type": {
+                    "terms": {
+                        "field": "organisationType.keyword",
+                        "size": 500
+                    }
+                },
+                "group_by_source": {
+                    "terms": {
+                        "field": "sources.keyword",
+                        "size": 500
+                    }
+                }
+            }
+        },
+        ignore=[404]
+    )
+    return res["aggregations"]

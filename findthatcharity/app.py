@@ -31,7 +31,6 @@ async def homepage(request):
         return search_return(query, request)
     return templates.TemplateResponse('index.html', {
         'request': request,
-        'value_counts': value_counts(),
     })
 
 @app.route('/about')
@@ -39,7 +38,6 @@ async def about_page(request):
     sources = fetch_all_sources()
     publishers = {}
     for s in sources.values():
-        print(s)
         if s["publisher"]["name"] not in publishers:
             publishers[s["publisher"]["name"]] = []
         publishers[s["publisher"]["name"]].append(s)
@@ -70,33 +68,3 @@ def search_return(query, request):
         'term': request.query_params.get("q"),
         'selected_org_type': request.query_params.get("orgtype"),
     })
-
-def value_counts():
-    res = es.search(
-        index=settings.ES_INDEX,
-        doc_type=settings.ES_TYPE,
-        size=0,
-        body={
-            "query": {
-                "match": {
-                    "active": True
-                }
-            },
-            "aggs" : {
-                "group_by_type": {
-                    "terms": {
-                        "field": "organisationType.keyword",
-                        "size": 500
-                    }
-                },
-                "group_by_source": {
-                    "terms": {
-                        "field": "sources.keyword",
-                        "size": 500
-                    }
-                }
-            }
-        },
-        ignore=[404]
-    )
-    return res["aggregations"]

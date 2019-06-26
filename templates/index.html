@@ -32,7 +32,7 @@
             <div class="column">
                 <h3>Types of organisation available</h3>
                 <div class="field is-grouped is-grouped-multiline">
-                {% for o in value_counts["group_by_type"]["buckets"] if o.key in key_types %}
+                {% for o in org_types if o.key in key_types %}
                     <div class="control">
                         <div class="tags has-addons">
                             <a href="/orgid/type/{{ o.key }}" class="tag is-light is-medium">{{ o.key }}</a>
@@ -45,7 +45,7 @@
             <div class="column">
                 <h3>Data sources</h3>
                 <div class="field is-grouped is-grouped-multiline">
-                {% for o in value_counts["group_by_source"]["buckets"] %}
+                {% for o in sources_count %}
                     <div class="control">
                         <div class="tags has-addons">
                             <span class="tag is-light is-medium">{{ sources.get(o.key, {}).get("publisher", {}).get("name", o.key) }}</span>

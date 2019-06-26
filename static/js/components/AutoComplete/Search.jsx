@@ -78,8 +78,8 @@ export default class SearchAutoComplete extends React.Component {
                                 name="orgtype">
                                 <option value="all">All organisation types</option>
                                 <option readOnly>----------</option>
-                                {Object.keys(this.props.org_types).map((org_type, i) =>
-                                    <option key={i} value={this.props.org_types[org_type]}>{this.props.org_types[org_type]}</option>
+                                {this.props.org_types.map((org_type, i) =>
+                                    <option key={i} value={org_type['key']}>{org_type['key']}</option>
                                 )}
                             </select>
                         </span>
@@ -100,8 +100,8 @@ export default class SearchAutoComplete extends React.Component {
                                                 {this.getHighlightedText(result.label, this.state.q)}
                                                 {result.orgtypes.map((orgtype, i) =>
                                                     <span key={i} 
-                                                          className={(element.props.org_types.includes(orgtype) ? "" : "is-hidden") + " tag is-small"} 
-                                                          style={{ marginLeft: '5px' }}>{orgtype}</span>
+                                                        className={(element.props.org_types.map(o => o.key).includes(orgtype) ? "" : "is-hidden") + " tag is-small"} 
+                                                        style={{ marginLeft: '5px' }}>{orgtype}</span>
                                                 )}
                                             </div>
                                             <div className="column is-italic has-text-grey is-narrow">{result.value}</div>
