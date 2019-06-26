@@ -60,7 +60,12 @@
                 {% for o in sources_count %}
                     <div class="control">
                         <div class="tags has-addons">
-                            <a href="/orgid/source/{{ o.key }}" class="tag is-light is-medium">{{ sources.get(o.key, {}).get("publisher", {}).get("name", o.key) }}</a>
+                            <a href="/orgid/source/{{ o.key }}" class="tag is-light is-medium">
+                                {{ sources.get(o.key, {}).get("publisher", {}).get("name", o.key) }}
+                            {% if sources.get(o.key, {}).get("publisher", {}).get("duplicate", False) %}
+                                <br><span class="is-size-7">({{ sources.get(o.key, {}).get("title") }})</span>
+                            {% endif %}
+                            </a>
                             <span class="tag is-info is-medium">{{ "{:,.0f}".format(o.doc_count) }}</span>
                         </div>
                     </div>

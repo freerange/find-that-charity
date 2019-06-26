@@ -1,3 +1,5 @@
+from collections import Counter
+
 from elasticsearch import Elasticsearch
 
 from . import settings
@@ -12,9 +14,16 @@ def fetch_all_sources():
         size=100,
         ignore=[404]
     )
-    return {
+    
+    def check_duplicate_publishers(sources):
+        publishers = Counter([s.get("publisher", {}).get("name") for s in sources.values()])
+        for i, s in sources.items():
+            sources[i]["publisher"]["duplicate"] = publishers[s.get("publisher", {}).get("name")]>1
+        return sources
+
+    return check_duplicate_publishers({
         s["_id"]: sort_out_date(s["_source"], ["modified", "issued"]) for s in res["hits"]["hits"]
-    }
+    })
 
 def get_org_types():
     res = es.search(index=settings.ES_INDEX,
