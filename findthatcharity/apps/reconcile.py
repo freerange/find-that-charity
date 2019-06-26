@@ -25,30 +25,10 @@ async def propose_properties(request):
                 "id": "alternateName",
                 "name": "List of alternative names"
             },
-            # {
-            #     "id": "ccew_link",
-            #     "name": "Charity Commission URL"
-            # },
             {
                 "id": "charityNumber",
                 "name": "Charity Number"
             },
-            # {
-            #     "id": "ccni_link",
-            #     "name": "Charity Commission for Northern Ireland URL"
-            # },
-            # {
-            #     "id": "ccni_number",
-            #     "name": "Charity Commission for Northern Ireland Number"
-            # },
-            # {
-            #     "id": "oscr_link",
-            #     "name": "Scottish Charity Regulator URL"
-            # },
-            # {
-            #     "id": "oscr_number",
-            #     "name": "Scottish Charity Regulator Number"
-            # },
             {
                 "id": "companyNumber",
                 "name": "Company numbers"
@@ -61,11 +41,42 @@ async def propose_properties(request):
                 "id": "dateRemoved",
                 "name": "Date of removal from the register"
             },
-            # @TODO: Include postcodes
-            # {
-            #     "id": "geo.postcode",
-            #     "name": "Postcode"
-            # },
+            {
+                "id": "postalCode",
+                "name": "Postcode"
+            },
+            {
+                "id": "streetAddress",
+                "name": "Address street"
+            },
+            {
+                "id": "addressLocality",
+                "name": "Address locality"
+            },
+            {
+                "id": "addressRegion",
+                "name": "Address region"
+            },
+            {
+                "id": "addressCountry",
+                "name": "Address country"
+            },
+            {
+                "id": "telephone",
+                "name": "Telephone"
+            },
+            {
+                "id": "email",
+                "name": "email"
+            },
+            {
+                "id": "description",
+                "name": "Description"
+            },
+            {
+                "id": "organisationType",
+                "name": "Type of organisation"
+            },
             # {
             #     "id": "domain",
             #     "name": "Web domain"
@@ -85,6 +96,10 @@ async def propose_properties(request):
             {
                 "id": "orgIDs",
                 "name": "Organisation identifiers"
+            },
+            {
+                "id": "source",
+                "name": "Source"
             },
             {
                 "id": "parent",
