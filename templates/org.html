@@ -173,10 +173,12 @@
             {{ "{:%d %B %Y}".format(org.dateRemoved) }}
           </p>
           {% endif %}
-          {# <tr>
-            <td>Postcode</td>
-            <td>{{ o.get("geo", {}).get("postcode") }}</td>
-          </tr> #}
+          {% if org.postalCode %}
+          <p>
+            <strong class="is-size-7">Postcode</strong><br>
+            <td>{{ org.postalCode }}</td>
+          </p>
+          {% endif %}
           {% if org.url %}
           <p>
             <strong class="is-size-7">Website</strong><br>

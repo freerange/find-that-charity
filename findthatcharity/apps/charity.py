@@ -9,6 +9,7 @@ from ..templates import templates
 
 app = Starlette()
 
+@app.route('/{regno}/preview')
 @app.route('/{regno}')
 @app.route('/{regno}\.{filetype}')
 async def index(request):
@@ -17,10 +18,14 @@ async def index(request):
 
     orgid = clean_regno(regno)
     
+    template = 'org.html'
+    if str(request.url).endswith("/preview"):
+        template = 'org_preview.html'
+    
     orgs = get_orgs_from_orgid(orgid)
     if orgs:
         if filetype == "html":
-            return templates.TemplateResponse('org.html', {
+            return templates.TemplateResponse(template, {
                 'request': request,
                 'orgs': merge_orgs(orgs)
             })
@@ -36,26 +41,16 @@ async def index(request):
 async def preview(request):
     regno = request.path_params['regno']
 
-    regno_cleaned = clean_regno(regno)
-    if regno_cleaned == "":
-        return JSONResponse({
-            "error": 'Charity {} not found.'.format(regno)
-        }, status_code=404)
-
-    res = es.get(
-        index=settings.ES_INDEX,
-        doc_type=settings.ES_TYPE,
-        id=regno_cleaned,
-        _source_exclude=["complete_names"],
-        ignore=[404]
-    )
-    if "_source" in res:
-        return templates.TemplateResponse('charity_preview.html', {
+    orgid = clean_regno(regno)
+    
+    orgs = get_orgs_from_orgid(orgid)
+    if orgs:
+        return templates.TemplateResponse('org_preview.html', {
             'request': request,
-            'charity': sort_out_date(res["_source"]),
-            'charity_id': res["_id"]
+            'orgs': merge_orgs(orgs)
         })
-    else:
-        return JSONResponse({
-            "error": 'Charity {} not found.'.format(regno)
-        }, status_code=404)
+    
+    # @TODO: this should be a proper 404 page
+    return JSONResponse({
+        "error": 'Charity {} not found.'.format(regno)
+    }, status_code=404)

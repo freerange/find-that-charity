@@ -65,9 +65,15 @@ async def orgid_html(request):
     Find a record based on the org-id
     """
     orgid = request.path_params['orgid']
+
+    template = 'org.html'
+    if orgid.endswith("/preview"):
+        orgid = orgid[:-8]
+        template = 'org_preview.html'
+
     orgs = get_orgs_from_orgid(orgid)
     if orgs:
-        return templates.TemplateResponse('org.html', {
+        return templates.TemplateResponse(template, {
             'request': request,
             'orgs': merge_orgs(orgs),
             'key_types': settings.KEY_TYPES,

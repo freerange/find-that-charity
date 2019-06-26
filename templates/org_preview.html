@@ -1,0 +1,67 @@
+<html>
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.2/css/bulma.min.css" integrity="sha256-2k1KVsNPRXxZOsXQ8aqcZ9GOOwmJTMoOB5o5Qp1d6/s="
+    crossorigin="anonymous" />
+</head>
+  <body>
+    <div class="content is-small" style="padding: 5px;">
+      {% if not hide_title %}
+      <h3>
+        {{ orgs.name }}
+      </h3>
+      {% endif %}
+      <h5>
+        {% if orgs.active %}
+        <strong>Active</strong>
+        {% else %}
+        <strong>Inactive</strong>
+        {% endif %}
+         |
+        <a href='/orgid/{{ orgs.id }}' target="_blank">
+          View full profile</a>
+      </h5>
+      <h5><strong>Charity Number</strong></h5>
+      <ul>
+        {% for k, orgid in orgs.data.orgIDs.items() %}
+          {% set v = orgid.value %}
+          {% if v.startswith("GB-CHC-") %}
+          <li>
+            <strong>England and Wales (CCEW):</strong>
+            <a href="http://beta.charitycommission.gov.uk/charity-details/?regid={{ v.replace('GB-CHC-', '') }}&subid=0" target="_blank">{{ v.replace('GB-CHC-', '') }}</a>
+          </li>
+          {% endif %}
+          {% if v.startswith("GB-NIC-") %}
+          <li>
+            <strong>Northern Ireland (CCNI):</strong>
+            <a href="http://www.charitycommissionni.org.uk/charity-details/?regid={{ v.replace('GB-NIC-', '').replace('NIC', '')}}&subid=0" target="_blank">{{ v.replace('GB-NIC-', '') }}</a>
+          </li>
+          {% endif %}
+          {% if v.startswith("GB-SC-") %}
+          <li>
+            <strong>Scotland (OSCR):</strong>
+            <a href="https://www.oscr.org.uk/about-charities/search-the-register/charity-details?number={{ v.replace('GB-SC-', '') }}" target="_blank">{{ v.replace('GB-SC-', '') }}</a>
+          </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+      <h5><strong>Company Number:</strong>
+        {% for k, orgid in orgs.data.orgIDs.items() %}
+          {% set v = orgid.value %}
+          {% if v.startswith("GB-COH-") %}
+            <a href="https://beta.companieshouse.gov.uk/company/{{ v.replace('GB-COH-', '') }}" target="_blank">{{ v.replace('GB-COH-', '') }}</a>
+          {% endif %}
+        {% endfor %}
+      </h5>
+      <h5><strong>Postcode:</strong>
+        {{ orgs.orgs[0]["postalCode"] }}
+      </h5>
+      <h5><strong>Other Names:</strong>
+      <ul>
+        {% for k, v in orgs.names.items() %}
+          <li>{{ v.value }}{# <br><small class="has-text-grey">({{ show_sources(v) }})</small> #}</li>
+        {% endfor %}
+      </ul>
+      </h5>
+    </div>
+  </body>
+</html>
