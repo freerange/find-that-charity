@@ -6,12 +6,12 @@
         <div class="content is-large">
             <p>A search engine for UK charities.</p>
         </div>
-        <div style="padding-top: 30px; padding-bottom: 160px;">
+        <div style="padding-top: 30px; padding-bottom: 60px;">
             {% include '_search_form.html' %}
         </div>
 
         {# <div class="columns"> #}
-            <div class="column">
+            <div class="column" style="padding-top: 30px; padding-bottom: 60px;">
                 <div class="content is-medium">
                     <p>Other ways to use:</p>
                     <ul>
@@ -29,7 +29,7 @@
                     </ul>
                 </div>
             </div>
-            <div class="column">
+            <div class="column content" style="padding-top: 30px; padding-bottom: 60px;">
                 <h3>Types of organisation available</h3>
                 <div class="field is-grouped is-grouped-multiline">
                 {% for o in org_types if o.key in key_types %}
@@ -42,7 +42,7 @@
                 {% endfor %}
                 </div>
             </div>
-            <div class="column">
+            <div class="column content" style="padding-top: 30px; padding-bottom: 60px;">
                 <h3>Data sources</h3>
                 <div class="field is-grouped is-grouped-multiline">
                 {% for o in sources_count %}
