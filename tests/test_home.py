@@ -22,5 +22,5 @@ def test_about():
 
     # check regulators are acknowledged
     assert "Charity Commission for England and Wales" in response.text
-    assert "Office of the Scottish Charity Regulator" in response.text
+    assert "Office of Scottish Charity Regulator" in response.text
     assert "Charity Commission for Northern Ireland" in response.text

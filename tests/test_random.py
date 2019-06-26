@@ -6,7 +6,7 @@ def test_random():
     client = TestClient(app)
     response = client.get('/random')
     assert response.status_code == 200
-    assert "/charity/" in response.url
+    assert "/orgid/" in response.url
 
 def test_random_active():
     client = TestClient(app)

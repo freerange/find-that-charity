@@ -21,11 +21,37 @@ def test_charity_preview():
     assert "National Council for Voluntary Organisations".lower() in response.text.lower()
 
 def test_charity_json():
+    legacy_fields = [
+        "ccew_number",
+        "oscr_number",
+        "ccni_number",
+        "active",
+        "names",
+        "known_as",
+        "geo",
+        "url",
+        "domain",
+        "latest_income",
+        "company_number",
+        "parent",
+        "ccew_link",
+        "oscr_link",
+        "ccni_link",
+        "date_registered",
+        "date_removed",
+        "org-ids",
+        "alt_names",
+        "last_modified",
+    ]
+
     client = TestClient(app)
     response = client.get('/charity/225922.json')
     assert response.status_code == 200
     result = response.json()
     assert result["known_as"] == "The National Council for Voluntary Organisations"
+
+    for f in legacy_fields:
+        assert f in result
 
 def test_charity():
     client = TestClient(app)

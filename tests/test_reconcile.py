@@ -18,7 +18,7 @@ def test_reconcile_query():
     result = response.json()
     assert result["total"] == 1
     assert len(result["result"]) == 1
-    assert result["result"][0]["id"] == "225922"
+    assert result["result"][0]["id"] == "GB-CHC-225922"
 
 def test_reconcile_query_callback():
     client = TestClient(app)
@@ -37,8 +37,8 @@ def test_reconcile_queries():
     assert len(result) == 2
     assert "q0" in result.keys()
     assert "q1" in result.keys()
-    assert result["q0"]["result"][0]["id"] == "225922"
-    assert result["q1"]["result"][0]["id"] == "1114591"
+    assert result["q0"]["result"][0]["id"] == "GB-CHC-225922"
+    assert result["q1"]["result"][0]["id"] == "GB-CHC-1114591"
 
 
 def test_reconcile_queries_callback():
@@ -57,10 +57,10 @@ def test_reconcile_queries_callback():
 def test_reconcile_extend():
     client = TestClient(app)
     data = {
-        "ids": ["225922", "123456"],
+        "ids": ["GB-CHC-225922", "GB-CHC-123456"],
         "properties": [
-            {"id": "known_as"},
-            {"id": "geo.postcode"},
+            {"id": "name"},
+            {"id": "postalCode"},
         ]
     }
     response = client.get('/reconcile?extend={}'.format(json.dumps(data)))
@@ -68,17 +68,17 @@ def test_reconcile_extend():
     result = response.json()
     assert len(result["meta"]) == 2
     assert len(result["rows"]) == 2
-    assert len(result["rows"]["225922"]) == 2
-    assert len(result["rows"]["123456"]) == 2
-    assert len(result["rows"]["123456"]["known_as"]) == 0
-    assert len(result["rows"]["225922"]["known_as"])
+    assert len(result["rows"]["GB-CHC-225922"]) == 2
+    assert len(result["rows"]["GB-CHC-123456"]) == 2
+    assert len(result["rows"]["GB-CHC-123456"]["name"]) == 0
+    assert len(result["rows"]["GB-CHC-225922"]["name"])
 
 def test_propose_properties():
     client = TestClient(app)
     response = client.get('/reconcile/propose_properties')
     assert response.status_code == 200
     result = response.json()
-    assert len(result["properties"])==19
+    assert len(result["properties"])==22
 
 def test_propose_properties_callback():
     client = TestClient(app)
