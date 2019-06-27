@@ -26,6 +26,18 @@ EXTERNAL_LINKS = {
     "GB-NHS": [
         ["https://odsportal.hscic.gov.uk/Organisation/Details/{}", "NHS Digital"],
     ],
+    "GB-LAE": [
+        ["https://www.registers.service.gov.uk/registers/local-authority-eng/records/{}", "Local authorities in England"],
+    ],
+    "GB-LAN": [
+        ["https://www.registers.service.gov.uk/registers/local-authority-nir/records/{}", "Local authorities in Northern Ireland"],
+    ],
+    "GB-LAS": [
+        ["https://www.registers.service.gov.uk/registers/local-authority-sct/records/{}", "Local authorities in Scotland"],
+    ],
+    "GB-PLA": [
+        ["https://www.registers.service.gov.uk/registers/principal-local-authority/records/{}", "Principal Local authorities in Wales"],
+    ],
 }
 
 class Org():
@@ -296,7 +308,7 @@ class MergedOrg():
         self.name, self.names = self.get_names()
         self.id = self.get_main_value("id")
         self.active = self.get_main_value("active")
-        self.links = Org.get_links(self.data["orgIDs"].keys())
+        self.links = Org.get_links(self.get_values("orgIDs"))
     
     def get_names(self):
         main_name = self.get_main_value("name")
