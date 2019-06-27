@@ -6,10 +6,10 @@ import uvicorn
 from .queries import search_query
 from .db import es, fetch_all_sources
 from . import settings
-from .utils import sort_out_date
 from .utils import JSONResponseDate as JSONResponse
 from .apps import randcharity, reconcile, charity, autocomplete, orgid, feeds, csvdata
 from .templates import templates
+from .classes.org import Org
 
 app = Starlette()
 app.debug = settings.DEBUG
@@ -58,14 +58,13 @@ def search_return(query, request):
         body=query,
         ignore=[404]
     )
-    res = res["hits"]
-    for result in res["hits"]:
-        result["_link"] = "/orgid/" + result["_id"]
-        result["_source"] = sort_out_date(result["_source"])
     
     return templates.TemplateResponse('search.html', {
         'request': request,
-        'res': res,
+        'res': {
+            "hits": [Org(o["_id"], o["_source"]) for o in res.get("hits", {}).get("hits", [])],
+            "total": res.get("hits", {}).get("total"),
+        },
         'term': request.query_params.get("q"),
         'selected_org_type': request.query_params.get("orgtype"),
     })

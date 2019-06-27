@@ -6,6 +6,8 @@ import json
 from dateutil import parser
 from starlette.responses import JSONResponse
 
+from .classes.org import MergedOrg, Org
+
 def clean_regno(regno):
     """
     Clean up a charity registration number
@@ -101,4 +103,8 @@ class JSONResponseDate(JSONResponse):
 
         if isinstance(obj, (datetime, date)):
             return obj.isoformat()
+
+        if isinstance(obj, MergedOrg):
+            return obj.to_json()
+
         raise TypeError ("Type %s not serializable" % type(obj))

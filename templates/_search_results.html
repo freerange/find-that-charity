@@ -28,20 +28,20 @@
         <tbody>
             {% for result in res.hits %}
             <tr>
-                <td><a href="/orgid/{{ result._id }}">{{result._source.name }}</a></td>
+                <td><a href="/orgid/{{ result.id }}">{{result.name }}</a></td>
                 <td>
                 <div class="tags are-small">
-                    {% for t in result._source.organisationType %}
+                    {% for t in result.organisationType %}
                     <span class="tag is-small"><a href="/orgid/type/{{t}}">{{ t }}</a></span>
                     {% endfor %}
                 </div>
                 </td>
                 <td>
-                    {% if result._source.active %}<span class="tag is-success">Active</span>
+                    {% if result.active %}<span class="tag is-success">Active</span>
                     {% else %}<span class="tag is-danger">Inactive</span>
                     {% endif %}
                 </td>
-                <td>{{ result._id }}</td>
+                <td>{{ result.id }}</td>
             </tr>
             {% endfor %}
         </tbody>
