@@ -80,6 +80,8 @@ class Org():
             setattr(self, f, source.get(f))
         self._sort_out_date()
 
+    def __repr__(self):
+        return "<Org {}>".format(self.id)
 
     def _sort_out_date(self):
         """
@@ -309,6 +311,9 @@ class MergedOrg():
         self.id = self.get_main_value("id")
         self.active = self.get_main_value("active")
         self.links = Org.get_links(self.get_values("orgIDs"))
+
+    def __repr__(self):
+        return "<MergedOrg {}>".format(self.id)
     
     def get_names(self):
         main_name = self.get_main_value("name")

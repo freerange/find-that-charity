@@ -31,8 +31,6 @@ async def orgid_type(request):
         ignore=[404]
     )
 
-    print([Org(o["_id"], o["_source"]) for o in res.get("hits", {}).get("hits", [])])
-
     return templates.TemplateResponse('orgtype.html', {
         'request': request,
         'res': {
