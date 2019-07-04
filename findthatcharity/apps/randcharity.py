@@ -10,7 +10,7 @@ def random(request):
     """ Get a random charity record
     """
     filetype = request.path_params.get("filetype", "html")
-    active = request.path_params.get("active", False)
+    active = request.query_params.get("active", False)
     res = es.search(
         index=settings.ES_INDEX,
         doc_type=settings.ES_TYPE,
