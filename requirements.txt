@@ -23,6 +23,7 @@ py==1.4.34
 pyexcel-ezodf==0.3.4
 pyexcel-io==0.5.9.1
 pyexcel-ods3==0.5.2
+pymongo==3.7.1
 pytest==3.1.2
 python-dateutil==2.6.1
 python-multipart==0.0.5
