@@ -104,7 +104,7 @@ class JSONResponseDate(JSONResponse):
         if isinstance(obj, (datetime, date)):
             return obj.isoformat()
 
-        if isinstance(obj, MergedOrg):
+        if isinstance(obj, (MergedOrg, Org)):
             return obj.to_json()
 
         raise TypeError ("Type %s not serializable" % type(obj))

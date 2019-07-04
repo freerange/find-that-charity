@@ -35,6 +35,11 @@
               </div> #}
             </div>
             <div class="tags are-medium">
+              {% if orgs.active %}
+              <span class="tag is-medium is-success">Active</span>
+              {% else %}
+              <span class="tag is-medium is-danger">Inactive</span>
+              {% endif %}
               {% for k, v in orgs.data.organisationType.items() if v.value in key_types %}
               <a class="tag is-medium is-info" href="/orgid/type/{{ v.value }}">{{ v.value }}</a>
               {% endfor %}
@@ -52,8 +57,8 @@
       <a class="tag is-small is-light" href="/orgid/type/{{ v.value }}">{{ v.value }}</a>
       {% endfor %}
     </div>
-    {% if orgs.data.description.keys()|length %}
     <div class="content">
+      {% if orgs.data.description.keys()|length %}
       <h4>Description</h4>
       {% for k, v in orgs.data.description.items() %}
       <p>
@@ -61,6 +66,7 @@
         {{ show_sources(v) }}
       </p>
       {% endfor %}
+      {% endif %}
       {% if orgs.names %}
       <h4>Other names</h4>
       <ul>
@@ -71,7 +77,6 @@
       {% endif %}
     </div>
     <br>
-    {% endif %}
 
   </div>
   <div class="column is-one-third">
@@ -89,6 +94,25 @@
           {% for link, text in orgs.links %}
           <li><a href="{{ link }}" target="_blank">{{ text }}</a></li>
           {% endfor %}
+        </ul>
+      </div>
+    </article>
+    {% endif %}
+    
+    {% if orgs.data.location.keys()|length %}
+    <article class="message is-info">
+      <div class="message-header">
+        <p class="">Locations</p>
+      </div>
+      <div class="message-body">
+        <ul>
+        {% for k, v in orgs.data.location.items() %}
+          {% if v.value.geoCode and v.value.geoCode|regex_search("[ENWS][0-9]{8}") %}
+          <li><a href="https://postcodes.findthatcharity.uk/areas/{{ v.value.geoCode }}.html" target="_blank">{{ v.value.name }}</a> {{ show_sources(v) }}</li>
+          {% else %}
+          <li>{{ v.value.name }} {{ show_sources(v) }}</li>
+          {% endif %}
+        {% endfor %}
         </ul>
       </div>
     </article>

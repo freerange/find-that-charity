@@ -66,6 +66,7 @@ class Org():
         "addressLocality",
         "addressRegion",
         "addressCountry",
+        "location",
     ]
 
     date_fields = [
@@ -168,6 +169,9 @@ class Org():
         
         return data
 
+    def to_json(self):
+        return self.__dict__
+
     @staticmethod
     def clean_regno(regno, to_orgid=True):
         """
@@ -213,7 +217,8 @@ class MergedOrg():
         "url", "latestIncome", "dateModified",
         "dateRegistered", "dateRemoved",
         "active", "parent", "organisationType", 
-        "alternateName", "orgIDs", "id"
+        "alternateName", "orgIDs", "id",
+        "location",
     ]
 
     address_fields = [
@@ -260,7 +265,7 @@ class MergedOrg():
             for org in self.orgs:
 
                 # if there's nothing for this field in this org then move to the next one
-                if not getattr(org, f):
+                if getattr(org, f, None) is None:
                     continue
 
                 # make sure the values are a list
@@ -345,7 +350,8 @@ class MergedOrg():
     def to_json(self):
         r_json = {
             "sources": self.sources,
-            # "data": self.data,
+            "data": self.data,
+            "orgs": self.orgs,
         }
 
         for f in self.data.keys():
