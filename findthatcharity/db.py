@@ -7,9 +7,8 @@ from .utils import sort_out_date
 
 es = Elasticsearch(str(settings.ES_URL))
 
-print(str(settings.ES_URL))
 if not es.ping():
-    raise ValueError("Elasticsearch connection failed")
+    raise ValueError("Elasticsearch connection failed for {}".format(str(settings.ES_URL)))
 
 
 def fetch_all_sources():
