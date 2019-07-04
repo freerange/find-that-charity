@@ -22,7 +22,7 @@ def fetch_all_sources():
         return sources
 
     return check_duplicate_publishers({
-        s["_id"]: sort_out_date(s["_source"], ["modified", "issued"]) for s in res["hits"]["hits"]
+        s["_id"]: sort_out_date(s["_source"], ["modified", "issued"]) for s in res.get("hits", {}).get("hits", [])
     })
 
 def get_org_types():
