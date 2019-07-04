@@ -75,4 +75,4 @@ def value_counts():
         },
         ignore=[404]
     )
-    return res["aggregations"]
+    return res.get("aggregations", {})
