@@ -52,31 +52,185 @@
 {% block content %}
 <div class="columns">
   <div class="column">
-    <div class="tags are-medium">
-      {% for k, v in orgs.data.organisationType.items() if v.value not in key_types %}
-      <a class="tag is-small is-light" href="/orgid/type/{{ v.value }}">{{ v.value }}</a>
-      {% endfor %}
+    <div class="columns">
+      <div class="column">
+        <div class="tags are-medium">
+          {% for k, v in orgs.data.organisationType.items() if v.value not in key_types %}
+          <a class="tag is-small is-light" href="/orgid/type/{{ v.value }}">{{ v.value }}</a>
+          {% endfor %}
+        </div>
+        <div class="content">
+          {% if orgs.data.description.keys()|length %}
+          <h4>Description</h4>
+          {% for k, v in orgs.data.description.items() %}
+          <p>
+            {{ v.value }}
+            {{ show_sources(v) }}
+          </p>
+          {% endfor %}
+          {% endif %}
+          {% if orgs.names %}
+          <h4>Other names</h4>
+          <ul>
+            {% for k, v in orgs.names.items() %}
+            <li>{{ v.value }} {{ show_sources(v) }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+        <br>
+      </div>
     </div>
-    <div class="content">
-      {% if orgs.data.description.keys()|length %}
-      <h4>Description</h4>
-      {% for k, v in orgs.data.description.items() %}
-      <p>
-        {{ v.value }}
-        {{ show_sources(v) }}
-      </p>
-      {% endfor %}
-      {% endif %}
-      {% if orgs.names %}
-      <h4>Other names</h4>
-      <ul>
-        {% for k, v in orgs.names.items() %}
-        <li>{{ v.value }} {{ show_sources(v) }}</li>
-        {% endfor %}
-      </ul>
-      {% endif %}
+    <div class="columns is-multiline">
+
+    {% for org in orgs.orgs %}
+    <div class="column is-half">
+      <div class="card">
+        <header class="card-header">
+          <p class="card-header-title">
+            Organisation record<br>
+          </p>
+          <p class="card-header-title is-size-7 has-text-weight-light">
+            {% for s in org.sources if sources.get(s) %}
+            <span class="">{{ sources[s].publisher.name }}</span>
+            {% endfor %}
+          </p>
+        </header>
+        <div class="card-content">
+          <div class="is-clearfix">
+            <p>
+              <strong>{{ org.name }}</strong> ({{ org.orgIDs[0] }})
+            </p>
+            <div class="tags are-small">
+              {% if org.active %}
+              <span class="tag is-small is-success">Active</span>
+              {% else %}
+              <span class="tag is-small is-danger">Inactive</span>
+              {% endif %}
+              {% for t in org.organisationType %}
+              <span class="tag is-small">{{ t }}</span>
+              {% endfor %}
+            </div>
+            {% for v in org.orgIDs %}
+              {% if v.startswith("GB-COH-") %}
+                <p>
+                  <strong class="is-size-7">Company number</strong><br>
+                  <a href="https://beta.companieshouse.gov.uk/company/{{ v.replace('GB-COH-', '') }}" target="_blank">{{ v.replace('GB-COH-', '') }}</a>
+                </p>
+              {% endif %}
+              {% if v.startswith("GB-CHC-") %}
+                <p>
+                  <strong class="is-size-7">CCEW Charity number</strong><br>
+                  <a href="http://beta.charitycommission.gov.uk/charity-details/?regid={{ v.replace('GB-CHC-', '') }}&subid=0" target="_blank">{{ v.replace('GB-CHC-', '') }}</a>
+                </p>
+              {% endif %}
+              {% if v.startswith("GB-NIC-") %}
+                <p>
+                  <strong class="is-size-7">CCNI Charity number</strong><br>
+                  <a href="http://www.charitycommissionni.org.uk/charity-details/?regid={{ v.replace('GB-NIC-', '').replace('NIC', '')}}&subid=0" target="_blank">{{ v.replace('GB-NIC-', '') }}</a>
+                </p>
+              {% endif %}
+              {% if v.startswith("GB-SC-") %}
+                <p>
+                  <strong class="is-size-7">OSCR Charity number</strong><br>
+                  <a href="https://www.oscr.org.uk/about-charities/search-the-register/charity-details?number={{ v.replace('GB-SC-', '') }}" target="_blank">{{ v.replace('GB-SC-', '') }}</a>
+                </p>
+              {% endif %}
+            {% endfor %}
+            <p>
+              <strong class="is-size-7">
+                Identifiers 
+                <span class="is-size-7">(using <a href="http://org-id.guide/about" target="_blank" class="">org-id</a>)</span>
+              </strong><br>
+              <ul>
+              {% for orgid in org.orgIDs %}
+                <li>{{orgid}}</li>
+              {% endfor %}
+              </ul>
+            </p>
+            {% if org.dateRegistered %}
+            <p>
+              <strong class="is-size-7">Registered</strong><br>
+              {{ "{:%d %B %Y}".format(org.dateRegistered) }}
+            </p>
+            {% endif %}
+            {% if org.dateRemoved %}
+            <p>
+              <strong class="is-size-7">Removed</strong><br>
+              {{ "{:%d %B %Y}".format(org.dateRemoved) }}
+            </p>
+            {% endif %}
+            {% if org.postalCode %}
+            <p>
+              <strong class="is-size-7">Postcode</strong><br>
+              <td>{{ org.postalCode }}</td>
+            </p>
+            {% endif %}
+            {% if org.url %}
+            <p>
+              <strong class="is-size-7">Website</strong><br>
+              <a href="{{ org.url }}">{{ org.url|replace("http://", "")|replace("https://", "") }}</a>
+            </p>
+            {% endif %}
+            {% if org.domain %}
+            <p>
+              <strong class="is-size-7">Domain</strong><br>
+              <code>{{ org.domain }}</code>
+            </p>
+            {% endif %}
+            {% if org.latestIncome %}
+            <p>
+              <strong class="is-size-7">Latest income</strong><br>
+              &pound;{{ "{:,.0f}".format( org.latestIncome )}}
+            </p>
+            {% endif %}
+            {% for s in org.sources if sources.get(s) %}
+            <p class="has-text-weight-light is-size-7 is-pulled-right">
+              <strong>Data source</strong>:
+              <a href="{{ sources[s].publisher.website }}" target="_blank">
+                {{ sources[s].publisher.name }}
+              </a><br>
+              <i>Last updated {{ "{:%d %B %Y}".format(sources[s].modified) }}</i>
+            </p>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <br>
+      {# {% if charity["geo"]["location"] %}
+      <div class="card">
+        <header class="card-header">
+          <p class="card-header-title">Location</p>
+        </header>
+        <div class="card-content">
+          <div class="content">
+            <table class="table">
+              <tbody>
+                {% if charity.get("geo", {}).get("location") %}
+                <tr>
+                  <th>Latitude/longitude</th>
+                  <td>
+                    <a href="#">
+                      {{ charity.get("geo", {}).get("location",{}).get("lat") }},
+                      {{ charity.get("geo", {}).get("location",{}).get("lon") }}
+                    </a>
+                  </td>
+                </tr>
+                {% endif %}
+                <!--<tr><th>Local Authority</th><td>{{ charity.get("geo", {}).get("areas",[]) }}</td></tr>-->
+                <tr><th>Postcode</th><td>{{ charity.get("geo", {}).get("postcode") }}</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {% endif %} #}
+
+
     </div>
-    <br>
+    {% endfor %}
+  </div>
+
 
   </div>
   <div class="column is-one-third">
@@ -119,152 +273,6 @@
     {% endif %}
 
   </div>
-</div>
-<div class="columns">
-    
-  {% for org in orgs.orgs %}
-  <div class="column is-one-third">
-    <div class="card">
-      <header class="card-header">
-        <p class="card-header-title">
-          Organisation record  
-          {# {% for s in org.sources if sources.get(s) %}
-          <span class="is-size-7 has-text-weight-light pull-right"> ({{ sources[s].publisher.name }})</span>
-          {% endfor %} #}
-        </p>
-      </header>
-      <div class="card-content">
-        <div class="">
-          <p>
-            <strong>{{ org.name }}</strong> ({{ org.orgIDs[0] }})
-          </p>
-          <div class="tags are-small">
-            {% if org.active %}
-            <span class="tag is-small is-success">Active</span>
-            {% else %}
-            <span class="tag is-small is-danger">Inactive</span>
-            {% endif %}
-            {% for t in org.organisationType %}
-            <span class="tag is-small">{{ t }}</span>
-            {% endfor %}
-          </div>
-          {% for v in org.orgIDs %}
-            {% if v.startswith("GB-COH-") %}
-              <p>
-                <strong class="is-size-7">Company number</strong><br>
-                <a href="https://beta.companieshouse.gov.uk/company/{{ v.replace('GB-COH-', '') }}" target="_blank">{{ v.replace('GB-COH-', '') }}</a>
-              </p>
-            {% endif %}
-            {% if v.startswith("GB-CHC-") %}
-              <p>
-                <strong class="is-size-7">CCEW Charity number</strong><br>
-                <a href="http://beta.charitycommission.gov.uk/charity-details/?regid={{ v.replace('GB-CHC-', '') }}&subid=0" target="_blank">{{ v.replace('GB-CHC-', '') }}</a>
-              </p>
-            {% endif %}
-            {% if v.startswith("GB-NIC-") %}
-              <p>
-                <strong class="is-size-7">CCNI Charity number</strong><br>
-                <a href="http://www.charitycommissionni.org.uk/charity-details/?regid={{ v.replace('GB-NIC-', '').replace('NIC', '')}}&subid=0" target="_blank">{{ v.replace('GB-NIC-', '') }}</a>
-              </p>
-            {% endif %}
-            {% if v.startswith("GB-SC-") %}
-              <p>
-                <strong class="is-size-7">OSCR Charity number</strong><br>
-                <a href="https://www.oscr.org.uk/about-charities/search-the-register/charity-details?number={{ v.replace('GB-SC-', '') }}" target="_blank">{{ v.replace('GB-SC-', '') }}</a>
-              </p>
-            {% endif %}
-          {% endfor %}
-          <p>
-            <strong class="is-size-7">
-              Identifiers 
-              <span class="is-size-7">(using <a href="http://org-id.guide/about" target="_blank" class="">org-id</a>)</span>
-            </strong><br>
-            <ul>
-            {% for orgid in org.orgIDs %}
-              <li>{{orgid}}</li>
-            {% endfor %}
-            </ul>
-          </p>
-          {% if org.dateRegistered %}
-          <p>
-            <strong class="is-size-7">Registered</strong><br>
-            {{ "{:%d %B %Y}".format(org.dateRegistered) }}
-          </p>
-          {% endif %}
-          {% if org.dateRemoved %}
-          <p>
-            <strong class="is-size-7">Removed</strong><br>
-            {{ "{:%d %B %Y}".format(org.dateRemoved) }}
-          </p>
-          {% endif %}
-          {% if org.postalCode %}
-          <p>
-            <strong class="is-size-7">Postcode</strong><br>
-            <td>{{ org.postalCode }}</td>
-          </p>
-          {% endif %}
-          {% if org.url %}
-          <p>
-            <strong class="is-size-7">Website</strong><br>
-            <a href="{{ org.url }}">{{ org.url|replace("http://", "")|replace("https://", "") }}</a>
-          </p>
-          {% endif %}
-          {% if org.domain %}
-          <p>
-            <strong class="is-size-7">Domain</strong><br>
-            <code>{{ org.domain }}</code>
-          </p>
-          {% endif %}
-          {% if org.latestIncome %}
-          <p>
-            <strong class="is-size-7">Latest income</strong><br>
-            &pound;{{ "{:,.0f}".format( org.latestIncome )}}
-          </p>
-          {% endif %}
-          {% for s in org.sources if sources.get(s) %}
-          <p class="has-text-weight-light is-size-7">
-            <strong>Data source</strong>:
-            <a href="{{ sources[s].publisher.website }}" target="_blank">
-              {{ sources[s].publisher.name }}
-            </a><br>
-            <i>Last updated {{ "{:%d %B %Y}".format(sources[s].modified) }}</i>
-          </p>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
-    <br>
-    {# {% if charity["geo"]["location"] %}
-    <div class="card">
-      <header class="card-header">
-        <p class="card-header-title">Location</p>
-      </header>
-      <div class="card-content">
-        <div class="content">
-          <table class="table">
-            <tbody>
-              {% if charity.get("geo", {}).get("location") %}
-              <tr>
-                <th>Latitude/longitude</th>
-                <td>
-                  <a href="#">
-                     {{ charity.get("geo", {}).get("location",{}).get("lat") }},
-                     {{ charity.get("geo", {}).get("location",{}).get("lon") }}
-                  </a>
-                </td>
-              </tr>
-              {% endif %}
-              <!--<tr><th>Local Authority</th><td>{{ charity.get("geo", {}).get("areas",[]) }}</td></tr>-->
-              <tr><th>Postcode</th><td>{{ charity.get("geo", {}).get("postcode") }}</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    {% endif %} #}
-
-  </div>
-  {% endfor %}
 </div>
 
 <div class="columns">
