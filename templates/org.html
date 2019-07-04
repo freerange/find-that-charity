@@ -191,14 +191,12 @@
             <code>{{ org.domain }}</code>
           </p>
           {% endif %}
+          {% if org.latestIncome %}
           <p>
             <strong class="is-size-7">Latest income</strong><br>
-            {% if org.latestIncome %}
-              &pound;{{ "{:,.0f}".format( org.latestIncome )}}
-            {% else %}
-              <code>Unknown</code>
-            {% endif %}
+            &pound;{{ "{:,.0f}".format( org.latestIncome )}}
           </p>
+          {% endif %}
           {% for s in org.sources if sources.get(s) %}
           <p class="has-text-weight-light is-size-7">
             <strong>Data source</strong>:
