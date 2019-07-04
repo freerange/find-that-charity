@@ -1,1 +1,1 @@
-web: uvicorn findthatcharity.app:app
+web: uvicorn --host 0.0.0.0 findthatcharity.app:app
