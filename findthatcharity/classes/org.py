@@ -356,8 +356,8 @@ class MergedOrg():
     def to_json(self):
         r_json = {
             "sources": self.sources,
-            "data": self.data,
-            "orgs": self.orgs,
+            # "data": self.data,
+            # "orgs": self.orgs,
         }
 
         for f in self.data.keys():
