@@ -9,7 +9,7 @@ Click==7.0
 colorama==0.3.9
 decorator==4.0.11
 elasticsearch==5.3.0
--e git+https://github.com/drkane/find-that-charity-scrapers.git@2b946e8f5e1245d21bc594af1c285133b746168a#egg=findthatcharity_import
+-e git+https://github.com/drkane/find-that-charity-scrapers.git#egg=findthatcharity_import
 gunicorn==19.7.1
 h11==0.8.1
 idna==2.6
