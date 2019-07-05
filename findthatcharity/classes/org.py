@@ -38,6 +38,9 @@ EXTERNAL_LINKS = {
     "GB-PLA": [
         ["https://www.registers.service.gov.uk/registers/principal-local-authority/records/{}", "Principal Local authorities in Wales"],
     ],
+    "GB-GOR": [
+        ["https://www.registers.service.gov.uk/registers/government-organisation/records/{}", "Government organisations on GOV.UK"],
+    ],
 }
 
 class Org():
