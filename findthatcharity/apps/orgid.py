@@ -76,6 +76,8 @@ async def orgid_html(request):
             'request': request,
             'orgs': orgs,
             'key_types': settings.KEY_TYPES,
+            'parent_orgs': get_parents(orgs),
+            'child_orgs': get_children(orgs),
         })
     
     # @TODO: this should be a proper 404 page
@@ -112,3 +114,34 @@ def get_orgs_from_orgid(orgid):
     )
     if res.get("hits", {}).get("hits", []):
         return MergedOrg([Org(o["_id"], o["_source"]) for o in res["hits"]["hits"]])
+
+def get_parents(orgs):
+    parents = {}
+    for k, v in orgs.data["parent"].items():
+        if v["value"] not in parents:
+            parents[v["value"]] = get_orgs_from_orgid(v["value"])
+    return parents
+
+def get_children(orgs):
+    children = {}
+
+    res = es.search(
+        index=settings.ES_INDEX,
+        doc_type=settings.ES_TYPE,
+        body={
+            "query": {
+                "terms": {
+                    "parent.keyword": [v["value"] for v in orgs.data["orgIDs"].values()]
+                }
+            }
+        },
+        _source_exclude=["complete_names"],
+        ignore=[404]
+    )
+
+    for o in res.get("hits", {}).get("hits", []):
+        print(o["_id"])
+        if o["_id"] not in children:
+            children[o["_id"]] = Org(o["_id"], o["_source"])
+
+    return list(children.values())

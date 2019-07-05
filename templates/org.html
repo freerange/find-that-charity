@@ -271,6 +271,40 @@
       </div>
     </article>
     {% endif %}
+    
+    {% if orgs.data.parent.keys()|length %}
+    <article class="message is-info">
+      <div class="message-header">
+        <p class="">Parent organisations</p>
+      </div>
+      <div class="message-body">
+        <ul>
+        {% for k, v in orgs.data.parent.items() %}
+          {% if v.value in parent_orgs %}
+          <li><a href="/orgid/{{ v.value }}" target="_blank">{{ parent_orgs[v.value].name }}</a> {{ show_sources(v) }}</li>
+          {% else %}
+          <li><a href="/orgid/{{ v.value }}" target="_blank">{{ v.value }}</a> {{ show_sources(v) }}</li>
+          {% endif %}
+        {% endfor %}
+        </ul>
+      </div>
+    </article>
+    {% endif %}
+
+    {% if child_orgs|length %}
+    <article class="message is-info">
+      <div class="message-header">
+        <p class="">Child organisations</p>
+      </div>
+      <div class="message-body">
+        <ul>
+        {% for o in child_orgs %}
+          <li><a href="/orgid/{{ o.id }}" target="_blank">{{ o.name }}</a> {{ show_sources(o) }}</li>
+        {% endfor %}
+        </ul>
+      </div>
+    </article>
+    {% endif %}
 
   </div>
 </div>
