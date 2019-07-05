@@ -140,7 +140,6 @@ def get_children(orgs):
     )
 
     for o in res.get("hits", {}).get("hits", []):
-        print(o["_id"])
         if o["_id"] not in children:
             children[o["_id"]] = Org(o["_id"], o["_source"])
 
