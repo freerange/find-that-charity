@@ -7,7 +7,15 @@
 
 {% macro show_sources(v) %}
 <span class="has-text-weight-light is-size-7">
-  [{{ v["sources"]|list_to_string }}]
+  [Source: {% for s in v.sources -%}
+    {%- if sources.get(s) -%}
+      {{ sources.get(s).publisher.name }}
+    {%- else -%}
+      {{ s }}
+    {%- endif -%}
+    {%- if not loop.last %}, {% endif -%}
+  {%- endfor -%}]
+  {# [{{ v["sources"]|list_to_string }}] #}
 </span>
 {% endmacro %}
 
@@ -262,9 +270,17 @@
         <ul>
         {% for k, v in orgs.data.location.items() %}
           {% if v.value.geoCode and v.value.geoCode|regex_search("[ENWS][0-9]{8}") %}
-          <li><a href="https://postcodes.findthatcharity.uk/areas/{{ v.value.geoCode }}.html" target="_blank">{{ v.value.name }}</a> {{ show_sources(v) }}</li>
+          <li>
+            <a href="https://postcodes.findthatcharity.uk/areas/{{ v.value.geoCode }}.html" target="_blank">{{ v.value.name }}</a>
+            {% if v.value.geoCodeType %}({{ v.value.geoCodeType }}){% endif %}
+            {{ show_sources(v) }}
+          </li>
           {% else %}
-          <li>{{ v.value.name }} {{ show_sources(v) }}</li>
+          <li>
+            {{ v.value.name }}
+            {% if v.value.geoCodeType %}({{ v.value.geoCodeType }}){% endif %}
+            {{ show_sources(v) }}
+          </li>
           {% endif %}
         {% endfor %}
         </ul>
