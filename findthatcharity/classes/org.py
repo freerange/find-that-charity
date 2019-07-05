@@ -41,6 +41,9 @@ EXTERNAL_LINKS = {
     "GB-GOR": [
         ["https://www.registers.service.gov.uk/registers/government-organisation/records/{}", "Government organisations on GOV.UK"],
     ],
+    "XI-GRID": [
+        ["https://www.grid.ac/institutes/{}", "Global Research Identifier Database"],
+    ],
 }
 
 class Org():
