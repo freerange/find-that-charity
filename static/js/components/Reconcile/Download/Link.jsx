@@ -55,8 +55,12 @@ class ReconcileDownloadData extends React.Component {
             let extra_data = {};
             Object.keys(field_renames).forEach(f => {
                 let new_field_name = field_renames[f];
-                if (this.props.org_data[charity_number]){
-                    extra_data[new_field_name] = this.props.org_data[charity_number][f];
+                if (this.props.org_data[charity_number]) {
+                    var value = this.props.org_data[charity_number][f];
+                    if (!value || Object.getOwnPropertyNames(value).length == 0) {
+                        value = null;
+                    }
+                    extra_data[new_field_name] = value;
                 } else {
                     extra_data[new_field_name] = null;
                 }
