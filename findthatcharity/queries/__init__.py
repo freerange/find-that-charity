@@ -12,7 +12,7 @@ with open(os.path.join(os.path.dirname(__file__), './es_config.yml'), 'rb') as y
 with open(os.path.join(os.path.dirname(__file__), './recon_config.yml'), 'rb') as yaml_file:
     RECON_CONFIG = yaml.safe_load(yaml_file)
 
-def search_query(term, orgtype='all'):
+def search_query(term, orgtype='all', p=1, size=10):
     """
     Fetch the search query and insert the query term
     """
@@ -24,8 +24,8 @@ def search_query(term, orgtype='all'):
     if orgtype and orgtype != "all":
         if not isinstance(orgtype, list):
             orgtype = [orgtype]
-        dis_max = json_q["inline"]["query"]["function_score"]["query"]
-        json_q["inline"]["query"]["function_score"]["query"] = {
+        dis_max = json_q["source"]["query"]["function_score"]["query"]
+        json_q["source"]["query"]["function_score"]["query"] = {
             "bool": {
                 "must": dis_max,
                 "filter": {
@@ -33,6 +33,9 @@ def search_query(term, orgtype='all'):
                 }
             }
         }
+
+    json_q["source"]["from"] = (p-1) * size
+    json_q["source"]["size"] = size
 
     return json.dumps(json_q)
 

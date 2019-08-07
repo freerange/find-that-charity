@@ -24,12 +24,39 @@ app.mount('/feeds', feeds.app)
 app.mount('/orgid', orgid.app)
 app.mount('/adddata', csvdata.app)
 
+DEFAULT_PAGE = 1
+DEFAULT_SIZE = 10
+
 @app.route('/')
 async def homepage(request):
     query = request.query_params.get("q")
+
+    try:
+        page = int(request.query_params.get("p", DEFAULT_PAGE))
+        if page < 1:
+            raise ValueError()
+    except ValueError:
+        page = DEFAULT_PAGE
+
+    try:
+        size = int(request.query_params.get("size", DEFAULT_SIZE))
+        if size > 50:
+            raise ValueError()
+    except ValueError:
+        size = DEFAULT_SIZE
+
     if query:
-        query = search_query(query, orgtype=request.query_params.get("orgtype"))
-        return search_return(query, request)
+        return search_return(
+            search_query(
+                query,
+                orgtype=request.query_params.get("orgtype"),
+                p=page,
+                size=size,
+            ),
+            request,
+            p=page,
+            size=size,
+        )
     return templates.TemplateResponse('index.html', {
         'request': request,
     })
@@ -48,7 +75,7 @@ async def about_page(request):
         'publishers': publishers,
     })
 
-def search_return(query, request):
+def search_return(query, request, p=DEFAULT_PAGE, size=DEFAULT_SIZE):
     """
     Fetch search results and display on a template
     """
@@ -66,5 +93,7 @@ def search_return(query, request):
             "total": res.get("hits", {}).get("total"),
         },
         'term': request.query_params.get("q"),
+        'page': p,
+        'size': size,
         'selected_org_type': request.query_params.get("orgtype"),
     })

@@ -1,7 +1,15 @@
 {% if res.total > 0 and term %}
 <article class="message is-success">
     <div class="message-body">
-        {{ "{:,}".format(res.total) }} result{{"s" if res.total > 1 else ""}} found for "{{term}}"
+    {% if res.total == 1 %}
+        1 result found found for "{{term}}"
+    {% elif res.total < size %}
+        {{ "{:,}".format(res.total) }} results found for "{{term}}"
+    {% else %}
+        {{ "{:,}".format(res.total) }} results found for "{{term}}".
+        Showing results {{ ((page - 1) * size) + 1 }} to 
+        {{ [page * size, res.total]|min }}.
+    {% endif %}
     </div>
 </article>
 {% elif term %}
@@ -47,3 +55,35 @@
         </tbody>
     </table>
 </div>
+
+<nav class="pagination is-small" role="navigation" aria-label="pagination">
+    {% if page > 1 %}
+    <a class="pagination-previous">Previous</a>
+    {% endif %}
+    {% if (page * size) < res.total %}
+    <a class="pagination-next">Next</a>
+    {% endif %}
+    {# <ul class="pagination-list">
+    <li>
+        <a class="pagination-link" aria-label="Goto page 1">1</a>
+    </li>
+    <li>
+        <span class="pagination-ellipsis">&hellip;</span>
+    </li>
+    <li>
+        <a class="pagination-link" aria-label="Goto page 45">45</a>
+    </li>
+    <li>
+        <a class="pagination-link is-current" aria-label="Page 46" aria-current="page">46</a>
+    </li>
+    <li>
+        <a class="pagination-link" aria-label="Goto page 47">47</a>
+    </li>
+    <li>
+        <span class="pagination-ellipsis">&hellip;</span>
+    </li>
+    <li>
+        <a class="pagination-link" aria-label="Goto page 86">86</a>
+    </li>
+    </ul> #}
+</nav>
