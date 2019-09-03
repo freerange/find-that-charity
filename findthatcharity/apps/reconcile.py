@@ -125,7 +125,7 @@ async def index(request):
 
     orgtypes = request.path_params.get("orgtype", "charity")
     if orgtypes == 'all':
-        orgtypes = None
+        orgtypes = []
     if orgtypes:
         if orgtypes == 'charity':
             orgtypes = 'registered-charity'
