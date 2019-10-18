@@ -17,3 +17,5 @@ node_modules/
 
 # include static dist folder
 !static/dist/
+
+*.ipynb

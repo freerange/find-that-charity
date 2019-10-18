@@ -93,27 +93,13 @@ def get_orgs_from_orgid(orgid):
         index=settings.ES_INDEX,
         doc_type=settings.ES_TYPE,
         body=orgid_query(orgid),
-        _source_include=["orgIDs"],
+        _source_exclude=["complete_names"],
         ignore=[404]
     )
     orgids = set()
     if res.get("hits", {}).get("hits", []):
-        for org in res["hits"]["hits"]:
-            orgids.update(org["_source"]["orgIDs"])
-
-    if not orgids:
-        return []
-
-    # do a second search based on the org ids we've found
-    res = es.search(
-        index=settings.ES_INDEX,
-        doc_type=settings.ES_TYPE,
-        body=orgid_query(list(orgids)),
-        _source_exclude=["complete_names"],
-        ignore=[404]
-    )
-    if res.get("hits", {}).get("hits", []):
-        return MergedOrg([Org(o["_id"], o["_source"]) for o in res["hits"]["hits"]])
+        o = res["hits"]["hits"][0]
+        return MergedOrg(o["_id"], o["_source"])
 
 def get_parents(orgs):
     parents = {}

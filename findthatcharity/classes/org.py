@@ -4,6 +4,8 @@ import hashlib
 
 from dateutil import parser
 
+# from ..db import db_con, organisation
+
 EXTERNAL_LINKS = {
     "GB-CHC": [
         ["http://apps.charitycommission.gov.uk/Showcharity/RegisterOfCharities/SearchResultHandler.aspx?RegisteredCharityNumber={}&SubsidiaryNumber=0&Ref=CO", "Charity Commission England and Wales"],
@@ -234,19 +236,20 @@ class MergedOrg():
         "addressCountry",
         "postalCode",
     ]
-
-    source_priority = [
-        "ccew",
-        "oscr",
-        "ccni",
-        "companies",
-        "gias",
-    ]
     
     charity_sources = set(["ccew", "oscr", "ccni"])
 
-    def __init__(self, orgs):
+    def __init__(self, mainorg):
         self.data = {}
+
+        # fetch other records from the database
+        results = db_con.execute(
+            select(
+                [organisation.c.id, organisation.c.name], 
+                organisation.c.id.in_(mainorg.orgIDs)
+            )
+        ).fetchall()
+        print(results)
 
         # get all the unique sources in the data
         sources = set()

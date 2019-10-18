@@ -1,6 +1,7 @@
 from collections import Counter
 
 from elasticsearch import Elasticsearch
+from sqlalchemy import create_engine, MetaData, Table, Column, String, Text, BigInteger, DateTime, JSON, Date, Boolean
 
 from . import settings
 from .utils import sort_out_date
@@ -10,6 +11,9 @@ es = Elasticsearch(str(settings.ES_URL))
 if not es.ping():
     raise ValueError("Elasticsearch connection failed for {}".format(str(settings.ES_URL)))
 
+db = create_engine(str(settings.DB_URL))
+db_con = db.connect()
+metadata = MetaData()
 
 def fetch_all_sources():
     res = es.search(
@@ -80,3 +84,32 @@ def value_counts():
         ignore=[404]
     )
     return res.get("aggregations", {})
+
+organisation = Table('organisation', metadata, 
+    Column("id", String, primary_key=True),
+    Column("name", String),
+    Column("charityNumber", String),
+    Column("companyNumber", String),
+    Column("addressLocality", String),
+    Column("addressRegion", String),
+    Column("addressCountry", String),
+    Column("postalCode", String),
+    Column("telephone", String),
+    Column("email", String),
+    Column("description", Text),
+    Column("url", String),
+    Column("latestIncome", BigInteger),
+    Column("latestIncomeDate", Date),
+    Column("dateRegistered", Date),
+    Column("dateRemoved", Date),
+    Column("active", Boolean),
+    Column("status", String),
+    Column("parent", String),
+    Column("dateModified", DateTime),
+    Column("location", JSON),
+    Column("orgIDs", JSON),
+    Column("alternateName", JSON),
+    Column("organisationType", JSON),
+    Column("organisationTypePrimary", String),
+    Column("source", String),
+)

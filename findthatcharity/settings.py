@@ -12,6 +12,8 @@ if TESTING:
 ES_INDEX = config('ES_INDEX', default='organisation')
 ES_TYPE = config('ES_TYPE', default='item')
 
+DB_URL = config('DB_URL', cast=URL)
+
 ORGID_JSON = config('ORGID_JSON', default='http://org-id.guide/download.json')
 
 # key organisation types to highlight
