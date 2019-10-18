@@ -104,7 +104,7 @@ def importdata(es_url, db_url, es_bulk_limit):
             },
             "organisationType": list(set(chain.from_iterable([i["organisationType"] for i in v]))),
             "postalCode": list(set([i["postalCode"] for i in v if i["postalCode"]])),
-            # "records": {i["id"]: i for i in v},
+            # "records": v,
         })
 
         if len(merged_orgs) >= es_bulk_limit:
