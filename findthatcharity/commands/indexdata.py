@@ -8,6 +8,7 @@ import click
 import sqlalchemy
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
+import tqdm
 
 
 priorities = [
@@ -26,6 +27,15 @@ def get_complete_names(all_names):
             w = n.split()
             words.update([" ".join(w[r:]) for r in range(len(w))])
     return list(words)
+
+def get_ids_from_record(record):
+    if not isinstance(record, list):
+        record = [record]
+    ids_to_check = []
+    for r in record:
+        ids_to_check.extend([r["id"]] + r["linked_orgs"] + r["orgIDs"])
+    return set([i for i in ids_to_check if i])
+
 
 @click.command()
 @click.option('--es-url', help='Elasticsearch connection')
@@ -52,28 +62,53 @@ def importdata(es_url, db_url, es_bulk_limit):
     '''
     results = conn.execute(sql)
 
-    # group by linked organisations
+    # get dictionary of organisations
+    orgs_checked = set()
     orgs = defaultdict(list)
-    for k, r in enumerate(results):
-        
-        for i in r.linked_orgs:
-            if i in orgs.keys():
-                orgs[i].append(dict(r))
-                continue
-        
-        orgs[r.id].append(dict(r))
+    for r in results:
+        r = dict(r)
+        ids = get_ids_from_record(r)
+        for i in ids:
+            orgs[i].append(r)
 
     click.echo(f"Loaded at least {len(orgs)} records from db")
 
     merged_orgs = []
+    total_results = {
+        "success": 0,
+        "errors": []
+    }
+    last_updated = datetime.datetime.now()
 
     # create the merged organisation
-    for k, v in orgs.items():
+    for k, v in tqdm.tqdm(orgs.items()):
+
+        ids_to_check = get_ids_from_record(v)
+
+        records = [orgs.get(i) for i in ids_to_check if orgs.get(i)]
+        for r in records:
+            ids_to_check.update(get_ids_from_record(r))
+        records = [orgs.get(i) for i in ids_to_check if orgs.get(i)]
+        records = [item for sublist in records for item in sublist]
+
+        if 'GB-UKPRN-10007792' in ids_to_check:
+            print(ids_to_check)
+
+        # if we've already found this organisation then ignore it and continue
+        already_found = False
+        for i in ids_to_check:
+            if i in orgs_checked:
+                already_found = True
+        if already_found:
+            continue
+
+        orgs_checked.update(ids_to_check)
+
         ids = []
-        for i in v:
+        for i in records:
             scheme = "-".join(i["id"].split("-")[0:2])
             priority = priorities.get(scheme, 0)
-            if i["dateRegistered"]:
+            if i["dateRegistered"] and i["active"]:
                 age = (datetime.datetime.now().date() - i["dateRegistered"]).days
                 priority += 1 / age
                 
@@ -83,11 +118,16 @@ def importdata(es_url, db_url, es_bulk_limit):
                     scheme = "-".join(j.split("-")[0:2])
                     priority = priorities.get(scheme, 0)
                     ids.append((j, scheme, priority, i["dateRegistered"], i["name"]))
+            for j in i["orgIDs"]:
+                if j:
+                    scheme = "-".join(j.split("-")[0:2])
+                    priority = priorities.get(scheme, 0)
+                    ids.append((j, scheme, priority, i["dateRegistered"], i["name"]))
                 
         ids = sorted(ids, key=lambda x: -x[2])
         orgids = list(OrderedDict.fromkeys([i[0] for i in ids]))
         names = list(OrderedDict.fromkeys([i[4] for i in ids]))
-        alternateName = list(set(chain.from_iterable([[i["name"]] + i["alternateName"] for i in v])))
+        alternateName = list(set(chain.from_iterable([[i["name"]] + i["alternateName"] for i in records])))
         
         merged_orgs.append({
             "_index": "organisation",
@@ -102,19 +142,45 @@ def importdata(es_url, db_url, es_bulk_limit):
                 "input": get_complete_names(alternateName),
                 "weight": max(1, math.ceil(math.log1p((i.get("latestIncome", 0) or 0))))
             },
-            "organisationType": list(set(chain.from_iterable([i["organisationType"] for i in v]))),
-            "postalCode": list(set([i["postalCode"] for i in v if i["postalCode"]])),
-            # "records": v,
+            "organisationType": list(set(chain.from_iterable([i["organisationType"] for i in records]))),
+            "postalCode": list(set([i["postalCode"] for i in records if i["postalCode"]])),
+            "to_remove": 0,
+            "last_updated": last_updated,
+            # "records": records,
         })
 
         if len(merged_orgs) >= es_bulk_limit:
             results = bulk(es_client, merged_orgs, raise_on_error=False, chunk_size=es_bulk_limit)
-            click.echo(f"[elasticsearch] saved {results[0]} records")
+            total_results["success"] += results[0]
+            total_results["errors"].extend(results[1])
             merged_orgs = []
             
     results = bulk(es_client, merged_orgs, raise_on_error=False, chunk_size=es_bulk_limit)
-    click.echo(f"[elasticsearch] saved {results[0]} records")
+    total_results["success"] += results[0]
+    total_results["errors"].extend(results[1])
     merged_orgs = []
+
+    click.echo('{:,.0f} organisations saved to elasticsearch'.format(total_results['success']))
+    if total_results["errors"]:
+        click.echo('{:,.0f} errors while saving. Showing first 5 errors'.format(len(total_results['errors'])))
+        for k, e in enumerate(total_results["errors"]):
+            click.echo(e)
+            if k > 4:
+                break
+
+    q = {
+        "query": {
+            "bool" : {
+                "must_not" : {
+                        "match": {
+                            "last_updated": last_updated
+                        }
+                    }
+                }
+            }
+        }
+    result = es_client.delete_by_query(index="organisation", body=q, conflicts='proceed', timeout='30m')
+    print(result)
 
 if __name__ == '__main__':
     importdata()
