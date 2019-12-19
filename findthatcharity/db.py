@@ -1,7 +1,7 @@
 from collections import Counter
 
 from elasticsearch import Elasticsearch
-from sqlalchemy import create_engine, MetaData, Table, Column, String, Text, BigInteger, DateTime, JSON, Date, Boolean
+from sqlalchemy import create_engine, MetaData, Table, Column, String, Text, BigInteger, DateTime, JSON, Date, Boolean, select
 
 from . import settings
 from .utils import sort_out_date
@@ -16,6 +16,19 @@ db_con = db.connect()
 metadata = MetaData()
 
 def fetch_all_sources():
+
+    def sort_source(source):
+        source = dict(source)
+        source['publisher'] = {
+            "name": source["publisher_name"],
+            "website": source["publisher_website"],
+        }
+        del source["publisher_name"]
+        del source["publisher_website"]
+        return source
+
+    return {s["identifier"]: sort_source(s) for s in db_con.execute(select([source])).fetchall()}
+
     res = es.search(
         index="source",
         doc_type=settings.ES_TYPE,
@@ -112,4 +125,17 @@ organisation = Table('organisation', metadata,
     Column("organisationType", JSON),
     Column("organisationTypePrimary", String),
     Column("source", String),
+)
+
+source = Table('source', metadata, 
+    Column("identifier", String, primary_key=True),
+    Column("title", String),
+    Column("description", String),
+    Column("license", String),
+    Column("license_name", String),
+    Column("issued", DateTime),
+    Column("modified", DateTime),
+    Column("publisher_name", String),
+    Column("publisher_website", String),
+    Column("distribution", JSON),
 )

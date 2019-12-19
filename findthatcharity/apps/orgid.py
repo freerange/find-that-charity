@@ -76,8 +76,8 @@ async def orgid_html(request):
             'request': request,
             'orgs': orgs,
             'key_types': settings.KEY_TYPES,
-            'parent_orgs': get_parents(orgs),
-            'child_orgs': get_children(orgs),
+            # 'parent_orgs': get_parents(orgs),
+            # 'child_orgs': get_children(orgs),
         })
     
     # @TODO: this should be a proper 404 page
@@ -96,10 +96,12 @@ def get_orgs_from_orgid(orgid):
         _source_exclude=["complete_names"],
         ignore=[404]
     )
+
     orgids = set()
     if res.get("hits", {}).get("hits", []):
         o = res["hits"]["hits"][0]
-        return MergedOrg(o["_id"], o["_source"])
+        o = Org(o["_id"], o["_source"])
+        return MergedOrg(o)
 
 def get_parents(orgs):
     parents = {}

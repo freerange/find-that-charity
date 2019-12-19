@@ -6,7 +6,6 @@ import json
 from dateutil import parser
 from starlette.responses import JSONResponse
 
-from .classes.org import MergedOrg, Org
 
 def clean_regno(regno):
     """
@@ -104,6 +103,7 @@ class JSONResponseDate(JSONResponse):
         if isinstance(obj, (datetime, date)):
             return obj.isoformat()
 
+        from .classes.org import MergedOrg, Org
         if isinstance(obj, (MergedOrg, Org)):
             return obj.to_json()
 

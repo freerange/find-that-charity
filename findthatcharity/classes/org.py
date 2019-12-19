@@ -3,8 +3,9 @@ import re
 import hashlib
 
 from dateutil import parser
+from sqlalchemy import select
 
-# from ..db import db_con, organisation
+from ..db import db_con, organisation
 
 EXTERNAL_LINKS = {
     "GB-CHC": [
@@ -67,7 +68,7 @@ class Org():
         "orgIDs",
         "parent",
         "postalCode",
-        "sources",
+        "source",
         "telephone",
         "url",
         "streetAddress",
@@ -87,6 +88,7 @@ class Org():
         self.id = id
         for f in self.fields:
             setattr(self, f, source.get(f))
+        setattr(self, 'sources', [source.get("source")])
         self._sort_out_date()
 
     def __repr__(self):
@@ -239,17 +241,21 @@ class MergedOrg():
     
     charity_sources = set(["ccew", "oscr", "ccni"])
 
+    source_priority = ["ccew", "oscr", "ccni"]
+
     def __init__(self, mainorg):
-        self.data = {}
+        self.data = {
+            "main": mainorg
+        }
 
         # fetch other records from the database
-        results = db_con.execute(
+        orgs = db_con.execute(
             select(
-                [organisation.c.id, organisation.c.name], 
+                [organisation], 
                 organisation.c.id.in_(mainorg.orgIDs)
             )
         ).fetchall()
-        print(results)
+        orgs = [Org(o["id"], dict(o)) for o in orgs]
 
         # get all the unique sources in the data
         sources = set()
@@ -264,7 +270,7 @@ class MergedOrg():
         ]
 
         # sort the organisations
-        self.orgs = sorted(orgs, key=lambda o: self.sources.index(o.sources[0]))
+        self.orgs = sorted(orgs, key=lambda o: self.data["main"].orgIDs.index(o.id))
 
         # go through each possible field
         for f in self.fields:
@@ -347,6 +353,9 @@ class MergedOrg():
         return [v.get("value") for v in list(self.data.get(key, {}).values())]
 
     def get_main_value(self, key, default=None):
+        if getattr(self.data.get("main", {}), key, None):
+            return getattr(self.data.get("main", {}), key, default)
+
         if not self.data.get(key, {}):
             return default
         

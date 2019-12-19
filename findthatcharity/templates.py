@@ -3,8 +3,8 @@ import re
 from starlette.templating import Jinja2Templates
 from slugify import slugify
 
-from .utils import list_to_string
 from .db import fetch_all_sources, value_counts
+from .utils import list_to_string
 from . import settings
 
 def sort_out_orgtypes(orgtypes):
@@ -20,6 +20,8 @@ def regex_search(s, regex):
 templates = Jinja2Templates(directory='templates')
 
 vals = value_counts()
+
+print(fetch_all_sources())
 
 templates.env.filters["list_to_string"] = list_to_string
 templates.env.filters["regex_search"] = regex_search
