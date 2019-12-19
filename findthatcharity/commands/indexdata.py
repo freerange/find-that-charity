@@ -91,9 +91,6 @@ def importdata(es_url, db_url, es_bulk_limit):
         records = [orgs.get(i) for i in ids_to_check if orgs.get(i)]
         records = [item for sublist in records for item in sublist]
 
-        if 'GB-UKPRN-10007792' in ids_to_check:
-            print(ids_to_check)
-
         # if we've already found this organisation then ignore it and continue
         already_found = False
         for i in ids_to_check:
@@ -143,8 +140,9 @@ def importdata(es_url, db_url, es_bulk_limit):
                 "weight": max(1, math.ceil(math.log1p((i.get("latestIncome", 0) or 0))))
             },
             "organisationType": list(set(chain.from_iterable([i["organisationType"] for i in records]))),
+            "sources": list(set([i["source"] for i in records])),
+            "active": len([i["active"] for i in records if i["active"]]) > 0,
             "postalCode": list(set([i["postalCode"] for i in records if i["postalCode"]])),
-            "to_remove": 0,
             "last_updated": last_updated,
             # "records": records,
         })
@@ -180,7 +178,7 @@ def importdata(es_url, db_url, es_bulk_limit):
             }
         }
     result = es_client.delete_by_query(index="organisation", body=q, conflicts='proceed', timeout='30m')
-    print(result)
+    click.echo('Removed {:,.0f} old records'.format(result['deleted']))
 
 if __name__ == '__main__':
     importdata()

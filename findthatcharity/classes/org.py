@@ -244,15 +244,14 @@ class MergedOrg():
     source_priority = ["ccew", "oscr", "ccni"]
 
     def __init__(self, mainorg):
-        self.data = {
-            "main": mainorg
-        }
+        self.main = mainorg
+        self.data = {}
 
         # fetch other records from the database
         orgs = db_con.execute(
             select(
                 [organisation], 
-                organisation.c.id.in_(mainorg.orgIDs)
+                organisation.c.id.in_(self.main.orgIDs)
             )
         ).fetchall()
         orgs = [Org(o["id"], dict(o)) for o in orgs]
@@ -270,7 +269,7 @@ class MergedOrg():
         ]
 
         # sort the organisations
-        self.orgs = sorted(orgs, key=lambda o: self.data["main"].orgIDs.index(o.id))
+        self.orgs = sorted(orgs, key=lambda o: self.main.orgIDs.index(o.id))
 
         # go through each possible field
         for f in self.fields:
@@ -353,8 +352,8 @@ class MergedOrg():
         return [v.get("value") for v in list(self.data.get(key, {}).values())]
 
     def get_main_value(self, key, default=None):
-        if getattr(self.data.get("main", {}), key, None):
-            return getattr(self.data.get("main", {}), key, default)
+        if getattr(self.main, key, None):
+            return getattr(self.main, key, default)
 
         if not self.data.get(key, {}):
             return default

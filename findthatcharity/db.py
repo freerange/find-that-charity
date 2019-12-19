@@ -29,23 +29,6 @@ def fetch_all_sources():
 
     return {s["identifier"]: sort_source(s) for s in db_con.execute(select([source])).fetchall()}
 
-    res = es.search(
-        index="source",
-        doc_type=settings.ES_TYPE,
-        size=100,
-        ignore=[404]
-    )
-    
-    def check_duplicate_publishers(sources):
-        publishers = Counter([s.get("publisher", {}).get("name") for s in sources.values()])
-        for i, s in sources.items():
-            sources[i]["publisher"]["duplicate"] = publishers[s.get("publisher", {}).get("name")]>1
-        return sources
-
-    return check_duplicate_publishers({
-        s["_id"]: sort_out_date(s["_source"], ["modified", "issued"]) for s in res.get("hits", {}).get("hits", [])
-    })
-
 def get_org_types():
     res = es.search(index=settings.ES_INDEX,
                     doc_type=settings.ES_TYPE,
@@ -77,7 +60,7 @@ def value_counts():
             "query": {
                 "match": {
                     "active": True
-                }
+                },
             },
             "aggs" : {
                 "group_by_type": {
@@ -96,6 +79,7 @@ def value_counts():
         },
         ignore=[404]
     )
+    print(res)
     return res.get("aggregations", {})
 
 organisation = Table('organisation', metadata, 

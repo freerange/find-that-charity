@@ -56,6 +56,7 @@
     </table>
 </div>
 
+{% if page %}
 <nav class="pagination is-small" role="navigation" aria-label="pagination">
     {% if page > 1 %}
     <a class="pagination-previous">Previous</a>
@@ -87,3 +88,4 @@
     </li>
     </ul> #}
 </nav>
+{% endif %}

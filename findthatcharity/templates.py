@@ -21,8 +21,6 @@ templates = Jinja2Templates(directory='templates')
 
 vals = value_counts()
 
-print(fetch_all_sources())
-
 templates.env.filters["list_to_string"] = list_to_string
 templates.env.filters["regex_search"] = regex_search
 templates.env.globals["sources"] = fetch_all_sources()
