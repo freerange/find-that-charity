@@ -39,6 +39,6 @@ text-unidecode==1.2
 titlecase==0.12.0
 urllib3==1.24.1
 uvicorn==0.6.1
-validators==0.11.3
+validators==0.14.1
 websockets==7.0
 XlsxWriter==1.1.5
