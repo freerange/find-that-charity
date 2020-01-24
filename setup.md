@@ -32,6 +32,11 @@ dokku elasticsearch:create ftc-es
 dokku elasticsearch:link ftc-es ftc
 dokku config:set ftc ES_URL=$(dokku config:get ftc ELASTICSEARCH_URL)
 
+# Create redis to help with caching ccew scraper
+sudo dokku plugin:install https://github.com/dokku/dokku-redis.git redis
+dokku redis:create ftc-redis
+dokku redis:link ftc-redis ftc-scrapers
+
 # Install letsencrypt
 sudo dokku plugin:install https://github.com/dokku/dokku-letsencrypt.git
 dokku config:set --global DOKKU_LETSENCRYPT_EMAIL=your@email.tld
@@ -71,4 +76,6 @@ dokku enter ftc-scrapers cron sh ./crawl_all.sh
 dokku run ftc python manage.py create-index
 dokku run ftc python manage.py indexdata
 ```
+
+## Step 7. Set up cron job so that it runs often
 
