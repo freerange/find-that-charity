@@ -1,7 +1,5 @@
 from starlette.applications import Starlette
 from starlette.staticfiles import StaticFiles
-import uvicorn
-
 
 from .queries import search_query
 from .db import es, fetch_all_sources

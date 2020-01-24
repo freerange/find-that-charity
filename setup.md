@@ -42,6 +42,9 @@ sudo dokku plugin:install https://github.com/dokku/dokku-letsencrypt.git
 dokku config:set --global DOKKU_LETSENCRYPT_EMAIL=your@email.tld
 dokku letsencrypt ftc
 
+# Add apt-get plugin
+sudo dokku plugin:install https://github.com/dokku-community/dokku-apt apt
+
 # scale the scraping process
 dokku ps:scale ftc-scrapers cron=1
 ```

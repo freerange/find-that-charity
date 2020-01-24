@@ -2,7 +2,6 @@ from datetime import datetime
 
 from starlette.applications import Starlette
 from starlette.responses import RedirectResponse
-import jinja2
 
 from ..queries import orgid_query, random_query
 from ..db import es
