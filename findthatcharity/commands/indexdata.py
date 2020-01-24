@@ -10,6 +10,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 import tqdm
 
+from .. import settings
 
 priorities = [
     "GB-CHC",
@@ -38,10 +39,16 @@ def get_ids_from_record(record):
 
 
 @click.command()
-@click.option('--es-url', help='Elasticsearch connection')
-@click.option('--db-url', help='Database connection')
-@click.option('--es-bulk-limit', default=500, help='Bulk limit for importing data')
-def importdata(es_url, db_url, es_bulk_limit):
+@click.option('--es-url', help='Elasticsearch connection', default=settings.ES_URL)
+@click.option('--db-url', help='Database connection', default=settings.DB_URI)
+@click.option('--es-index', help='Elasticsearch type', default=settings.ES_INDEX)
+@click.option('--es-type', help='Elasticsearch type', default=settings.ES_TYPE)
+@click.option('--es-bulk-limit', default=settings.ES_BULK_LIMIT, help='Bulk limit for importing data')
+def importdata(es_url=settings.ES_URL, 
+               db_url=settings.DB_URI,
+               es_index=settings.ES_INDEX,
+               es_type=settings.ES_TYPE,
+               es_bulk_limit=settings.ES_BULK_LIMIT):
     """Import data from a database into an elasticsearch index"""
     
     # Connect to the data base
@@ -127,8 +134,8 @@ def importdata(es_url, db_url, es_bulk_limit):
         alternateName = list(set(chain.from_iterable([[i["name"]] + i["alternateName"] for i in records])))
         
         merged_orgs.append({
-            "_index": "organisation",
-            "_type": "item",
+            "_index": es_index,
+            "_type": es_type,
             "_op_type": "index",
             "_id": orgids[0],
             "orgID": orgids[0],
@@ -177,7 +184,7 @@ def importdata(es_url, db_url, es_bulk_limit):
                 }
             }
         }
-    result = es_client.delete_by_query(index="organisation", body=q, conflicts='proceed', timeout='30m')
+    result = es_client.delete_by_query(index=es_index, body=q, conflicts='proceed', timeout='30m')
     click.echo('Removed {:,.0f} old records'.format(result['deleted']))
 
 if __name__ == '__main__':

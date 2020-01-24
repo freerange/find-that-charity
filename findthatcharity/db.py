@@ -11,7 +11,7 @@ es = Elasticsearch(str(settings.ES_URL))
 if not es.ping():
     raise ValueError("Elasticsearch connection failed for {}".format(str(settings.ES_URL)))
 
-db = create_engine(str(settings.DB_URL))
+db = create_engine(str(settings.DB_URI))
 db_con = db.connect()
 metadata = MetaData()
 

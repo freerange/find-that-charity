@@ -6,13 +6,14 @@ config = Config(".env")
 DEBUG = config('DEBUG', cast=bool, default=False)
 TESTING = config('TESTING', cast=bool, default=False)
 
-ES_URL = config('ES_URL', cast=URL)
+ES_URL = config('ES_URL', cast=URL, default='http://localhost:9200')
 if TESTING:
     ES_URL = ES_URL.replace(database='test_' + ES_URL.database)
 ES_INDEX = config('ES_INDEX', default='organisation')
-ES_TYPE = config('ES_TYPE', default='item')
+ES_TYPE = config('ES_TYPE', default='_doc')
+ES_BULK_LIMIT = config('ES_BULK_LIMIT', cast=int, default=500)
 
-DB_URL = config('DB_URL', cast=URL)
+DB_URI = config('DB_URI', cast=URL)
 
 ORGID_JSON = config('ORGID_JSON', default='http://org-id.guide/download.json')
 
