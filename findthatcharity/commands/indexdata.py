@@ -72,6 +72,7 @@ def create_index(es_url=settings.ES_URL,
         "mappings": mapping
     })
 
+
 @cli.command()
 @click.option('--es-url', help='Elasticsearch connection', default=settings.ES_URL)
 @click.option('--db-url', help='Database connection', default=settings.DB_URI)
@@ -91,6 +92,23 @@ def importdata(es_url=settings.ES_URL,
 
     # connect to elasticsearch
     es_client = Elasticsearch(str(es_url))
+
+    # create the linked_organisations view
+    create_view = """
+    CREATE OR REPLACE VIEW linked_organisations
+    AS SELECT organisation_links.organisation_id_a,
+        organisation_links.organisation_id_b,
+        organisation_links.description,
+        organisation_links.source
+    FROM organisation_links
+    UNION ALL
+    SELECT organisation_links.organisation_id_b AS organisation_id_a,
+        organisation_links.organisation_id_a AS organisation_id_b,
+        organisation_links.description,
+        organisation_links.source
+    FROM organisation_links;
+    """
+    conn.execute(create_view)
 
     # Fetch all the records
     sql = '''
