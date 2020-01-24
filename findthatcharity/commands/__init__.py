@@ -1,0 +1,1 @@
+from .indexdata import cli

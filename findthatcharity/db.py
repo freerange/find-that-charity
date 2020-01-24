@@ -1,7 +1,9 @@
 from collections import Counter
 
 from elasticsearch import Elasticsearch
-from sqlalchemy import create_engine, MetaData, Table, Column, String, Text, BigInteger, DateTime, JSON, Date, Boolean, select
+from sqlalchemy import create_engine, Table, Column, String, Text, BigInteger, DateTime, JSON, Date, Boolean, select
+
+from findthatcharity_import.db import tables
 
 from . import settings
 from .utils import sort_out_date
@@ -13,7 +15,7 @@ if not es.ping():
 
 db = create_engine(str(settings.DB_URI))
 db_con = db.connect()
-metadata = MetaData()
+
 
 def fetch_all_sources():
 
@@ -82,44 +84,8 @@ def value_counts():
     print(res)
     return res.get("aggregations", {})
 
-organisation = Table('organisation', metadata, 
-    Column("id", String, primary_key=True),
-    Column("name", String),
-    Column("charityNumber", String),
-    Column("companyNumber", String),
-    Column("addressLocality", String),
-    Column("addressRegion", String),
-    Column("addressCountry", String),
-    Column("postalCode", String),
-    Column("telephone", String),
-    Column("email", String),
-    Column("description", Text),
-    Column("url", String),
-    Column("latestIncome", BigInteger),
-    Column("latestIncomeDate", Date),
-    Column("dateRegistered", Date),
-    Column("dateRemoved", Date),
-    Column("active", Boolean),
-    Column("status", String),
-    Column("parent", String),
-    Column("dateModified", DateTime),
-    Column("location", JSON),
-    Column("orgIDs", JSON),
-    Column("alternateName", JSON),
-    Column("organisationType", JSON),
-    Column("organisationTypePrimary", String),
-    Column("source", String),
-)
-
-source = Table('source', metadata, 
-    Column("identifier", String, primary_key=True),
-    Column("title", String),
-    Column("description", String),
-    Column("license", String),
-    Column("license_name", String),
-    Column("issued", DateTime),
-    Column("modified", DateTime),
-    Column("publisher_name", String),
-    Column("publisher_website", String),
-    Column("distribution", JSON),
-)
+organisation = tables['organisation']
+source = tables['source']
+organisation_links = tables['organisation_links']
+identifier = tables['identifier']
+scrape = tables['scrape']

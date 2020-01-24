@@ -10,7 +10,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 import tqdm
 
-from .. import settings
+from findthatcharity import settings
 
 priorities = [
     "GB-CHC",
@@ -37,8 +37,42 @@ def get_ids_from_record(record):
         ids_to_check.extend([r["id"]] + r["linked_orgs"] + r["orgIDs"])
     return set([i for i in ids_to_check if i])
 
+@click.group()
+def cli():
+    pass
 
-@click.command()
+@cli.command()
+@click.option('--es-url', help='Elasticsearch connection', default=settings.ES_URL)
+@click.option('--es-index', help='Elasticsearch type', default=settings.ES_INDEX)
+@click.option('--es-type', help='Elasticsearch type', default=settings.ES_TYPE)
+def create_index(es_url=settings.ES_URL,
+               es_index=settings.ES_INDEX,
+               es_type=settings.ES_TYPE):
+
+    # connect to elasticsearch
+    es = Elasticsearch(str(es_url))
+    
+    mapping = {
+        "properties": {
+            "geo": {
+                "properties": {
+                    "location": {
+                        "type": "geo_point"
+                    }
+                }
+            },
+            "complete_names": {
+                "type": "completion"
+            }
+        }
+    }
+
+    # create the index
+    es.indices.create(index=es_index, ignore=400, body={
+        "mappings": mapping
+    })
+
+@cli.command()
 @click.option('--es-url', help='Elasticsearch connection', default=settings.ES_URL)
 @click.option('--db-url', help='Database connection', default=settings.DB_URI)
 @click.option('--es-index', help='Elasticsearch type', default=settings.ES_INDEX)
@@ -52,11 +86,11 @@ def importdata(es_url=settings.ES_URL,
     """Import data from a database into an elasticsearch index"""
     
     # Connect to the data base
-    engine = sqlalchemy.create_engine(db_url)
+    engine = sqlalchemy.create_engine(str(db_url))
     conn = engine.connect()
 
     # connect to elasticsearch
-    es_client = Elasticsearch(es_url)
+    es_client = Elasticsearch(str(es_url))
 
     # Fetch all the records
     sql = '''
@@ -188,4 +222,4 @@ def importdata(es_url=settings.ES_URL,
     click.echo('Removed {:,.0f} old records'.format(result['deleted']))
 
 if __name__ == '__main__':
-    importdata()
+    cli()
