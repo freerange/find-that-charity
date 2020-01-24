@@ -275,7 +275,7 @@ def extend_with_fields(ids, properties):
                 index=settings.ES_INDEX,
                 doc_type=settings.ES_TYPE,
                 id=regno_cleaned,
-                _source_include=fields_to_include,
+                _source_includes=fields_to_include,
                 ignore=[404]
             )
             if "_source" in res:

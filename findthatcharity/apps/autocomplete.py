@@ -19,7 +19,7 @@ async def index(request):
             request.query_params.get("q", ""),
             orgtype=request.query_params.get("orgtype", "all"),
         ),
-        _source_include=['name', 'organisationType']
+        _source_includes=['name', 'organisationType']
     )
     return JSONResponse({
         "results": [

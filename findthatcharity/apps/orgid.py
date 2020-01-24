@@ -26,7 +26,7 @@ async def orgid_type(request):
         index=settings.ES_INDEX,
         doc_type=settings.ES_TYPE,
         body=random_query(active=True, orgtype=orgtype, aggregate=True, source=source),
-        _source_exclude=["complete_names"],
+        _source_excludes=["complete_names"],
         ignore=[404]
     )
 
@@ -92,7 +92,7 @@ def get_orgs_from_orgid(orgid):
         index=settings.ES_INDEX,
         doc_type=settings.ES_TYPE,
         body=orgid_query(orgid),
-        _source_exclude=["complete_names"],
+        _source_excludes=["complete_names"],
         ignore=[404]
     )
 
@@ -122,7 +122,7 @@ def get_children(orgs):
                 }
             }
         },
-        _source_exclude=["complete_names"],
+        _source_excludes=["complete_names"],
         ignore=[404]
     )
 
