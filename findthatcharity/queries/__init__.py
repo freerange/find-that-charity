@@ -1,16 +1,15 @@
 import os
-import yaml
 import copy
 import json
 import time
 
 from ..templates import templates
 
-with open(os.path.join(os.path.dirname(__file__), './es_config.yml'), 'rb') as yaml_file:
-    ES_CONFIG = yaml.safe_load(yaml_file)
+with open(os.path.join(os.path.dirname(__file__), './es_config.json'), 'r') as f:
+    ES_CONFIG = json.load(f)
 
-with open(os.path.join(os.path.dirname(__file__), './recon_config.yml'), 'rb') as yaml_file:
-    RECON_CONFIG = yaml.safe_load(yaml_file)
+with open(os.path.join(os.path.dirname(__file__), './recon_config.json'), 'r') as f:
+    RECON_CONFIG = json.load(f)
 
 def search_query(term, orgtype='all', p=1, size=10):
     """
@@ -39,7 +38,7 @@ def search_query(term, orgtype='all', p=1, size=10):
 
     return json.dumps(json_q)
 
-def recon_query(term, orgtype='all'):
+def recon_query(term, orgtype='all', postcode=None):
     """
     Fetch the reconciliation query and insert the query term
     """
@@ -47,6 +46,18 @@ def recon_query(term, orgtype='all'):
     for param in json_q["params"]:
         json_q["params"][param] = term
 
+    # add postcode
+    if postcode:
+        json_q["inline"]["query"]["functions"].append({
+            "filter": {
+              "term": {
+                "postcode": "{{postcode}}"
+              }
+            },
+            "weight": 2
+        })
+        json_q["params"]["postcode"] = postcode
+        
     # check for organisation type
     if orgtype and orgtype != "all":
         if not isinstance(orgtype, list):
@@ -60,7 +71,7 @@ def recon_query(term, orgtype='all'):
                 }
             }
         }
-    
+
     return json.dumps(json_q)
 
 def autocomplete_query(term, orgtype='all'):

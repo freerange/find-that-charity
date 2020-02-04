@@ -1,0 +1,81 @@
+{
+    "settings": {
+        "analysis": {
+            "filter": {
+                "english_stop": {
+                    "type": "stop",
+                    "stopwords": "_english_"
+                },
+                "english_keywords": {
+                    "type": "keyword_marker",
+                    "keywords": [
+                        "example"
+                    ]
+                },
+                "ftc_stop": {
+                    "type": "stop",
+                    "stopwords": [
+                        "ltd",
+                        "limited",
+                        "trust",
+                        "scio",
+                        "cio"
+                    ],
+                    "ignore_case": true
+                },
+                "english_stemmer": {
+                    "type": "stemmer",
+                    "language": "english"
+                },
+                "english_possessive_stemmer": {
+                    "type": "stemmer",
+                    "language": "possessive_english"
+                }
+            },
+            "analyzer": {
+                "ftc_analyzer": {
+                    "tokenizer": "standard",
+                    "filter": [
+                        "english_possessive_stemmer",
+                        "lowercase",
+                        "english_stop",
+                        "ftc_stop",
+                        "english_keywords",
+                        "english_stemmer"
+                    ]
+                }
+            }
+        }
+    },
+    "mappings": {
+        "_doc": {
+            "properties": {
+                "geo": {
+                    "properties": {
+                        "location": {
+                            "type": "geo_point"
+                        }
+                    }
+                },
+                "name": {
+                    "type": "text",
+                    "analyzer": "ftc_analyzer"
+                },
+                "alternateName": {
+                    "type": "text",
+                    "analyzer": "ftc_analyzer"
+                },
+                "complete_names": {
+                    "type": "completion",
+                    "contexts": [
+                        {
+                            "name": "organisationType",
+                            "type": "category",
+                            "path": "organisationType"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
