@@ -94,6 +94,7 @@ def importdata(es_url=settings.ES_URL,
     es_client = Elasticsearch(str(es_url))
 
     # create the linked_organisations view
+    click.echo(f"Creating view...")
     create_view = """
     CREATE OR REPLACE VIEW linked_organisations
     AS SELECT organisation_links.organisation_id_a,
@@ -109,8 +110,10 @@ def importdata(es_url=settings.ES_URL,
     FROM organisation_links;
     """
     conn.execute(create_view)
+    click.echo(f"View created")
 
     # Fetch all the records
+    click.echo(f"Fetching records...")
     sql = '''
     select o.*, 
         array_agg(l.organisation_id_b) as linked_orgs
@@ -207,12 +210,24 @@ def importdata(es_url=settings.ES_URL,
         })
 
         if len(merged_orgs) >= es_bulk_limit:
-            results = bulk(es_client, merged_orgs, raise_on_error=False, chunk_size=es_bulk_limit)
+            results = bulk(
+                es_client,
+                merged_orgs,
+                raise_on_error=False,
+                chunk_size=es_bulk_limit,
+                request_timeout=600,
+            )
             total_results["success"] += results[0]
             total_results["errors"].extend(results[1])
             merged_orgs = []
             
-    results = bulk(es_client, merged_orgs, raise_on_error=False, chunk_size=es_bulk_limit)
+    results = bulk(
+        es_client,
+        merged_orgs,
+        raise_on_error=False,
+        chunk_size=es_bulk_limit,
+        request_timeout=600,
+    )
     total_results["success"] += results[0]
     total_results["errors"].extend(results[1])
     merged_orgs = []

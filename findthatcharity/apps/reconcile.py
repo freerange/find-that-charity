@@ -8,7 +8,7 @@ from starlette.responses import Response
 from ..queries import recon_query
 from ..db import es
 from ..utils import clean_regno
-from ..utils import JSONResponseDate as JSONResponse
+from ..utils import JSONResponseDate as JSONResponse, slugify
 from .. import settings
 from ..templates import templates
 
@@ -218,7 +218,7 @@ def service_spec(service_url, orgtypes=None):
             "url": service_url + "/orgid/{{id}}"
         },
         "preview": {
-            "url": service_url + "/preview/orgid/{{id}}",
+            "url": service_url + "/orgid/{{id}}/preview",
             "width": 430,
             "height": 300
         },
@@ -249,9 +249,12 @@ def esdoc_orresponse(query):
             name += " [INACTIVE]"
         hits.append({
             "id": i["_id"],
-            "type": [i["_type"]],
+            "type": "[
+                slugify(t)
+                for t in i["_source"].get("organisationType", [])
+                if t
+            ]",
             "score": i["_score"],
-            "index": i["_index"],
             "name": name,
             "source": i["_source"],
             "match": i["_source"]["name"].lower() == json.loads(query)["params"]["name"].lower() and i["_score"] == res["hits"]["max_score"]

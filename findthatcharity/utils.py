@@ -2,6 +2,7 @@ import re
 import typing
 from datetime import date, datetime
 import json
+import unicodedata
 
 from dateutil import parser
 from starlette.responses import JSONResponse
@@ -108,3 +109,19 @@ class JSONResponseDate(JSONResponse):
             return obj.to_json()
 
         raise TypeError ("Type %s not serializable" % type(obj))
+
+def slugify(string):
+
+    """
+    Slugify a unicode string.
+
+    Example:
+
+        >>> slugify(u"Héllø Wörld")
+        u"hello-world"
+
+    """
+    string = unicodedata.normalize('NFKD', string)
+    string = re.sub(r'[^\w\s-]', '', string).strip().lower()
+    string = re.sub(r'[-\s]+', '-', string)
+    return string

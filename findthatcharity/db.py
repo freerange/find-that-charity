@@ -80,7 +80,6 @@ def value_counts():
         },
         ignore=[404]
     )
-    print(res)
     return res.get("aggregations", {})
 
 organisation = Table('organisation', metadata, 

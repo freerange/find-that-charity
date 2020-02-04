@@ -1,10 +1,9 @@
 import re
 
 from starlette.templating import Jinja2Templates
-from slugify import slugify
 
 from .db import fetch_all_sources, value_counts
-from .utils import list_to_string
+from .utils import list_to_string, slugify
 from . import settings
 
 def sort_out_orgtypes(orgtypes):
