@@ -249,11 +249,11 @@ def esdoc_orresponse(query):
             name += " [INACTIVE]"
         hits.append({
             "id": i["_id"],
-            "type": "[
+            "type": [
                 slugify(t)
                 for t in i["_source"].get("organisationType", [])
                 if t
-            ]",
+            ],
             "score": i["_score"],
             "name": name,
             "source": i["_source"],
