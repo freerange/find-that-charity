@@ -3,6 +3,8 @@ from itertools import chain
 import datetime
 import logging
 import math
+import os
+import json
 
 import click
 import sqlalchemy
@@ -45,32 +47,26 @@ def cli():
 @click.option('--es-url', help='Elasticsearch connection', default=settings.ES_URL)
 @click.option('--es-index', help='Elasticsearch type', default=settings.ES_INDEX)
 @click.option('--es-type', help='Elasticsearch type', default=settings.ES_TYPE)
+@click.option('--replace/--no-replace', help='Replace the index if it already exists', default=False)
 def create_index(es_url=settings.ES_URL,
                es_index=settings.ES_INDEX,
-               es_type=settings.ES_TYPE):
+               es_type=settings.ES_TYPE,
+               replace=False):
 
     # connect to elasticsearch
     es = Elasticsearch(str(es_url))
     
-    mapping = {
-        "properties": {
-            "geo": {
-                "properties": {
-                    "location": {
-                        "type": "geo_point"
-                    }
-                }
-            },
-            "complete_names": {
-                "type": "completion"
-            }
-        }
-    }
+    # fetch the index file
+    with open(os.path.join(os.path.dirname(__file__), './org_index.json'), 'r') as b:
+        index_mappings = json.load(b)
+
+    # delete existing index if we're replacing
+    if replace and es.indices.exists(index=es_index):
+        es.indices.delete(index=es_index)
 
     # create the index
-    es.indices.create(index=es_index, ignore=400, body={
-        "mappings": mapping
-    })
+    result = es.indices.create(index=es_index, body=index_mappings)
+    click.echo(result)
 
 
 @cli.command()
@@ -196,7 +192,7 @@ def importdata(es_url=settings.ES_URL,
             "orgID": orgids[0],
             "name": names[0],
             "orgIDs": orgids,
-            "alternateName": alternateName,
+            "alternateName": [n for n in alternateName if n != names[0]],
             "complete_names": {
                 "input": get_complete_names(alternateName),
                 "weight": max(1, math.ceil(math.log1p((i.get("latestIncome", 0) or 0))))
