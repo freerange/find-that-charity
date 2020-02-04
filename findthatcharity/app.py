@@ -81,7 +81,7 @@ def search_return(query, request, p=DEFAULT_PAGE, size=DEFAULT_SIZE):
         index=settings.ES_INDEX,
         doc_type=settings.ES_TYPE,
         body=query,
-        ignore=[404]
+        ignore=[404],
     )
     
     return templates.TemplateResponse('search.html', {

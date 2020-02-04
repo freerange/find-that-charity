@@ -68,17 +68,15 @@
           {% endfor %}
         </div>
         <div class="content">
-          {% if orgs.data.description.keys()|length %}
-          <h4>Description</h4>
-          {% for k, v in orgs.data.description.items() %}
+          {% for k, v in orgs.data.description.items() if v.value %}
+          {% if loop.first %}<h4>Description</h4>{% endif %}
           <p>
             {{ v.value }}
             {{ show_sources(v) }}
           </p>
           {% endfor %}
-          {% endif %}
           {% if orgs.names %}
-          <h4>Other names</h4>
+          <h4>Also known as</h4>
           <ul>
             {% for k, v in orgs.names.items() %}
             <li>{{ v.value }} {{ show_sources(v) }}</li>
@@ -95,14 +93,20 @@
     <div class="column is-half">
       <div class="card">
         <header class="card-header">
-          <p class="card-header-title">
-            Organisation record<br>
-          </p>
-          <p class="card-header-title is-size-7 has-text-weight-light">
+          <div class="card-header-title is-block">
+            <span class="has-text-weight-light is-inline-block">Organisation record from </span>
+            {% for s in org.sources if sources.get(s) %}
+            <a href="{{ sources[s].publisher.website }}" target="_blank" class="is-inline-block">
+              {{ sources[s].publisher.name }}
+            </a><br>
+            <i class="has-text-weight-light is-size-7">Last updated {{ "{:%d %B %Y}".format(sources[s].modified) }}</i>
+            {% endfor %}
+          </div>
+          {# <p class="card-header-title is-size-7 has-text-weight-light">
             {% for s in org.sources if sources.get(s) %}
             <span class="">{{ sources[s].publisher.name }}</span>
             {% endfor %}
-          </p>
+          </p> #}
         </header>
         <div class="card-content">
           <div class="is-clearfix">
@@ -190,9 +194,12 @@
             <p>
               <strong class="is-size-7">Latest income</strong><br>
               &pound;{{ "{:,.0f}".format( org.latestIncome )}}
+              {% if org.latestIncomeDate %}
+              {{ org.latestIncomeDate }}
+              {% endif %}
             </p>
             {% endif %}
-            {% for s in org.sources if sources.get(s) %}
+            {# {% for s in org.sources if sources.get(s) %}
             <p class="has-text-weight-light is-size-7 is-pulled-right">
               <strong>Data source</strong>:
               <a href="{{ sources[s].publisher.website }}" target="_blank">
@@ -200,7 +207,7 @@
               </a><br>
               <i>Last updated {{ "{:%d %B %Y}".format(sources[s].modified) }}</i>
             </p>
-            {% endfor %}
+            {% endfor %} #}
           </div>
         </div>
       </div>
