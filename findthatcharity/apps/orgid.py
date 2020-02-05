@@ -3,7 +3,7 @@ from datetime import datetime
 from starlette.routing import Route
 from starlette.responses import RedirectResponse
 
-from ..queries import orgid_query, random_query, all_by_type_query
+from ..queries import orgid_query, random_query, search_query
 from ..db import es
 from .. import settings
 from ..utils import JSONResponseDate as JSONResponse, pagination, pagination_request
@@ -19,21 +19,19 @@ async def orgid_type(request):
     source = [o for o in request.path_params.get('source', "").split("+") if o]
     p = pagination_request(request, defaultsize=10)
 
-    query = all_by_type_query(
+    query = search_query(
         active=True,
         orgtype=orgtype,
         aggregate=True,
-        source=source
+        source=source,
+        p=p['p'],
+        size=p['size'],
     )
-    query["sort"] = [{"name.sort": "asc"}]
-    res = es.search(
+    res = es.search_template(
         index=settings.ES_INDEX,
         doc_type=settings.ES_TYPE,
         body=query,
-        _source_excludes=["complete_names"],
         ignore=[404],
-        size=p["size"],
-        from_=p["from"],
     )
 
     return templates.TemplateResponse('orgtype.html', {

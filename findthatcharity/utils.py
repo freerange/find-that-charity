@@ -149,21 +149,21 @@ def pagination(p, size, total):
     pages['end_item'] = min([total, p*size])
     return pages
 
-def pagination_request(request, maxsize=100):
+def pagination_request(request, defaultsize=DEFAULT_SIZE, defaultpage=DEFAULT_PAGE, maxsize=100):
 
     try:
-        page = int(request.query_params.get("p", DEFAULT_PAGE))
+        page = int(request.query_params.get("p", defaultpage))
         if page < 1:
             raise ValueError()
     except ValueError:
-        page = DEFAULT_PAGE
+        page = defaultpage
 
     try:
-        size = int(request.query_params.get("size", DEFAULT_SIZE))
+        size = int(request.query_params.get("size", defaultsize))
         if size > maxsize:
             raise ValueError()
     except ValueError:
-        size = DEFAULT_SIZE
+        size = defaultsize
 
     return {
         "p": page, "size": size, "from": (page-1) * size

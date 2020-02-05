@@ -11,24 +11,58 @@ with open(os.path.join(os.path.dirname(__file__), './es_config.json'), 'r') as f
 with open(os.path.join(os.path.dirname(__file__), './recon_config.json'), 'r') as f:
     RECON_CONFIG = json.load(f)
 
-def search_query(term, orgtype='all', p=1, size=10):
+def search_query(term=None, orgtype='all', source='all', active=False, aggregate=False, p=1, size=10):
     """
     Fetch the search query and insert the query term
     """
     json_q = copy.deepcopy(ES_CONFIG)
-    for param in json_q["params"]:
-        json_q["params"][param] = term
+    base_query = json_q["source"]["query"]["function_score"]
+    if term:
+        json_q['params']["name"] = term
+    else:
+        json_q['source']['sort'] = [{"name.sort": "asc"}]
+        base_query["query"]["bool"]["must"] = [
+            {"match_all": {}}
+        ]
+        base_query["functions"] = []
 
     # check for organisation type
-    if orgtype and orgtype != "all":
+    if orgtype and orgtype != "all" and orgtype!=['']:
         if not isinstance(orgtype, list):
             orgtype = [orgtype]
-        dis_max = json_q["source"]["query"]["function_score"]["query"]
-        json_q["source"]["query"]["function_score"]["query"] = {
-            "bool": {
-                "must": dis_max,
-                "filter": {
-                    "terms": {"organisationType.keyword": orgtype}
+        base_query["query"]["bool"]["filter"].append({
+            "terms": {"organisationType.keyword": orgtype}
+        })
+
+    # check for organisation type
+    if source and source != "all" and source!=['']:
+        if not isinstance(source, list):
+            source = [source]
+        base_query["query"]["bool"]["filter"].append({
+            "terms": {"sources.keyword": source}
+        })
+
+    # check for active
+    if active:
+        base_query["query"]["bool"]["must"].append({
+            "match": {
+                "active": True
+            }
+        })
+        
+    # add aggregates
+    if aggregate:
+        json_q["source"]["aggs"] = {
+            "group_by_type": {
+                "terms": {
+                    "field": "organisationType.keyword",
+                    "size": 500
+                }
+            },
+            "group_by_source": {
+                "terms": {
+                    "field": "sources.keyword",
+                    "size": 500
                 }
             }
         }
@@ -36,7 +70,7 @@ def search_query(term, orgtype='all', p=1, size=10):
     json_q["source"]["from"] = (p-1) * size
     json_q["source"]["size"] = size
 
-    return json.dumps(json_q)
+    return json_q
 
 def recon_query(term, orgtype='all', postcode=None):
     """
@@ -176,56 +210,3 @@ def random_query(active=False, orgtype=None, aggregate=False, source=None):
         }
     
     return query
-
-
-def all_by_type_query(active=False, orgtype=None, aggregate=False, source=None):
-    query = {
-        "query": {
-            "bool": {
-                "must": []
-            }
-        }
-    }
-    if active:
-        query["query"]["bool"]["must"].append({
-            "match": {
-                "active": True
-            }
-        })
-
-    if orgtype and orgtype!=['']:
-        if not isinstance(orgtype, list):
-            orgtype = [orgtype]
-        query["query"]["bool"]["must"].append({
-            "terms": {
-                "organisationType.keyword": orgtype
-            }
-        })
-
-    if source and source!=['']:
-        if not isinstance(source, list):
-            source = [source]
-        query["query"]["bool"]["must"].append({
-            "terms": {
-                "sources.keyword": source
-            }
-        })
-
-    if aggregate:
-        query["aggs"] = {
-            "group_by_type": {
-                "terms": {
-                    "field": "organisationType.keyword",
-                    "size": 500
-                }
-            },
-            "group_by_source": {
-                "terms": {
-                    "field": "sources.keyword",
-                    "size": 500
-                }
-            }
-        }
-
-    return query
-

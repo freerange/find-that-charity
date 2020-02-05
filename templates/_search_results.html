@@ -19,39 +19,18 @@
 </article>
 {% endif %}
 
+{% for result in res.hits %}
 <div class="content">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Status</th>
-                <th>
-                    Org ID 
-                    <a href="http://org-id.guide/about" target="_blank" class="has-text-weight-light">What is org-id?</a>
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in res.hits %}
-            <tr>
-                <td><a href="/orgid/{{ result.id }}">{{result.name }}</a></td>
-                <td>
-                <div class="tags are-small">
-                    {% for t in result.organisationType %}
-                    <span class="tag is-small"><a href="/orgid/type/{{t}}">{{ t }}</a></span>
-                    {% endfor %}
-                </div>
-                </td>
-                <td>
-                    {% if result.active %}<span class="tag is-success">Active</span>
-                    {% else %}<span class="tag is-danger">Inactive</span>
-                    {% endif %}
-                </td>
-                <td>{{ result.id }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h3 class="title">
+        <a href="/orgid/{{ result.id }}">{{result.name }}</a>
+        {% if not result.active %}<span class="tag is-danger is-small">Inactive</span>{% endif %}
+    </h3>
+    <h4 class="subtitle">{{ result.id }}</h4>
+    <div class="tags are-small">
+        {% for t in result.organisationType %}
+        <a class="tag is-small" href="/orgid/type/{{t}}">{{ t }}</a>
+        {% endfor %}
+    </div>
 </div>
+{% endfor %}
 {% include '_pagination.html' %}
