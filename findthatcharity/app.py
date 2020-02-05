@@ -5,42 +5,18 @@ from starlette.staticfiles import StaticFiles
 from .queries import search_query
 from .db import es, fetch_all_sources
 from . import settings
-from .utils import JSONResponseDate as JSONResponse
+from .utils import JSONResponseDate as JSONResponse, pagination, pagination_request
 from .apps import randcharity, reconcile, charity, autocomplete, orgid, feeds, csvdata
 from .templates import templates
 from .classes.org import Org
 
-DEFAULT_PAGE = 1
-DEFAULT_SIZE = 10
-
 async def homepage(request):
     query = request.query_params.get("q")
 
-    try:
-        page = int(request.query_params.get("p", DEFAULT_PAGE))
-        if page < 1:
-            raise ValueError()
-    except ValueError:
-        page = DEFAULT_PAGE
-
-    try:
-        size = int(request.query_params.get("size", DEFAULT_SIZE))
-        if size > 50:
-            raise ValueError()
-    except ValueError:
-        size = DEFAULT_SIZE
-
     if query:
         return search_return(
-            search_query(
-                query,
-                orgtype=request.query_params.get("orgtype"),
-                p=page,
-                size=size,
-            ),
+            query,
             request,
-            p=page,
-            size=size,
         )
     return templates.TemplateResponse('index.html', {
         'request': request,
@@ -59,14 +35,20 @@ async def about_page(request):
         'publishers': publishers,
     })
 
-def search_return(query, request, p=DEFAULT_PAGE, size=DEFAULT_SIZE):
+def search_return(query, request):
     """
     Fetch search results and display on a template
     """
+    p = pagination_request(request)
     res = es.search_template(
         index=settings.ES_INDEX,
         doc_type=settings.ES_TYPE,
-        body=query,
+        body=search_query(
+            query,
+            orgtype=request.query_params.get("orgtype"),
+            p=p['p'],
+            size=p['size'],
+        ),
         ignore=[404],
     )
     
@@ -77,8 +59,7 @@ def search_return(query, request, p=DEFAULT_PAGE, size=DEFAULT_SIZE):
             "total": res.get("hits", {}).get("total"),
         },
         'term': request.query_params.get("q"),
-        'page': p,
-        'size': size,
+        'pages': pagination(p["p"], p["size"], res.get("hits", {}).get("total")),
         'selected_org_type': request.query_params.get("orgtype"),
     })
 

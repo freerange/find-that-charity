@@ -1,5 +1,4 @@
 from datetime import datetime
-from math import ceil
 
 from starlette.routing import Route
 from starlette.responses import RedirectResponse
@@ -7,7 +6,7 @@ from starlette.responses import RedirectResponse
 from ..queries import orgid_query, random_query, all_by_type_query
 from ..db import es
 from .. import settings
-from ..utils import JSONResponseDate as JSONResponse
+from ..utils import JSONResponseDate as JSONResponse, pagination, pagination_request
 from ..templates import templates
 from ..classes.org import MergedOrg, Org
 
@@ -18,9 +17,7 @@ async def orgid_type(request):
     """
     orgtype = [o for o in request.path_params.get('orgtype', "").split("+") if o]
     source = [o for o in request.path_params.get('source', "").split("+") if o]
-    p = int(request.query_params.get('p', '1'))
-    size = min([int(request.query_params.get('size', '10')), 100])
-    from_ = (p-1) * size
+    p = pagination_request(request, defaultsize=10)
 
     query = all_by_type_query(
         active=True,
@@ -35,39 +32,19 @@ async def orgid_type(request):
         body=query,
         _source_excludes=["complete_names"],
         ignore=[404],
-        size=size,
-        from_=from_,
+        size=p["size"],
+        from_=p["from"],
     )
-    
-    pages = {
-        # 'base_url': request.url_for('orgid:orgid_type', **request.path_params),
-        'base_url': request.url,
-        'current_page': p,
-        'size': size,
-        'total_items': res.get("hits", {}).get("total"),
-    }
-    print(request.url)
-    if p > 1:
-        pages['previous_page'] = p - 1
-    if p > 2:
-        pages['first_page'] = 1
-    max_pages = ceil(pages['total_items'] / size)
-    if max_pages > p:
-        pages['next_page'] = p + 1
-    if max_pages > (p+1):
-        pages['last_page'] = max_pages
-    pages['start_item'] = ((p-1) * size) + 1
-    pages['end_item'] = min([pages['total_items'], p*size])
 
     return templates.TemplateResponse('orgtype.html', {
         'request': request,
         'res': {
             "hits": [Org(o["_id"], o["_source"]) for o in res.get("hits", {}).get("hits", [])],
-            "total": pages['total_items'],
+            "total": res.get("hits", {}).get("total"),
         },
         'query': orgtype + [templates.env.globals["sources"].get(s, {"publisher": {"name": s}}).get("publisher", {}).get("name", s) for s in source],
         'aggs': res["aggregations"],
-        'pages': pages,
+        'pages': pagination(p["p"], p["size"], res.get("hits", {}).get("total")),
     })
 
 

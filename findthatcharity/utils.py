@@ -3,10 +3,14 @@ import typing
 from datetime import date, datetime
 import json
 import unicodedata
+from math import ceil
 
 from dateutil import parser
 from starlette.responses import JSONResponse
 
+
+DEFAULT_PAGE = 1
+DEFAULT_SIZE = 10
 
 def clean_regno(regno):
     """
@@ -125,3 +129,42 @@ def slugify(string):
     string = re.sub(r'[^\w\s-]', '', string).strip().lower()
     string = re.sub(r'[-\s]+', '-', string)
     return string
+
+def pagination(p, size, total):
+    pages = {
+        'current_page': p,
+        'size': size,
+        'total_items': total,
+    }
+    if p > 1:
+        pages['previous_page'] = p - 1
+    if p > 2:
+        pages['first_page'] = 1
+    max_pages = ceil(total / size)
+    if max_pages > p:
+        pages['next_page'] = p + 1
+    if max_pages > (p+1):
+        pages['last_page'] = max_pages
+    pages['start_item'] = ((p-1) * size) + 1
+    pages['end_item'] = min([total, p*size])
+    return pages
+
+def pagination_request(request, maxsize=100):
+
+    try:
+        page = int(request.query_params.get("p", DEFAULT_PAGE))
+        if page < 1:
+            raise ValueError()
+    except ValueError:
+        page = DEFAULT_PAGE
+
+    try:
+        size = int(request.query_params.get("size", DEFAULT_SIZE))
+        if size > maxsize:
+            raise ValueError()
+    except ValueError:
+        size = DEFAULT_SIZE
+
+    return {
+        "p": page, "size": size, "from": (page-1) * size
+    }
