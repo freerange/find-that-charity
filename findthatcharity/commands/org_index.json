@@ -4,7 +4,7 @@
             "char_filter": {
                 "sort_stop": {
                     "type": "pattern_replace",
-                    "pattern": "^(the|a) ",
+                    "pattern": "^(the |a |[^a-z0-9]+)",
                     "replacement": "",
                     "flags": "CASE_INSENSITIVE"
                 }

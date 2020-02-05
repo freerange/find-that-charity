@@ -1,42 +1,46 @@
 <nav class="pagination" role="navigation" aria-label="pagination">
-    {% if pages.previous_page %}
-    <a href="{{ request.url.include_query_params(p=pages.previous_page) }}" class="pagination-previous">Previous</a>
-    {% endif %}
-    {% if pages.next_page %}
-    <a href="{{ request.url.include_query_params(p=pages.next_page) }}" class="pagination-next">Next</a>
-    {% endif %}
-    <ul class="pagination-list">
+    <ul class="pagination-list list ma0 pa0">
+        {% if pages.previous_page %}
+        <li class="dib mr4">
+        <a href="{{ request.url.include_query_params(p=pages.previous_page) }}" class="pagination-previous pa2 link br1 b--light-gray ba bw1 f5 near-black">Previous</a>
+        </li>
+        {% endif %}
         {% if pages.first_page %}
-        <li>
-            <a href="{{ request.url.include_query_params(p=pages.first_page) }}" class="pagination-link" aria-label="Goto page {{pages.first_page}}">{{pages.first_page}}</a>
+        <li class="dib">
+            <a href="{{ request.url.include_query_params(p=pages.first_page) }}" class="pagination-link pa2 link br1 b--light-gray ba bw1 f5 near-black" aria-label="Goto page {{pages.first_page}}">{{pages.first_page}}</a>
         </li>
         {% endif %}
         {% if pages.previous_page %}
         {% if pages.first_page and (pages.previous_page - pages.first_page) > 1 %}
-        <li>
+        <li class="dib">
             <span class="pagination-ellipsis">&hellip;</span>
         </li>
         {% endif %}
-        <li>
-            <a href="{{ request.url.include_query_params(p=pages.previous_page) }}" class="pagination-link" aria-label="Goto page {{pages.previous_page}}">{{pages.previous_page}}</a>
+        <li class="dib">
+            <a href="{{ request.url.include_query_params(p=pages.previous_page) }}" class="pagination-link pa2 link br1 b--light-gray ba bw1 f5 near-black" aria-label="Goto page {{pages.previous_page}}">{{pages.previous_page}}</a>
         </li>
         {% endif %}
-        <li>
-            <a href="{{ request.url.include_query_params(p=pages.current_page) }}" class="pagination-link is-current" aria-label="Page {{pages.current_page}}" aria-current="page">{{pages.current_page}}</a>
+        <li class="dib">
+            <a href="{{ request.url.include_query_params(p=pages.current_page) }}" class="pagination-link pa2 link br1 b--light-gray ba bw1 f5 dark-blue b bg-light-gray is-current" aria-label="Page {{pages.current_page}}" aria-current="page">{{pages.current_page}}</a>
         </li>
         {% if pages.next_page %}
-        <li>
-            <a href="{{ request.url.include_query_params(p=pages.next_page) }}" class="pagination-link" aria-label="Goto page {{pages.next_page}}">{{pages.next_page}}</a>
+        <li class="dib">
+            <a href="{{ request.url.include_query_params(p=pages.next_page) }}" class="pagination-link pa2 link br1 b--light-gray ba bw1 f5 near-black" aria-label="Goto page {{pages.next_page}}">{{pages.next_page}}</a>
         </li>
         {% if pages.last_page and (pages.last_page - pages.next_page) > 1 %}
-        <li>
+        <li class="dib">
             <span class="pagination-ellipsis">&hellip;</span>
         </li>
         {% endif %}
         {% endif %}
         {% if pages.last_page %}
-        <li>
-            <a href="{{ request.url.include_query_params(p=pages.last_page) }}" class="pagination-link" aria-label="Goto page {{pages.last_page}}">{{pages.last_page}}</a>
+        <li class="dib">
+            <a href="{{ request.url.include_query_params(p=pages.last_page) }}" class="pagination-link pa2 link br1 b--light-gray ba bw1 f5 near-black" aria-label="Goto page {{pages.last_page}}">{{pages.last_page}}</a>
+        </li>
+        {% endif %}
+        {% if pages.next_page %}
+        <li class="dib ml4">
+        <a href="{{ request.url.include_query_params(p=pages.next_page) }}" class="pagination-next pa2 link br1 b--light-gray ba bw1 f5 near-black">Next</a>
         </li>
         {% endif %}
     </ul>

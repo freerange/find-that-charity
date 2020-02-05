@@ -10,7 +10,7 @@ from .apps import randcharity, reconcile, charity, autocomplete, orgid, feeds, c
 from .templates import templates
 from .classes.org import Org
 
-async def homepage(request):
+async def index(request):
     query = request.query_params.get("q")
 
     if query:
@@ -22,7 +22,7 @@ async def homepage(request):
         'request': request,
     })
 
-async def about_page(request):
+async def about(request):
     sources = fetch_all_sources()
     publishers = {}
     for s in sources.values():
@@ -64,8 +64,8 @@ def search_return(query, request):
     })
 
 routes = [
-    Route('/', homepage),
-    Route('/about', about_page),
+    Route('/', index),
+    Route('/about', about),
     Route('/random', randcharity.random),
     Route('/random.{filetype}', randcharity.random),
     Route('/reconcile', reconcile.index, methods=['GET', 'POST']),

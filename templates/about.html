@@ -3,17 +3,17 @@
 {% set heading = 'About' %}
 
 {% block content %}
-<div class="columns">
+<div class="measure-wide">
   <div class="column is-three-quarters">
     <div class="content">
       <p>
         The site is a tool for finding non profit organisations by name. It brings together data from 
-        <a href="#data-sources">a number of sources</a> to include a record for a large number of
+        <a class="underline dark-blue" href="#data-sources">a number of sources</a> to include a record for a large number of
         non profit organisations in the UK, including every registered charity.
       </p>
       <p>
-        The site was initially put together by <a href="https://twitter.com/kanedr">David Kane</a>.
-        Huge thanks to other contributors, particularly <a href="">Bob Harper</a> who implemented
+        The site was initially put together by <a class="underline dark-blue" href="https://twitter.com/kanedr">David Kane</a>.
+        Huge thanks to other contributors, particularly <a class="underline dark-blue" href="">Bob Harper</a> who implemented
         the Northern Ireland charity data.
       </p>
       <p>
@@ -22,21 +22,21 @@
       </p>
       <h2>Support</h2>
       <p>
-        The site is supported by <a href="http://www.threesixtygiving.org/" target="_blank">360Giving</a>.
+        The site is supported by <a class="underline dark-blue" href="http://www.threesixtygiving.org/" target="_blank">360Giving</a>.
       </p>
       <h2>Using the data</h2>
       <p>
         As well as a search engine, you can also as an
-        <a href="https://github.com/OpenRefine/OpenRefine/wiki/Reconciliation">OpenRefine reconciliation service</a>.
-        Access this using <a href="/reconcile"><code>/reconcile</code></a> endpoint.
+        <a class="underline dark-blue" href="https://github.com/OpenRefine/OpenRefine/wiki/Reconciliation">OpenRefine reconciliation service</a>.
+        Access this using <a class="underline dark-blue" href="/reconcile"><code>/reconcile</code></a> endpoint.
       </p>
       <p>
         You can access data about any charity in json format by adding <code>.json</code> to the end of the URL.
       </p>
       <p>
-        Find a <a href="/random">random charity record</a>. Or add <a href="/random?active=true"><code>?active=true</code></a>
+        Find a <a class="underline dark-blue" href="/random">random charity record</a>. Or add <a class="underline dark-blue" href="/random?active=true"><code>?active=true</code></a>
         to the end to restrict the random search to only active charities. This powers the 
-        <a href="https://twitter.com/CharityRandom">@CharityRandom</a> twitter feed.
+        <a class="underline dark-blue" href="https://twitter.com/CharityRandom">@CharityRandom</a> twitter feed.
       </p>
       <h2 id="data-sources">Data sources</h2>
       <p>Uses data from the following sources:</p>
@@ -45,13 +45,13 @@
         {% for s in sources %}
         <li>
           {% if sources|length > 1 %}
-          <strong><a href="{{ s.publisher.website }}" target="_blank">{{ s.publisher.name }}</a></strong>
+          <strong><a class="underline dark-blue" href="{{ s.publisher.website }}" target="_blank">{{ s.publisher.name }}</a></strong>
           ({{ s.title }})
           {% else %}
-          <strong><a href="{{ s.publisher.website }}" target="_blank">{{ s.publisher.name }}</a></strong>
+          <strong><a class="underline dark-blue" href="{{ s.publisher.website }}" target="_blank">{{ s.publisher.name }}</a></strong>
           ({{ s.title }})
           {% endif %}
-          - data used under the <a href="{{ s.license }}" target="_blank">{{ s.license_name }}</a>.
+          - data used under the <a class="underline dark-blue" href="{{ s.license }}" target="_blank">{{ s.license_name }}</a>.
           {% if s.identifier=='oscr' %}
           <br>© Crown Copyright and database right {{ this_year }}. Contains information from the Scottish Charity Register supplied by the Office
           of the Scottish Charity Regulator and licensed under the Open Government Licence v.2.0.
@@ -61,22 +61,22 @@
       {% endfor %}
       </ul>
       <p>
-        The detection of <a href="https://gist.github.com/drkane/22d62e07346084fafdcc7d9f5e1cd661" target="_blank">duplicate charities</a> is based on a list maintained on github.
+        The detection of <a class="underline dark-blue" href="https://gist.github.com/drkane/22d62e07346084fafdcc7d9f5e1cd661" target="_blank">duplicate charities</a> is based on a list maintained on github.
         Any additional records can be submitted as comments to the github page.
       </p>
       <p>
-        A list of <a href="https://gist.github.com/BobHarper1/2687545c562b47bc755aef2e9e0de537" target="_blank">additional names for 
+        A list of <a class="underline dark-blue" href="https://gist.github.com/BobHarper1/2687545c562b47bc755aef2e9e0de537" target="_blank">additional names for 
         Northern Irish charities</a> is also maintained on Github.
       </p>
       <h2>Other acknowledgements</h2>
       <ul>
-        <li><a href="https://github.com/edent/SuperTinyIcons/" target="_blank">Github icon from @edent's SuperTinyIcons</a></li>
-        <li>Styles from <a href="https://bulma.io/" target="_blank">Bulma</a></li>
+        <li><a class="underline dark-blue" href="https://github.com/edent/SuperTinyIcons/" target="_blank">Github icon from @edent's SuperTinyIcons</a></li>
+        <li>Styles from <a class="underline dark-blue" href="https://bulma.io/" target="_blank">Bulma</a></li>
         <li>Powered by
-          <a href="https://www.python.org/" target="_blank">Python</a>, 
-          <a href="https://www.starlette.io/" target="_blank">Starlette</a>,
-          <a href="https://scrapy.org/" target="_blank">Scrapy</a> and 
-          <a href="https://www.elastic.co/products/elasticsearch" target="_blank">Elasticsearch</a>.
+          <a class="underline dark-blue" href="https://www.python.org/" target="_blank">Python</a>, 
+          <a class="underline dark-blue" href="https://www.starlette.io/" target="_blank">Starlette</a>,
+          <a class="underline dark-blue" href="https://scrapy.org/" target="_blank">Scrapy</a> and 
+          <a class="underline dark-blue" href="https://www.elastic.co/products/elasticsearch" target="_blank">Elasticsearch</a>.
         </li>
       </ul>
       <h2 id="privacy">Privacy</h2>

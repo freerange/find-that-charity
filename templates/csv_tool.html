@@ -1,7 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'base_original.html' %}
 {% set heading="Enhance your data" %}
 {% set subtitle="Add charity data to a CSV file" %}
 
 {% block content %}
 <div id='reconcile-root'></div>
+{% endblock %}
+
+{% block bodyscripts %}
+<script src="/static/dist/bundle.js" type="text/javascript"></script>
 {% endblock %}

@@ -1,5 +1,5 @@
 {% if res.total > 0 and term %}
-<article class="message is-success">
+<article class="message is-success pa2 bg-washed-green mb4">
     <div class="message-body">
     {% if res.total == 1 %}
         1 result found found for "{{term}}"
@@ -12,7 +12,7 @@
     </div>
 </article>
 {% elif term %}
-<article class="message is-error">
+<article class="message is-error pa2 bg-washed-red mb2">
     <div class="message-body">
         No results found for "{{term}}"
     </div>
@@ -20,15 +20,22 @@
 {% endif %}
 
 {% for result in res.hits %}
-<div class="content">
-    <h3 class="title">
-        <a href="/orgid/{{ result.id }}">{{result.name }}</a>
-        {% if not result.active %}<span class="tag is-danger is-small">Inactive</span>{% endif %}
+<div class="content measure-wide mb4">
+    <h3 class="title ma0 pa0">
+        <a href="/orgid/{{ result.id }}" class="dark-blue link underline-hover tracked-tight lh-copy normal">{{result.name }}</a>
+        {% if not result.active %}<span class="tag is-danger is-small f6 pa2 br1 bg-red white">Inactive</span>{% endif %}
     </h3>
-    <h4 class="subtitle">{{ result.id }}</h4>
+    <h4 class="subtitle mt0 mb2 pa0 f5 mid-gray normal">
+        <a class="link mid-gray underline-hover" href="/orgid/type/{{result.organisationType[0]}}">
+            {{ result.organisationType[0] }}
+        </a>
+        <span class="ml2 pa1 bg-washed-blue code">{{ result.id }}</span>
+    </h4>
     <div class="tags are-small">
         {% for t in result.organisationType %}
-        <a class="tag is-small" href="/orgid/type/{{t}}">{{ t }}</a>
+        {% if not loop.first and t %}
+        <a class="tag is-small f6 bg-light-gray br1 pa2 link near-black dib mr2 mb2" href="/orgid/type/{{t}}">{{ t }}</a>
+        {% endif %}
         {% endfor %}
     </div>
 </div>
