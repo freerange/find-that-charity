@@ -1,6 +1,14 @@
 {
     "settings": {
         "analysis": {
+            "char_filter": {
+                "sort_stop": {
+                    "type": "pattern_replace",
+                    "pattern": "^(the|a) ",
+                    "replacement": "",
+                    "flags": "CASE_INSENSITIVE"
+                }
+            },
             "filter": {
                 "english_stop": {
                     "type": "stop",
@@ -32,6 +40,13 @@
                     "language": "possessive_english"
                 }
             },
+            "normalizer": {
+                "ftc_sort": {
+                    "type": "custom",
+                    "char_filter": ["sort_stop"],
+                    "filter": ["lowercase"]
+                }
+            },
             "analyzer": {
                 "ftc_analyzer": {
                     "tokenizer": "standard",
@@ -59,7 +74,13 @@
                 },
                 "name": {
                     "type": "text",
-                    "analyzer": "ftc_analyzer"
+                    "analyzer": "ftc_analyzer",
+                    "fields": {
+                        "sort": {
+                            "type": "keyword",
+                            "normalizer": "ftc_sort"
+                        }
+                    }
                 },
                 "alternateName": {
                     "type": "text",

@@ -1,4 +1,5 @@
 from starlette.applications import Starlette
+from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
 
 from .queries import search_query
@@ -9,23 +10,9 @@ from .apps import randcharity, reconcile, charity, autocomplete, orgid, feeds, c
 from .templates import templates
 from .classes.org import Org
 
-app = Starlette()
-app.debug = settings.DEBUG
-app.mount('/static', StaticFiles(directory="static"))
-app.add_route('/random', randcharity.random)
-app.add_route('/random.{filetype}', randcharity.random)
-app.add_route('/reconcile', reconcile.index, methods=['GET', 'POST'])
-app.mount('/reconcile', reconcile.app)
-app.mount('/charity', charity.app)
-app.mount('/autocomplete', autocomplete.app)
-app.mount('/feeds', feeds.app)
-app.mount('/orgid', orgid.app)
-app.mount('/adddata', csvdata.app)
-
 DEFAULT_PAGE = 1
 DEFAULT_SIZE = 10
 
-@app.route('/')
 async def homepage(request):
     query = request.query_params.get("q")
 
@@ -59,7 +46,6 @@ async def homepage(request):
         'request': request,
     })
 
-@app.route('/about')
 async def about_page(request):
     sources = fetch_all_sources()
     publishers = {}
@@ -95,3 +81,20 @@ def search_return(query, request, p=DEFAULT_PAGE, size=DEFAULT_SIZE):
         'size': size,
         'selected_org_type': request.query_params.get("orgtype"),
     })
+
+routes = [
+    Route('/', homepage),
+    Route('/about', about_page),
+    Route('/random', randcharity.random),
+    Route('/random.{filetype}', randcharity.random),
+    Route('/reconcile', reconcile.index, methods=['GET', 'POST']),
+    Mount('/static', StaticFiles(directory="static")),
+    Mount('/reconcile', reconcile.app),
+    Mount('/charity', charity.app),
+    Mount('/autocomplete', autocomplete.app),
+    Mount('/feeds', feeds.app),
+    Mount('/orgid', routes=orgid.routes, name='orgid'),
+    Mount('/adddata', csvdata.app),
+]
+
+app = Starlette(routes=routes, debug=settings.DEBUG)

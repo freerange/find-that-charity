@@ -1,11 +1,20 @@
 {% extends 'base.html' %}
 {% set heading = query|list_to_string %}
-{% set subtitle = "{:,.0f} random organisations out of {:,.0f}".format(res.hits|length, res.total) %}
+{% if pages.last_page and pages.last_page > 1 %}
+    {% set subtitle = "Showing organisation {:,.0f} to {:,.0f} out of {:,.0f}".format(
+        pages.start_item,
+        pages.end_item,
+        pages.total_items
+    ) %}
+{% else %}
+    {% set subtitle = "Showing all {:,.0f} organisations".format(pages.total_items) %}
+{% endif %}
 
 {% block content %}
 <div class="columns">
   <div class="column">
         {% include '_search_results.html' %}
+        {% include '_pagination.html' %}
   </div>
   <div class="column is-one-third content">
     <h4>Related organisation types</h4>

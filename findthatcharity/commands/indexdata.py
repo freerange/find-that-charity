@@ -5,6 +5,7 @@ import logging
 import math
 import os
 import json
+from uuid import uuid4
 
 import click
 import sqlalchemy
@@ -62,7 +63,42 @@ def create_index(es_url=settings.ES_URL,
 
     # delete existing index if we're replacing
     if replace and es.indices.exists(index=es_index):
-        es.indices.delete(index=es_index)
+        es.indices.delete(index=es_index, timeout='30m')
+        # # https://www.elastic.co/guide/en/elasticsearch/reference/6.8/reindex-upgrade-inplace.html
+
+        # # Create a new index and copy the mappings and settings from the old index.
+        # # Set the refresh_interval to -1 and the number_of_replicas to 0 for efficient reindexing.
+        # new_index = str(uuid4())
+        # click.echo("Creating temporary index: {}".format(new_index))
+        # es.indices.create(index=new_index, body=index_mappings)
+        
+        # # Reindex all documents from the old index into the new index using the reindex API.
+        # click.echo("Reindexing to temporary index")
+        # es.reindex(body={
+        #     "source": {
+        #         "index": es_index
+        #     },
+        #     "dest": {
+        #         "index": new_index
+        #     }
+        # }, timeout='30m')
+        
+        # click.echo("Recreating index: {}".format(es_index))
+        # es.indices.delete(index=es_index)
+        # result = es.indices.create(index=es_index, body=index_mappings)
+
+        # click.echo("Reindexing to new index: {}".format(es_index))
+        # es.reindex(body={
+        #     "source": {
+        #         "index": new_index
+        #     },
+        #     "dest": {
+        #         "index": es_index
+        #     }
+        # })
+        # es.indices.delete(index=new_index, timeout='30m')
+        # click.echo(result)
+        # return
 
     # create the index
     result = es.indices.create(index=es_index, body=index_mappings)
@@ -75,7 +111,7 @@ def create_index(es_url=settings.ES_URL,
 @click.option('--es-index', help='Elasticsearch type', default=settings.ES_INDEX)
 @click.option('--es-type', help='Elasticsearch type', default=settings.ES_TYPE)
 @click.option('--es-bulk-limit', default=settings.ES_BULK_LIMIT, help='Bulk limit for importing data')
-def importdata(es_url=settings.ES_URL, 
+def import_data(es_url=settings.ES_URL, 
                db_url=settings.DB_URI,
                es_index=settings.ES_INDEX,
                es_type=settings.ES_TYPE,

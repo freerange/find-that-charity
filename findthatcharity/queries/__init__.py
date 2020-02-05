@@ -177,3 +177,55 @@ def random_query(active=False, orgtype=None, aggregate=False, source=None):
     
     return query
 
+
+def all_by_type_query(active=False, orgtype=None, aggregate=False, source=None):
+    query = {
+        "query": {
+            "bool": {
+                "must": []
+            }
+        }
+    }
+    if active:
+        query["query"]["bool"]["must"].append({
+            "match": {
+                "active": True
+            }
+        })
+
+    if orgtype and orgtype!=['']:
+        if not isinstance(orgtype, list):
+            orgtype = [orgtype]
+        query["query"]["bool"]["must"].append({
+            "terms": {
+                "organisationType.keyword": orgtype
+            }
+        })
+
+    if source and source!=['']:
+        if not isinstance(source, list):
+            source = [source]
+        query["query"]["bool"]["must"].append({
+            "terms": {
+                "sources.keyword": source
+            }
+        })
+
+    if aggregate:
+        query["aggs"] = {
+            "group_by_type": {
+                "terms": {
+                    "field": "organisationType.keyword",
+                    "size": 500
+                }
+            },
+            "group_by_source": {
+                "terms": {
+                    "field": "sources.keyword",
+                    "size": 500
+                }
+            }
+        }
+
+    return query
+

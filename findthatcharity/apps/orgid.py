@@ -1,47 +1,76 @@
 from datetime import datetime
+from math import ceil
 
-from starlette.applications import Starlette
+from starlette.routing import Route
 from starlette.responses import RedirectResponse
 
-from ..queries import orgid_query, random_query
+from ..queries import orgid_query, random_query, all_by_type_query
 from ..db import es
 from .. import settings
 from ..utils import JSONResponseDate as JSONResponse
 from ..templates import templates
 from ..classes.org import MergedOrg, Org
 
-app = Starlette()
 
-@app.route('/type/{orgtype}')
-@app.route('/type/{orgtype}.html')
-@app.route('/source/{source}')
-@app.route('/source/{source}.html')
 async def orgid_type(request):
     """
     Show some examples from the type of organisation
     """
     orgtype = [o for o in request.path_params.get('orgtype', "").split("+") if o]
     source = [o for o in request.path_params.get('source', "").split("+") if o]
+    p = int(request.query_params.get('p', '1'))
+    size = min([int(request.query_params.get('size', '10')), 100])
+    from_ = (p-1) * size
+
+    query = all_by_type_query(
+        active=True,
+        orgtype=orgtype,
+        aggregate=True,
+        source=source
+    )
+    query["sort"] = [{"name.sort": "asc"}]
     res = es.search(
         index=settings.ES_INDEX,
         doc_type=settings.ES_TYPE,
-        body=random_query(active=True, orgtype=orgtype, aggregate=True, source=source),
+        body=query,
         _source_excludes=["complete_names"],
-        ignore=[404]
+        ignore=[404],
+        size=size,
+        from_=from_,
     )
+    
+    pages = {
+        # 'base_url': request.url_for('orgid:orgid_type', **request.path_params),
+        'base_url': request.url,
+        'current_page': p,
+        'size': size,
+        'total_items': res.get("hits", {}).get("total"),
+    }
+    print(request.url)
+    if p > 1:
+        pages['previous_page'] = p - 1
+    if p > 2:
+        pages['first_page'] = 1
+    max_pages = ceil(pages['total_items'] / size)
+    if max_pages > p:
+        pages['next_page'] = p + 1
+    if max_pages > (p+1):
+        pages['last_page'] = max_pages
+    pages['start_item'] = ((p-1) * size) + 1
+    pages['end_item'] = min([pages['total_items'], p*size])
 
     return templates.TemplateResponse('orgtype.html', {
         'request': request,
         'res': {
             "hits": [Org(o["_id"], o["_source"]) for o in res.get("hits", {}).get("hits", [])],
-            "total": res.get("hits", {}).get("total"),
+            "total": pages['total_items'],
         },
         'query': orgtype + [templates.env.globals["sources"].get(s, {"publisher": {"name": s}}).get("publisher", {}).get("name", s) for s in source],
         'aggs': res["aggregations"],
+        'pages': pages,
     })
 
 
-@app.route('/{orgid}.json')
 async def orgid_json(request):
     """
     Fetch json representation based on a org-id for a record
@@ -56,8 +85,6 @@ async def orgid_json(request):
     }, 404)
 
 
-@app.route('/{orgid:path}')
-@app.route('/{orgid:path}.html')
 async def orgid_html(request):
     """
     Find a record based on the org-id
@@ -131,3 +158,13 @@ def get_children(orgs):
             children[o["_id"]] = Org(o["_id"], o["_source"])
 
     return list(children.values())
+
+routes = [
+    Route('/type/{orgtype}', orgid_type, name='orgid_type'),
+    Route('/type/{orgtype}.html', orgid_type),
+    Route('/source/{source}', orgid_type),
+    Route('/source/{source}.html', orgid_type),
+    Route('/{orgid}.json', orgid_json),
+    Route('/{orgid:path}', orgid_html),
+    Route('/{orgid:path}.html', orgid_html),
+]
