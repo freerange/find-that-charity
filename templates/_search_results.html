@@ -31,10 +31,10 @@
         </a>
         <span class="ml2 pa1 bg-washed-blue code">{{ result.id }}</span>
     </h4>
-    <div class="tags are-small">
+    <div class="cf">
         {% for t in result.organisationType %}
         {% if not loop.first and t %}
-        <a class="tag is-small f6 bg-light-gray br1 pa2 link near-black dib mr2 mb2" href="/orgid/type/{{t}}">{{ t }}</a>
+        <a class="f6 bg-light-gray br1 pv1 ph2 link near-black dib mr2 mb2 fl" href="/orgid/type/{{t}}">{{ t }}</a>
         {% endif %}
         {% endfor %}
     </div>

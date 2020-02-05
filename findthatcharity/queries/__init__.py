@@ -11,7 +11,8 @@ with open(os.path.join(os.path.dirname(__file__), './es_config.json'), 'r') as f
 with open(os.path.join(os.path.dirname(__file__), './recon_config.json'), 'r') as f:
     RECON_CONFIG = json.load(f)
 
-def search_query(term=None, orgtype='all', source='all', active=False, aggregate=False, p=1, size=10):
+def search_query(term=None, base_orgtype='all', base_source='all', orgtype='all', source='all',
+                 active=False, aggregate=False, p=1, size=10):
     """
     Fetch the search query and insert the query term
     """
@@ -33,13 +34,25 @@ def search_query(term=None, orgtype='all', source='all', active=False, aggregate
         base_query["query"]["bool"]["filter"].append({
             "terms": {"organisationType.keyword": orgtype}
         })
+    if base_orgtype and base_orgtype != "all" and base_orgtype!=['']:
+        if not isinstance(base_orgtype, list):
+            base_orgtype = [base_orgtype]
+        base_query["query"]["bool"]["filter"].append({
+            "terms": {"organisationType.keyword": base_orgtype}
+        })
 
-    # check for organisation type
+    # check for source
     if source and source != "all" and source!=['']:
         if not isinstance(source, list):
             source = [source]
         base_query["query"]["bool"]["filter"].append({
             "terms": {"sources.keyword": source}
+        })
+    if base_source and base_source != "all" and base_source!=['']:
+        if not isinstance(base_source, list):
+            base_source = [base_source]
+        base_query["query"]["bool"]["filter"].append({
+            "terms": {"sources.keyword": base_source}
         })
 
     # check for active

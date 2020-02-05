@@ -15,15 +15,20 @@ async def orgid_type(request):
     """
     Show some examples from the type of organisation
     """
-    orgtype = [o for o in request.path_params.get('orgtype', "").split("+") if o]
-    source = [o for o in request.path_params.get('source', "").split("+") if o]
+    base_orgtype = [o for o in request.path_params.get('orgtype', "").split("+") if o]
+    base_source = [o for o in request.path_params.get('source', "").split("+") if o]
+    q = request.query_params.get('q')
     p = pagination_request(request, defaultsize=10)
+    active = not request.query_params.get('inactive')
 
     query = search_query(
-        active=True,
-        orgtype=orgtype,
+        term=q,
+        base_orgtype=base_orgtype,
+        base_source=base_source,
+        orgtype=request.query_params.getlist('orgtype'),
+        source=request.query_params.getlist('source'),
+        active=active,
         aggregate=True,
-        source=source,
         p=p['p'],
         size=p['size'],
     )
@@ -35,12 +40,16 @@ async def orgid_type(request):
     )
 
     return templates.TemplateResponse('orgtype.html', {
+        'term': q,
         'request': request,
         'res': {
             "hits": [Org(o["_id"], o["_source"]) for o in res.get("hits", {}).get("hits", [])],
             "total": res.get("hits", {}).get("total"),
         },
-        'query': orgtype + [templates.env.globals["sources"].get(s, {"publisher": {"name": s}}).get("publisher", {}).get("name", s) for s in source],
+        'query': base_orgtype + [
+            templates.env.globals["sources"].get(s, {"publisher": {"name": s}}).get("publisher", {}).get("name", s)
+            for s in base_source
+        ],
         'aggs': res["aggregations"],
         'pages': pagination(p["p"], p["size"], res.get("hits", {}).get("total")),
     })
