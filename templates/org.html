@@ -238,7 +238,7 @@
       {% for k, v in orgs.data.location.items() %}
         {% if v.value.geoCode and v.value.geoCode|regex_search("[ENWS][0-9]{8}") %}
         <li class="w-100 mb2">
-          <a class="link dark-blue underline-hover" href="https://postcodes.findthatcharity.uk/areas/{{ v.value.geoCode }}.html" target="_blank">{{ v.value.name }}</a>
+          <a class="link dark-blue underline-hover" href="https://findthatpostcode.uk/areas/{{ v.value.geoCode }}.html" target="_blank">{{ v.value.name }}</a>
           {% if v.value.geoCodeType %}({{ v.value.geoCodeType }}){% endif %}
           {{ show_sources(v) }}
         </li>
