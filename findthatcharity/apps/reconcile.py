@@ -172,7 +172,7 @@ async def index(request):
             r = esdoc_orresponse(
                     recon_query(
                         query["query"],
-                        [s["key"] for s in templates.env.globals["org_types"] if s["slug"] in orgtypes]
+                        [s["key"] for s in templates.env.globals["org_types"].values() if s["slug"] in orgtypes]
                     )
                 )["result"]
             result.update({query_id: {"result": r}})
@@ -181,7 +181,7 @@ async def index(request):
         result = esdoc_orresponse(
                     recon_query(
                         query,
-                        [s["key"] for s in templates.env.globals["org_types"] if s["slug"] in orgtypes]
+                        [s["key"] for s in templates.env.globals["org_types"].values() if s["slug"] in orgtypes]
                     )
                 )
     elif extend:
@@ -203,12 +203,12 @@ def service_spec(service_url, orgtypes=None):
         orgtypes = [{
             "id": "/{}".format(s["slug"]),
             "name": s["key"]
-        } for s in templates.env.globals["org_types"] if s["slug"] in orgtypes]
+        } for s in templates.env.globals["org_types"].values() if s["slug"] in orgtypes]
     else:
         orgtypes = [{
             "id": "/{}".format(s["slug"]),
             "name": s["key"]
-        } for s in templates.env.globals["org_types"]]
+        } for s in templates.env.globals["org_types"].values()]
 
     return {
         "name": "findthatcharity",
