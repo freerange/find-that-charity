@@ -153,11 +153,11 @@ def get_children(orgs):
     return list(children.values())
 
 routes = [
-    Route('/type/{orgtype}', orgid_type, name='orgid_type'),
     Route('/type/{orgtype}.html', orgid_type),
-    Route('/source/{source}', orgid_type),
+    Route('/type/{orgtype}', orgid_type, name='orgid_type'),
     Route('/source/{source}.html', orgid_type),
+    Route('/source/{source}', orgid_type),
     Route('/{orgid}.json', orgid_json),
-    Route('/{orgid:path}', orgid_html),
     Route('/{orgid:path}.html', orgid_html),
+    Route('/{orgid:path}', orgid_html),
 ]
