@@ -276,7 +276,7 @@ class MergedOrg():
             self.data[f] = {}
 
             # go through each organisation in our data
-            for org in self.orgs:
+            for org in self.orgs + [self.main]:
 
                 # if there's nothing for this field in this org then move to the next one
                 if getattr(org, f, None) is None:
