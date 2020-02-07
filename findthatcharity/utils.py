@@ -135,16 +135,16 @@ def pagination(p, size, total):
         'current_page': p,
         'size': size,
         'total_items': total,
+        'total_pages': ceil(total / size),
     }
     if p > 1:
         pages['previous_page'] = p - 1
     if p > 2:
         pages['first_page'] = 1
-    max_pages = ceil(total / size)
-    if max_pages > p:
+    if pages['total_pages'] > p:
         pages['next_page'] = p + 1
-    if max_pages > (p+1):
-        pages['last_page'] = max_pages
+    if pages['total_pages'] > (p+1):
+        pages['last_page'] = pages['total_pages']
     pages['start_item'] = ((p-1) * size) + 1
     pages['end_item'] = min([total, p*size])
     return pages

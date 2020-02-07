@@ -69,7 +69,7 @@ routes = [
     Route('/random', randcharity.random),
     Route('/random.{filetype}', randcharity.random),
     Route('/reconcile', reconcile.index, methods=['GET', 'POST']),
-    Mount('/static', StaticFiles(directory="static")),
+    Mount('/static', StaticFiles(directory="static"), name='static'),
     Mount('/reconcile', reconcile.app),
     Mount('/charity', charity.app),
     Mount('/autocomplete', autocomplete.app),
