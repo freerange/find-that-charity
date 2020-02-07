@@ -38,12 +38,10 @@
     <span class="pv1 ph2 br2 bg-green white dib mr2 mb2">Inactive</span>
     {% endif %}
     {% for k, v in orgs.data.organisationType.items() if v.value in key_types %}
-    <a class="pv1 ph2 br2 bg-light-gray near-black dib mr2 mb2 link" href="/orgid/type/{{ v.value }}">{{ v.value }}</a>
+    <a class="pv1 ph2 br2 bg-light-gray near-black dib mr2 mb2 link" href="/orgid/type/{{ v.value|slugify }}">{{ v.value }}</a>
     {% endfor %}
-  </div>
-  <div class="">
     {% for k, v in orgs.data.organisationType.items() if v.value not in key_types %}
-    <a class="pv1 ph2 br1 bg-light-gray near-black dib mr2 mb2 link f5" href="/orgid/type/{{ v.value }}">{{ v.value }}</a>
+    <a class="pv1 ph2 br1 bg-light-gray near-black dib mr2 mb2 link f5" href="/orgid/type/{{ v.value|slugify }}">{{ v.value }}</a>
     {% endfor %}
   </div>
 </header>

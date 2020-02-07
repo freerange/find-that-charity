@@ -4,7 +4,7 @@ from starlette.routing import Route
 from starlette.responses import RedirectResponse
 
 from ..queries import orgid_query, random_query, search_query
-from ..db import es
+from ..db import es, ORGTYPES
 from .. import settings
 from ..utils import JSONResponseDate as JSONResponse, pagination, pagination_request
 from ..templates import templates
@@ -15,7 +15,16 @@ async def orgid_type(request):
     """
     Show some examples from the type of organisation
     """
-    base_orgtype = [o for o in request.path_params.get('orgtype', "").split("+") if o]
+    base_orgtype = [
+        ORGTYPES.get(o, {}).get("key", o)
+        for o in request.path_params.get('orgtype', "").split("+")
+        if o
+    ]
+    query_orgtypes = [
+        ORGTYPES.get(o, {}).get("key", o)
+        for o in request.query_params.getlist('orgtype')
+        if o
+    ]
     base_source = [o for o in request.path_params.get('source', "").split("+") if o]
     q = request.query_params.get('q')
     p = pagination_request(request, defaultsize=10)
@@ -25,7 +34,7 @@ async def orgid_type(request):
         term=q,
         base_orgtype=base_orgtype,
         base_source=base_source,
-        orgtype=request.query_params.getlist('orgtype'),
+        orgtype=query_orgtypes,
         source=request.query_params.getlist('source'),
         active=active,
         aggregate=True,

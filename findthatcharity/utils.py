@@ -41,6 +41,17 @@ def sort_out_date(record, date_fields=["dateRegistered", "dateRemoved", "dateMod
             except ValueError:
                 pass
     return record
+    
+
+def sort_out_orgtypes(orgtypes):
+    return {
+        slugify(o["key"]): {
+            "key": o["key"],
+            "doc_count": o["doc_count"],
+            "slug": slugify(o["key"]),
+        } for o in orgtypes
+    }
+
 
 def list_to_string(l):
     if not isinstance(l, list):

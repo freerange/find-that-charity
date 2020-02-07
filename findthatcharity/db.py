@@ -4,7 +4,7 @@ from elasticsearch import Elasticsearch
 from sqlalchemy import create_engine, MetaData, Table, Column, String, Text, BigInteger, Integer, DateTime, JSON, Date, Boolean, select
 
 from . import settings
-from .utils import sort_out_date
+from .utils import sort_out_date, sort_out_orgtypes
 
 es = Elasticsearch(str(settings.ES_URL))
 
@@ -81,6 +81,12 @@ def value_counts():
         ignore=[404]
     )
     return res.get("aggregations", {})
+
+
+vals = value_counts()
+ORGTYPES = sort_out_orgtypes(vals.get("group_by_type", {}).get("buckets",[]))
+SOURCES = vals.get("group_by_source", {}).get("buckets", [])
+
 
 organisation = Table('organisation', metadata, 
     Column("id", String, primary_key=True),

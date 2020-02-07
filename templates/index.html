@@ -34,9 +34,9 @@
     <div class="mv5 cf">
         <h3>Types of organisation available</h3>
         <div class="">
-        {% for o in org_types if o.key in key_types %}
+        {% for ot, o in org_types.items() if o.key in key_types %}
             <div class="bg-light-gray near-black fl dib mb2 mr2 f5">
-                <a href="/orgid/type/{{ o.key }}" class="link near-black underline-hover pa2 dib fl">{{ o.key }}</a>
+                <a href="/orgid/type/{{ ot }}" class="link near-black underline-hover pa2 dib fl">{{ o.key }}</a>
                 <span class="pa2 bg-blue white fl">{{ "{:,.0f}".format(o.doc_count) }}</span>
             </div>
         {% endfor %}

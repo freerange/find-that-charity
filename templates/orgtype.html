@@ -26,13 +26,13 @@
                 {% for r in request.query_params.getlist('orgtype') %}
                 <span class="bg-moon-gray b--dark-gray bw1 ba mr2 mb2 dib f6 br-pill pv1 ph2">
                     Type: 
-                    {{ r }}
+                    {{ org_types.get(r, {}).get('key', r) }}
                 </span>
                 {% endfor %}
                 {% for r in request.query_params.getlist('source') %}
                 <span class="bg-moon-gray b--dark-gray bw1 ba mr2 mb2 dib f6 br-pill pv1 ph2">
                     Source: 
-                    {{ r }}
+                    {{ sources.get(r, {}).get('publisher', {}).get('name', r) }}
                 </span>
                 {% endfor %}
                 <a href="{{ request.url.remove_query_params(['orgtype', 'source']) }}" class="f6 link blue underline">Clear filters</a>
@@ -51,7 +51,7 @@
             {% for t in aggs.group_by_type.buckets if t.key in key_types %}
                 <li class="w-100 f4 mb2">
                     <div class="">
-                        <a class="link dark-blue underline-hover mr3" href="{{ request.url.include_query_params(orgtype=t.key) }}">{{ t.key }}</a>
+                        <a class="link dark-blue underline-hover mr3" href="{{ request.url.include_query_params(orgtype=t.key|slugify) }}">{{ t.key }}</a>
                         <span class="mid-gray">{{ "{:,.0f}".format(t.doc_count) }}</span>
                     </div>
                 </li>
@@ -59,7 +59,7 @@
             {% for t in aggs.group_by_type.buckets if t.key not in key_types %}
                 <li class="w-100 f5 mb2">
                     <div class="">
-                        <a class="link dark-blue underline-hover mr3" href="{{ request.url.include_query_params(orgtype=t.key) }}">{{ t.key }}</a>
+                        <a class="link dark-blue underline-hover mr3" href="{{ request.url.include_query_params(orgtype=t.key|slugify) }}">{{ t.key }}</a>
                         <span class="mid-gray">{{ "{:,.0f}".format(t.doc_count) }}</span>
                     </div>
                 </li>
@@ -68,7 +68,7 @@
             <h4 class="ma0 pa0">Data sources</h4>
             <ul class="mb4 mt2 list mh0 pa0">
             {% for t in aggs.group_by_source.buckets if sources.get(t.key) %}
-                <li class="w-100 f4">
+                <li class="w-100 f4 mb2">
                     <div class="lh-title">
                         <a class="link dark-blue underline-hover mr3 lh-title" href="{{ request.url.include_query_params(source=t.key) }}">{{ sources[t.key].publisher.name }}</a>
                         <span class="mid-gray">{{ "{:,.0f}".format(t.doc_count) }}</span>
