@@ -15,14 +15,7 @@ import tqdm
 
 from findthatcharity import settings
 
-priorities = [
-    "GB-CHC",
-    "GB-SC",
-    "GB-NIC",
-    "GB-COH",
-    "GB-EDU"
-]
-priorities = {v: k+1 for k, v in enumerate(priorities[::-1])}
+priorities = {v: k+1 for k, v in enumerate(settings.PRIORITIES[::-1])}
 
 def get_complete_names(all_names):
     words = set()

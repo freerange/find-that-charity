@@ -36,3 +36,14 @@ KEY_TYPES = [
     "Local Authority",
     "Universities",
 ]
+
+PRIORITIES = [
+    "GB-CHC",
+    "GB-SC",
+    "GB-NIC",
+    "GB-COH",
+    "GB-EDU",
+    "GB-LAE",
+    "GB-PLA",
+    "GB-GOR"
+]
