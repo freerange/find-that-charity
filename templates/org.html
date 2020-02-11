@@ -6,8 +6,8 @@
 ) %}
 
 {% macro show_sources(v) %}
-<span class="gray f6 dib">
-  [Source: {% for s in v.sources|unique -%}
+<span class="gray f7 dib">
+  [Source: {% for s in v.sources|reject('none')|unique -%}
     {%- if sources.get(s) -%}
       {{ sources.get(s).publisher.name }}
     {%- else -%}
@@ -18,6 +18,26 @@
   {# [{{ v["sources"]|list_to_string }}] #}
 </span>
 {% endmacro %}
+
+{% block headscripts %}
+{{ super() }}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "url": {{ orgs.data.url.values()|map(attribute='value')|list|first|tojson }},
+  "name": {{ orgs.name|tojson }},
+  "identifier": {{ orgs.id|tojson }},
+  "description": {{ orgs.data.description.values()|map(attribute='value')|reject('equalto', '')|list|tojson }},
+  "alternateName": {{ orgs.data.alternateName.values()|map(attribute='value')|list|tojson }},
+  "foundingDate": {{ orgs.data.dateRegistered.values()|map(attribute='value')|list|first|string|tojson }},
+  {% if not orgs.active %}
+  "dissolutionDate": {{ orgs.data.dateRemoved.values()|map(attribute='value')|list|last|string|tojson }},
+  {%- endif %}
+  "sameAs": {{ orgs.data.orgIDs.values()|map(attribute='value')|list|tojson }},
+}
+</script>
+{% endblock %}
 
 {% block header %}
 <header class="fl w-100 ph3 ph5-ns entry-content lh-copy f4">
