@@ -1,6 +1,8 @@
 from starlette.applications import Starlette
 from starlette.routing import Route, Mount
 from starlette.staticfiles import StaticFiles
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
 
 from .queries import search_query
 from .db import es, fetch_all_sources
@@ -77,5 +79,13 @@ routes = [
     Mount('/orgid', routes=orgid.routes, name='orgid'),
     Mount('/adddata', csvdata.app),
 ]
+middleware = [
+    Middleware(
+        CORSMiddleware,
+        allow_origins=['*'],
+        allow_methods=['GET', 'POST', 'OPTIONS'],
+        allow_headers=['Origin', 'Accept', 'Content-Type', 'X-Requested-With', 'X-CSRF-Token'],
+    )
+]
 
-app = Starlette(routes=routes, debug=settings.DEBUG)
+app = Starlette(routes=routes, debug=settings.DEBUG, middleware=middleware)
