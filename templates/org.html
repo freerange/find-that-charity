@@ -25,12 +25,20 @@
 {
   "@context": "https://schema.org",
   "@type": "Organization",
+  {% if orgs.data.url %}
   "url": {{ orgs.data.url.values()|map(attribute='value')|list|first|tojson }},
+  {% endif %}
   "name": {{ orgs.name|tojson }},
   "identifier": {{ orgs.id|tojson }},
+  {% if orgs.data.description %}
   "description": {{ orgs.data.description.values()|map(attribute='value')|reject('equalto', '')|list|tojson }},
+  {% endif %}
+  {% if orgs.data.alternateName %}
   "alternateName": {{ orgs.data.alternateName.values()|map(attribute='value')|list|tojson }},
+  {% endif %}
+  {% if orgs.data.dateRegistered %}
   "foundingDate": {{ orgs.data.dateRegistered.values()|map(attribute='value')|list|first|string|tojson }},
+  {% endif %}
   {% if not orgs.active %}
   "dissolutionDate": {{ orgs.data.dateRemoved.values()|map(attribute='value')|list|last|string|tojson }},
   {%- endif %}
@@ -45,10 +53,10 @@
       {{ orgs["name"] }}
   </h2>
   <div class="mv3 w-100">
-    {% for k, v in orgs.data.orgIDs.items() %}
-    {% set org_id = v.value.split("-") %}
+    {% for v in orgs.data.orgIDs.values()|map(attribute='value')|list|prioritise %}
+    {% set org_id = v.split("-") %}
     {# <a href="http://org-id.guide/list/{{ '-'.join(org_id[0:2]) }}" target="_blank" class="tag is-dark is-medium">{{ "-".join(org_id[0:2]) }}</a> #}
-    <a href="/orgid/{{ v.value }}" class="link dib bg-dark-blue white f4 pv1 ph2 br2 code mr2 mb2">{{ "-".join(org_id) }}</a>
+    <a href="/orgid/{{ v }}" class="link dib bg-dark-blue white f4 pv1 ph2 br2 code mr2 mb2">{{ "-".join(org_id) }}</a>
     {% endfor %}
   </div>
   <div class="mv3 w-100">
@@ -150,7 +158,7 @@
               <span class="is-size-7">(using <a class="link underline-hover blue" href="http://org-id.guide/about" target="_blank" class="">org-id</a>)</span>
             </strong><br>
             <ul class="list ma0 pa0">
-            {% for orgid in org.orgIDs %}
+            {% for orgid in org.orgIDs|prioritise %}
               <li class="dib bg-dark-blue white f6 pv0 ph1 br1 code mr1 mb1">{{orgid}}</li>
             {% endfor %}
             </ul>

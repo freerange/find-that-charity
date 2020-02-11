@@ -29,7 +29,13 @@
         <a class="link mid-gray underline-hover" href="/orgid/type/{{result.organisationType[0]}}">
             {{ result.organisationType[0] }}
         </a>
-        <span class="ml2 pa1 bg-washed-blue code">{{ result.id }}</span>
+        {% for o  in result.orgIDs|prioritise %}
+        {% if loop.first %}
+        <span class="dib bg-dark-blue white f6 pv0 ph1 br1 code ml2 mr2 mb2">{{ o }}</span>
+        {% else %}
+        <span class="dib bg-washed-blue f6 pv0 ph1 br1 code mr2 mb2">{{ o }}</span>
+        {% endif %}
+        {% endfor %}
     </h4>
     <div class="cf">
         {% for t in result.organisationType %}
