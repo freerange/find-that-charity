@@ -1,7 +1,10 @@
 from datetime import datetime
+import io
+import csv
 
 from starlette.routing import Route
-from starlette.responses import RedirectResponse
+from starlette.responses import RedirectResponse, Response
+from elasticsearch.helpers import scan
 
 from ..queries import orgid_query, random_query, search_query
 from ..db import es, ORGTYPES
@@ -11,10 +14,64 @@ from ..templates import templates
 from ..classes.org import MergedOrg, Org
 
 
+async def orgid_type_download(request):
+    base_orgtype = [
+        ORGTYPES.get(o, {}).get("key", o)
+        for o in request.path_params.get('orgtype', "").split("+")
+        if o
+    ]
+    query_orgtypes = [
+        ORGTYPES.get(o, {}).get("key", o)
+        for o in request.query_params.getlist('orgtype')
+        if o
+    ]
+    base_source = [o for o in request.path_params.get('source', "").split("+") if o]
+    q = request.query_params.get('q')
+    active = not request.query_params.get('inactive')
+
+    query = search_query(
+        term=q,
+        base_orgtype=base_orgtype,
+        base_source=base_source,
+        orgtype=query_orgtypes,
+        source=request.query_params.getlist('source'),
+        active=active,
+        aggregate=True,
+        size=1000,
+    )
+    res = es.search_template(
+        index=settings.ES_INDEX,
+        doc_type=settings.ES_TYPE,
+        body=query,
+        ignore=[404],
+        scroll='5m',
+    )
+    scroll_id = res.get('_scroll_id')
+    output = io.StringIO()
+    writer = csv.writer(output)
+    fields = [
+        "orgID",
+        "name",
+        "active",
+        "postalCode",
+        "orgIDs",
+        "alternateName",
+    ]
+    writer.writerow(fields)
+    while len(res['hits']['hits']):
+        for o in res.get("hits", {}).get("hits", []):
+            writer.writerow([
+                o["_source"].get(f)
+                for f in fields
+            ])
+        res = es.scroll(
+            scroll_id=scroll_id,
+            scroll='5m',
+        )
+    return Response(output.getvalue(), media_type='text/csv')
+
+
 async def orgid_type(request):
-    """
-    Show some examples from the type of organisation
-    """
     base_orgtype = [
         ORGTYPES.get(o, {}).get("key", o)
         for o in request.path_params.get('orgtype', "").split("+")
@@ -48,6 +105,8 @@ async def orgid_type(request):
         ignore=[404],
     )
 
+    download_url = request.url.replace(path=request.url.path + '.csv')
+
     return templates.TemplateResponse('orgtype.html', {
         'term': q,
         'request': request,
@@ -61,6 +120,7 @@ async def orgid_type(request):
         ],
         'aggs': res["aggregations"],
         'pages': pagination(p["p"], p["size"], res.get("hits", {}).get("total")),
+        'download_url': download_url,
     })
 
 
@@ -153,8 +213,10 @@ def get_children(orgs):
     return list(children.values())
 
 routes = [
+    Route('/type/{orgtype}.csv', orgid_type_download),
     Route('/type/{orgtype}.html', orgid_type),
     Route('/type/{orgtype}', orgid_type, name='orgid_type'),
+    Route('/source/{source}.csv', orgid_type_download),
     Route('/source/{source}.html', orgid_type),
     Route('/source/{source}', orgid_type),
     Route('/{orgid}.json', orgid_json),

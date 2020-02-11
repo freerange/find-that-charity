@@ -15,13 +15,13 @@
 <main class="">
     <form class="" action="{{ request.url.remove_query_params('q') }}">
         <div class="fl w-100 w-70-l pa2">
-            <div class="cf mb3 flex">
+            <div class="cf mb2 flex">
                 <input name="q" class="f6 f5-l input-reset bl bt bb br br-0 b--black-20 fl near-black bg-white pa3 lh-solid w-100 w-80-ns br2-ns br--left-ns" type="text" placeholder="Search these organisations"
                     value="{{term or ''}}" autocomplete='off'>
                 <input type="submit" value="Search" class="f6 f5-l button-reset br bt bb bl-0 b--black-20 fl pv3 tc bg-animate bg-yellow dim near-black pointer w-100 w-20-m w-20-l br2-ns br--right-ns">
             </div>
             {% if 'orgtype' in request.query_params.keys() or 'source' in request.query_params.keys() %}
-            <div class="w-100 mb4">
+            <div class="w-100">
                 <span class="f6 b mr2">Filters: </span>
                 {% for r in request.query_params.getlist('orgtype') %}
                 <span class="bg-moon-gray b--dark-gray bw1 ba mr2 mb2 dib f6 br-pill pv1 ph2">
@@ -38,10 +38,12 @@
                 <a href="{{ request.url.remove_query_params(['orgtype', 'source']) }}" class="f6 link blue underline">Clear filters</a>
             </div>
             {% endif %}
-            {# {% include '_search_form.html' %} #}
-            {% include '_search_results.html' %}
+            <div class="mt4">
+                {% include '_search_results.html' %}
+            </div>
         </div>
         <div class="fl w-100 w-30-l pa2">
+            <a class="mb3 tr w-100 db b link dark-blue underline-hover" href="{{ download_url }}">Download as CSV</a>
             <label class="mb3 dib lh-title">
                 <input type='checkbox' class="mr1" name="inactive" value="include_inactive" />
                 Include inactive organisations
