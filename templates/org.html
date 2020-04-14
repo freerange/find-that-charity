@@ -19,6 +19,13 @@
 </span>
 {% endmacro %}
 
+{%- macro get_filetype(url) %}
+{%- if url.endswith("csv") %}(csv)
+{%- elif url.endswith("zip") %}(zip)
+{%- elif url.endswith("xlsx") %}(excel)
+{%- endif %}
+{%- endmacro %}
+
 {% block headscripts %}
 {{ super() }}
 <script type="application/ld+json">
@@ -244,7 +251,8 @@
 
   {% if orgs.data.url or orgs.links %}
   <article class="message is-info">
-    <h4 class="ma0 pa0">Links</h4>
+    <h4 class="ma0 pa0">More about this organisation</h4>
+    <p class="f6 gray">Find that Charity is not responsible for the content of external websites</p>
     <div class="message-body">
       <ul class="mb4 mt2 list mh0 pa0 f5">
         {% for k, v in orgs.data.url.items() %}
@@ -329,18 +337,23 @@
     <p class="mv1 pa0 f5"><strong>Last updated:</strong> {{ "{:%Y-%m-%d}".format(sources[s].modified) }}</p>
     <p class="mv1 pa0 f5">
       <a class="link underline dark-blue" href="{{ sources[s].license }}">{{ sources[s].license_name }}</a>
-      {% for d in sources[s].distribution %}
-        {% if loop.length > 1 %}
-        <li>
-        <a class="link underline dark-blue" href="{{ d.accessURL }}">{{ d.title }}</a>
-        <a class="link underline dark-blue" href="{{ d.downloadURL }}">Download data</a>
-        </li>
-        {% else %}
-        | <a class="link underline dark-blue" href="{{ d.accessURL }}">Access data</a>
-        | <a class="link underline dark-blue" href="{{ d.downloadURL }}">Download data</a><br>
-        {% endif %}
-      {% endfor %}
+      {% if sources[s].distribution|length == 1 %}
+      | <a class="link underline dark-blue" href="{{ sources[s].distribution[0].accessURL }}">Access data</a>
+      | <a class="link underline dark-blue" href="{{ sources[s].distribution[0].downloadURL }}" title="Download links may be large files">
+          Download data {{ get_filetype(sources[s].distribution[0].downloadURL) }}
+        </a><br>
+      {% endif %}
     </p>
+      {% if sources[s].distribution|length > 1 %}
+      <ul class="f5">
+      {% for d in sources[s].distribution %}
+        <li class="">
+          <a class="link underline dark-blue" href="{{ d.accessURL }}">{{ d.title }}</a>
+          <a class="link underline dark-blue" href="{{ d.downloadURL }}" title="Download links may be large files">Download data {{ get_filetype(d.downloadURL) }}</a>
+        </li>
+      {% endfor %}
+      </ul>
+      {% endif %}
   </div>
   {% endfor %}
 </div>
