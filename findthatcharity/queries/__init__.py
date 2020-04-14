@@ -140,7 +140,7 @@ def autocomplete_query(term, orgtype='all'):
     }
     
     if not orgtype or orgtype == 'all':
-        orgtype = [o['key'] for o in templates.env.globals["org_types"]]
+        orgtype = [o['key'] for o in templates.env.globals["org_types"].values()]
 
     doc["suggest"]["suggest-1"]["completion"]["contexts"] = {
         "organisationType": orgtype
