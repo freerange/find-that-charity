@@ -77,7 +77,7 @@ dokku enter ftc-scrapers cron sh ./crawl_all.sh
 
 ```bash
 dokku run ftc python manage.py create-index
-dokku run ftc python manage.py indexdata
+dokku run ftc python manage.py import-data
 ```
 
 ## Step 7. Set up cron job so that it runs often
