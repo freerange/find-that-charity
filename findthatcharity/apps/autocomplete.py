@@ -26,6 +26,7 @@ async def index(request):
             {
                 "label": x["_source"]["name"],
                 "value": x["_id"],
+                "url": f'/orgid/{x["_id"]}',
                 "orgtypes": x["_source"]["organisationType"],
             } for x in res.get("suggest", {}).get("suggest-1", [])[0]["options"]
         ]

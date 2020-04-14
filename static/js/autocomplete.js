@@ -67,7 +67,10 @@ const updateAutoComplete = (results, el, q) => {
     let ul = createEl('ul', { classList: 'list pa0 ma0 f6 br2 b--light-gray bw1 ba' });
     results.forEach((r) => {
         let li = createEl('li', { classList: 'pa3 bb b--light-gray' });
-        let a = createEl('a', { classList: 'link dark-blue underline-hover pointer' });
+        let a = createEl('a', { 
+            classList: 'link dark-blue underline-hover pointer',
+        });
+        a.setAttribute('href', r.url);
         a.append(
             getHighlightedText(r.label, q)
         );
@@ -81,38 +84,51 @@ const updateAutoComplete = (results, el, q) => {
     el.classList.remove('dn');
 }
 
-const els = document.getElementsByClassName('search-autocomplete');
-const resultsContainer = document.getElementById('autocomplete-results');
 var latestTargetValue = null;
-Array.from(els).forEach((el) => {
-    el.addEventListener('keyup', debounce((e) => {
-        e.preventDefault();
-        let v = e.target.value;
-        latestTargetValue = v;
-        if (v.length <= 3) {
-            updateAutoComplete([], resultsContainer, v);
-            return;
-        }
-        fetch(`/autocomplete?q=${v}`)
-            .then((r) => {
-                var url = new URL(r.url);
-                var urlq = new URLSearchParams(url.search);
-                if (urlq.get('q') == latestTargetValue) {
-                    return r.json();
-                }
-                throw new Error("Not searching for latest value");
-            })
-            .then((r) => {
-                updateAutoComplete(
-                    r["results"],
-                    resultsContainer,
-                    v
-                );
-            })
-            .catch((e) => {
-                if (e.message !== "Not searching for latest value") {
-                    throw e;
-                }
-            });
-    }, 300));
+const fetchAutocomplete = () => {
+    const resultsContainer = document.getElementById('autocomplete-results');
+    const q = document.getElementById('search-autocomplete-q');
+    const orgtype = document.getElementById('search-autocomplete-orgtype').value;
+    let v = q.value;
+    latestTargetValue = v;
+    if (v.length <= 3) {
+        updateAutoComplete([], resultsContainer, v);
+        return;
+    }
+    let urlparams = {q: v};
+    if(orgtype){
+        urlparams['orgtype'] = orgtype;
+    }
+    urlparams = new URLSearchParams(urlparams);
+    let url = `/autocomplete?${urlparams.toString()}`;
+    fetch(url)
+        .then((r) => {
+            var url = new URL(r.url);
+            var urlq = new URLSearchParams(url.search);
+            if (urlq.get('q') == latestTargetValue) {
+                return r.json();
+            }
+            throw new Error("Not searching for latest value");
+        })
+        .then((r) => {
+            updateAutoComplete(
+                r["results"],
+                resultsContainer,
+                v
+            );
+        })
+        .catch((err) => {
+            if (err.message !== "Not searching for latest value") {
+                throw err;
+            }
+        });
+}
+
+document.getElementById('search-autocomplete-q').addEventListener('keyup', debounce((e) => {
+    e.preventDefault();
+    fetchAutocomplete();
+}, 300));
+document.getElementById('search-autocomplete-orgtype').addEventListener('change', (e) => {
+    e.preventDefault();
+    fetchAutocomplete();
 });

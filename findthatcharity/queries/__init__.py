@@ -4,6 +4,7 @@ import json
 import time
 
 from ..templates import templates
+from ..utils import slugify
 
 with open(os.path.join(os.path.dirname(__file__), './es_config.json'), 'r') as f:
     ES_CONFIG = json.load(f)
@@ -141,6 +142,8 @@ def autocomplete_query(term, orgtype='all'):
     
     if not orgtype or orgtype == 'all':
         orgtype = [o['key'] for o in templates.env.globals["org_types"].values()]
+    elif orgtype:
+        orgtype = [templates.env.globals["org_types"].get(slugify(orgtype), {}).get('key')]
 
     doc["suggest"]["suggest-1"]["completion"]["contexts"] = {
         "organisationType": orgtype

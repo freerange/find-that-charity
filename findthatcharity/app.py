@@ -7,7 +7,7 @@ from starlette.middleware.cors import CORSMiddleware
 from .queries import search_query, random_query
 from .db import es, fetch_all_sources, ORGTYPES
 from . import settings
-from .utils import JSONResponseDate as JSONResponse, pagination, pagination_request
+from .utils import JSONResponseDate as JSONResponse, pagination, pagination_request, slugify
 from .apps import randcharity, reconcile, charity, autocomplete, orgid, feeds, csvdata
 from .templates import templates
 from .classes.org import Org
@@ -64,12 +64,13 @@ def search_return(query, request):
     Fetch search results and display on a template
     """
     p = pagination_request(request)
+    orgtype = ORGTYPES.get(slugify(request.query_params.get("orgtype")), {})
     res = es.search_template(
         index=settings.ES_INDEX,
         doc_type=settings.ES_TYPE,
         body=search_query(
             query,
-            orgtype=request.query_params.get("orgtype"),
+            orgtype=orgtype.get('key'),
             p=p['p'],
             size=p['size'],
         ),
@@ -84,7 +85,7 @@ def search_return(query, request):
         },
         'term': request.query_params.get("q"),
         'pages': pagination(p["p"], p["size"], res.get("hits", {}).get("total")),
-        'selected_org_type': request.query_params.get("orgtype"),
+        'selected_org_type': orgtype.get('slug'),
     })
 
 routes = [
