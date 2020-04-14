@@ -9,17 +9,29 @@
     </div>
     <p>Lookup individual charities based on their charity number:
         <ul>
-            <li>Charity registered in England and Wales: <a class="underline dark-blue f4" href="/charity/225922">/charity/225922</a></li>
-            <li>Charity registered in Scotland: <a class="underline dark-blue f4" href="/charity/SC003558">/charity/SC003558</a></li>
-            <li>Charity registered in Northern Ireland: <a class="underline dark-blue f4" href="/charity/NIC100012">/charity/NIC100012</a></li>
+            <li>Charity registered in England and Wales: 
+                <a class="underline dark-blue f4" href="/charity/{{ examples['registered-charity-england-and-wales']|replace('GB-CHC-', '') }}">
+                    /charity/{{ examples['registered-charity-england-and-wales']|replace('GB-CHC-', '') }}
+                </a>
+            </li>
+            <li>Charity registered in Scotland: 
+                <a class="underline dark-blue f4" href="/charity/{{ examples['registered-charity-scotland']|replace('GB-SC-', '') }}">
+                    /charity/{{ examples['registered-charity-scotland']|replace('GB-SC-', '') }}
+                </a>
+            </li>
+            <li>Charity registered in Northern Ireland:
+                <a class="underline dark-blue f4" href="/charity/{{ examples['registered-charity-northern-ireland']|replace('GB-NIC-', 'NIC') }}">
+                    /charity/{{ examples['registered-charity-northern-ireland']|replace('GB-NIC-', 'NIC') }}
+                </a>
+            </li>
         </ul>
         These can also be accessed as json data by adding <code>.json</code> to the end of the url
     </p>
     <p>Lookup other types of organisations with an <a class="underline dark-blue f4" href="http://org-id.guide/" target="_blank">OrgID</a>:
         <ul>
-            <li>Community Interest Company: <a class="underline dark-blue f4" href="/orgid/GB-COH-11040152">/orgid/GB-COH-11040152</a></li>
-            <li>Local Authority: <a class="underline dark-blue f4" href="/orgid/GB-LAE-VAL">/orgid/GB-LAE-VAL</a></li>
-            <li>University: <a class="underline dark-blue f4" href="/orgid/GB-EDU-133817">/orgid/GB-EDU-133817</a></li>
+            <li>Community Interest Company: <a class="underline dark-blue f4" href="/orgid/{{ examples['community-interest-company'] }}">/orgid/{{ examples['community-interest-company'] }}</a></li>
+            <li>Local Authority: <a class="underline dark-blue f4" href="/orgid/{{ examples['local-authority'] }}">/orgid/{{ examples['local-authority'] }}</a></li>
+            <li>University: <a class="underline dark-blue f4" href="/orgid/{{ examples['universities'] }}">/orgid/{{ examples['universities'] }}</a></li>
         </ul>
         These can also be accessed as json data by adding <code>.json</code> to the end of the url
     </p>

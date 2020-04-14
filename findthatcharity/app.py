@@ -4,8 +4,8 @@ from starlette.staticfiles import StaticFiles
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 
-from .queries import search_query
-from .db import es, fetch_all_sources
+from .queries import search_query, random_query
+from .db import es, fetch_all_sources, ORGTYPES
 from . import settings
 from .utils import JSONResponseDate as JSONResponse, pagination, pagination_request
 from .apps import randcharity, reconcile, charity, autocomplete, orgid, feeds, csvdata
@@ -20,8 +20,30 @@ async def index(request):
             query,
             request,
         )
+
+    examples = {
+        'registered-charity-england-and-wales': 'GB-CHC-1177548',
+        'registered-charity-scotland': 'GB-SC-SC007427',
+        'registered-charity-northern-ireland': 'GB-NIC-104226',
+        'community-interest-company': 'GB-COH-08255580',
+        'local-authority': 'GB-LAE-IPS',
+        'universities': 'GB-EDU-133808',
+    }
+    # for r in examples.keys():
+    #     org = es.search(
+    #         index=settings.ES_INDEX,
+    #         doc_type=settings.ES_TYPE,
+    #         size=1,
+    #         body=random_query(True, orgtype=ORGTYPES[r]['key']),
+    #         ignore=[404],
+    #         _source=False,
+    #     ).get('hits', {}).get('hits', [])
+    #     if org:
+    #         examples[r] = org[0]["_id"]
+
     return templates.TemplateResponse('index.html', {
         'request': request,
+        'examples': examples
     })
 
 async def about(request):
