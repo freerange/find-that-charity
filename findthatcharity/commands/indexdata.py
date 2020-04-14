@@ -212,6 +212,11 @@ def import_data(es_url=settings.ES_URL,
         orgids = list(OrderedDict.fromkeys([i[0] for i in ids]))
         names = list(OrderedDict.fromkeys([i[4] for i in ids]))
         alternateName = list(set(chain.from_iterable([[i["name"]] + i["alternateName"] for i in records])))
+        weight = 1
+        try:
+            weight = max(1, math.ceil(math.log1p((i.get("latestIncome", 0) or 0))))
+        except ValueError:
+            weight = 1
         
         merged_orgs.append({
             "_index": es_index,
@@ -224,7 +229,7 @@ def import_data(es_url=settings.ES_URL,
             "alternateName": [n for n in alternateName if n != names[0]],
             "complete_names": {
                 "input": get_complete_names(alternateName),
-                "weight": max(1, math.ceil(math.log1p((i.get("latestIncome", 0) or 0))))
+                "weight": weight,
             },
             "organisationType": list(set(chain.from_iterable([i["organisationType"] for i in records]))),
             "sources": list(set([i["source"] for i in records])),
