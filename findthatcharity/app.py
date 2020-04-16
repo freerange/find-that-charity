@@ -80,7 +80,7 @@ def search_return(query, request):
     return templates.TemplateResponse('search.html', {
         'request': request,
         'res': {
-            "hits": [Org(o["_id"], o["_source"]) for o in res.get("hits", {}).get("hits", [])],
+            "hits": [Org(o["_id"], **o["_source"]) for o in res.get("hits", {}).get("hits", [])],
             "total": res.get("hits", {}).get("total"),
         },
         'term': request.query_params.get("q"),

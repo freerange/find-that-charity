@@ -5,7 +5,7 @@ from ..utils import JSONResponseDate as JSONResponse
 from .. import settings
 from .orgid import get_orgs_from_orgid
 from ..templates import templates
-from ..classes.org import MergedOrg, Org
+from ..classes.org import OrgRecord, Org
 
 app = Starlette()
 

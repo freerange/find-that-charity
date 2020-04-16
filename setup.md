@@ -76,8 +76,8 @@ dokku enter ftc-scrapers cron sh ./crawl_all.sh
 ## Step 6. Set up the elasticsearch index
 
 ```bash
-dokku run ftc python manage.py create-index
-dokku run ftc python manage.py import-data
+dokku run ftc python findthatcharity/manage.py create-index
+dokku run ftc python findthatcharity/manage.py import-data
 ```
 
 ## Step 7. Set up cron job so that it runs often

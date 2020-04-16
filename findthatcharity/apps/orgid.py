@@ -7,11 +7,11 @@ from starlette.responses import RedirectResponse, Response
 from elasticsearch.helpers import scan
 
 from ..queries import orgid_query, random_query, search_query
-from ..db import es, ORGTYPES
+from ..db import es, ORGTYPES, db_con, organisation
 from .. import settings
 from ..utils import JSONResponseDate as JSONResponse, pagination, pagination_request
 from ..templates import templates
-from ..classes.org import MergedOrg, Org
+from ..classes.org import OrgRecord, Org
 
 
 async def orgid_type_download(request):
@@ -111,7 +111,7 @@ async def orgid_type(request):
         'term': q,
         'request': request,
         'res': {
-            "hits": [Org(o["_id"], o["_source"]) for o in res.get("hits", {}).get("hits", [])],
+            "hits": [Org(o["_id"], **o["_source"]) for o in res.get("hits", {}).get("hits", [])],
             "total": res.get("hits", {}).get("total"),
         },
         'query': base_orgtype + [
@@ -149,11 +149,13 @@ async def orgid_html(request):
         orgid = orgid[:-8]
         template = 'org_preview.html'
 
-    orgs = get_orgs_from_orgid(orgid)
-    if orgs:
+    org = Org.from_es(orgid, es, settings.ES_INDEX, settings.ES_TYPE)
+    if org:
+        org.fetch_records(db_con, organisation)
+        org.fetch_org_links(db_con)
         return templates.TemplateResponse(template, {
             'request': request,
-            'orgs': orgs,
+            'org': org,
             'key_types': settings.KEY_TYPES,
             # 'parent_orgs': get_parents(orgs),
             # 'child_orgs': get_children(orgs),

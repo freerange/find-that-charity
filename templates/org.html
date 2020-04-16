@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
-{% set heading = orgs["name"] %} 
+{% from 'components/org_record.html' import org_record %}
+{% from 'components/data_source.html' import data_source %}
+{% set heading = org["name"] %} 
 {% set subtitle = "Org ID: {}{}".format(
-    orgs["id"],
-    "" if orgs.active else " | Inactive"
+    org["id"],
+    "" if org.active else " | Inactive"
 ) %}
 
 {% macro show_sources(v) %}
@@ -19,64 +21,57 @@
 </span>
 {% endmacro %}
 
-{%- macro get_filetype(url) %}
-{%- if url.endswith("csv") %}(csv)
-{%- elif url.endswith("zip") %}(zip)
-{%- elif url.endswith("xlsx") %}(excel)
-{%- endif %}
-{%- endmacro %}
-
 {% block headscripts %}
 {{ super() }}
-<script type="application/ld+json">
+{# <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Organization",
-  {% if orgs.data.url %}
-  "url": {{ orgs.data.url.values()|map(attribute='value')|list|first|tojson }},
+  {% if org.url %}
+  "url": {{ org.url.values()|map(attribute='value')|list|first|tojson }},
   {% endif %}
-  "name": {{ orgs.name|tojson }},
-  "identifier": {{ orgs.id|tojson }},
-  {% if orgs.data.description %}
-  "description": {{ orgs.data.description.values()|map(attribute='value')|reject('equalto', '')|list|tojson }},
+  "name": {{ org.name|tojson }},
+  "identifier": {{ org.id|tojson }},
+  {% if org.description %}
+  "description": {{ org.description.values()|map(attribute='value')|reject('equalto', '')|list|tojson }},
   {% endif %}
-  {% if orgs.data.alternateName %}
-  "alternateName": {{ orgs.data.alternateName.values()|map(attribute='value')|list|tojson }},
+  {% if org.alternateName %}
+  "alternateName": {{ org.alternateName.values()|map(attribute='value')|list|tojson }},
   {% endif %}
-  {% if orgs.data.dateRegistered %}
-  "foundingDate": {{ orgs.data.dateRegistered.values()|map(attribute='value')|list|first|string|tojson }},
+  {% if org.dateRegistered %}
+  "foundingDate": {{ org.dateRegistered.values()|map(attribute='value')|list|first|string|tojson }},
   {% endif %}
-  {% if not orgs.active %}
-  "dissolutionDate": {{ orgs.data.dateRemoved.values()|map(attribute='value')|list|last|string|tojson }},
+  {% if not org.active %}
+  "dissolutionDate": {{ org.dateRemoved.values()|map(attribute='value')|list|last|string|tojson }},
   {%- endif %}
-  "sameAs": {{ orgs.data.orgIDs.values()|map(attribute='value')|list|tojson }},
+  "sameAs": {{ org.orgIDs.values()|map(attribute='value')|list|tojson }},
 }
-</script>
+</script> #}
 {% endblock %}
 
 {% block header %}
 <header class="fl w-100 ph3 ph5-ns entry-content lh-copy f4">
   <h2 class="f2-ns mt4 mb0 f3 lh-solid normal">
-      {{ orgs["name"] }}
+      {{ org["name"] }}
   </h2>
   <div class="mv3 w-100">
-    {% for v in orgs.data.orgIDs.values()|map(attribute='value')|list|prioritise %}
-    {% set org_id = v.split("-") %}
-    {# <a href="http://org-id.guide/list/{{ '-'.join(org_id[0:2]) }}" target="_blank" class="tag is-dark is-medium">{{ "-".join(org_id[0:2]) }}</a> #}
-    <a href="/orgid/{{ v }}" class="link dib bg-dark-blue white f4 pv1 ph2 br2 code mr2 mb2">{{ "-".join(org_id) }}</a>
+    <a href="/orgid/{{ org.id }}" class="link dib bg-dark-blue white f4 pv1 ph2 br2 code mr2 mb2">{{ org.id }}</a>
+    {% for v in org.get_orgids() if v.value != org.id %}
+    <a href="/orgid/{{ v.value }}" class="link dib bg-light-blue dark-blue f4 pv1 ph2 br2 code mr2 mb2">{{ v.value }}</a>
     {% endfor %}
+    <a href="#" class="blue link underline-hover f7">[What are these?]</a>
   </div>
   <div class="mv3 w-100">
-    {% if orgs.active %}
+    {% if org.active %}
     <span class="pv1 ph2 br2 bg-green white dib mr2 mb2">Active</span>
     {% else %}
     <span class="pv1 ph2 br2 bg-green white dib mr2 mb2">Inactive</span>
     {% endif %}
-    {% for k, v in orgs.data.organisationType.items() if v.value in key_types %}
-    <a class="pv1 ph2 br2 bg-light-gray near-black dib mr2 mb2 link" href="/orgid/type/{{ v.value|slugify }}">{{ v.value }}</a>
+    {% for k, v in org.organisationType.items() if v in key_types %}
+    <a class="pv1 ph2 br2 bg-light-gray near-black dib mr2 mb2 link" href="/orgid/type/{{ k }}">{{ v }}</a>
     {% endfor %}
-    {% for k, v in orgs.data.organisationType.items() if v.value not in key_types %}
-    <a class="pv1 ph2 br1 bg-light-gray near-black dib mr2 mb2 link f5" href="/orgid/type/{{ v.value|slugify }}">{{ v.value }}</a>
+    {% for k, v in org.organisationType.items() if v not in key_types %}
+    <a class="pv1 ph2 br1 bg-light-gray near-black dib mr2 mb2 link f5" href="/orgid/type/{{ k }}">{{ v }}</a>
     {% endfor %}
   </div>
 </header>
@@ -86,192 +81,66 @@
 <div class="w-100 w-80-l fl">
   <div class="measure-wide f5">
     <div class="content">
-      {% for k, v in orgs.data.description.items() if v.value %}
-      {% if loop.first %}<h4>Description</h4>{% endif %}
+      {% set description = org.first("description") %}
+      {% if description %}
+      <h4>Description</h4>
       <p>
-        {{ v.value }}
-        {{ show_sources(v) }}
+        {{ description.value }}
+        <span class="gray f7 dib">
+          [Source: 
+          {{ description.orgid }},
+          {{ sources.get(description.source).publisher.name -}}
+          ]
+        </span>
       </p>
-      {% endfor %}
-      {% if orgs.names %}
+      {% endif %}
+      {% if org.alternateName %}
       <h4>Also known as</h4>
       <ul>
-        {% for k, v in orgs.names.items() %}
-        <li>{{ v.value }} {{ show_sources(v) }}</li>
+        {% for n in org.alternateName[0:10] %}
+        <li>{{ n }}</li>
         {% endfor %}
+        {% if org.alternateName|length > 10 %}
+        <li>...and {{ "{:,.0f}".format(org.alternateName|length - 10) }} other names</li>
+        {% endif %}
       </ul>
       {% endif %}
     </div>
   </div>
+
   <div class="w-100 flex flex-wrap">
-
-    {% for org in orgs.orgs %}
+    {% for record in org.records %}
     <div class="w-third-l w-50-m w-100 f5 pr3 pb3">
-      <div class="br2 b--light-gray ba bw1 h-100">
-        <header class="bb b--light-gray bw1 pa3">
-          <h3 class="ma0 pa0 header-font tracked-tight">
-            {{ org.name }}
-          </h3>
-          <div class="card-header-title is-block tracked-tight">
-            <span class="f6 dib">Organisation record from </span>
-            {% for s in org.sources if sources.get(s) %}
-            <a href="#data-source-{{ s }}" class="link b blue f5 dib">
-              {{ sources[s].publisher.name }}
-            </a><br>
-            <i class="f6 gray">Last updated {{ "{:%d %B %Y}".format(sources[s].modified) }}</i>
-            {% endfor %}
-          </div>
-        </header>
-        <div class="pa3 f6">
-          <div class="w-100">
-            {% if org.active %}
-            <span class="pv1 ph2 br1 bg-green white dib mr2 mb2 link">Active</span>
-            {% else %}
-            <span class="pv1 ph2 br1 bg-red white dib mr2 mb2 link">Inactive</span>
-            {% endif %}
-            {% for t in org.organisationType %}
-            <span class="pv1 ph2 br1 bg-light-gray near-black dib mr2 mb2">{{ t }}</span>
-            {% endfor %}
-          </div>
-          {% for v in org.orgIDs %}
-            {% if v.startswith("GB-COH-") %}
-              <p>
-                <strong class="is-size-7">Company number</strong><br>
-                <a class="link dark-blue underline-hover f4" href="https://beta.companieshouse.gov.uk/company/{{ v.replace('GB-COH-', '') }}" target="_blank">{{ v.replace('GB-COH-', '') }}</a>
-              </p>
-            {% endif %}
-            {% if v.startswith("GB-CHC-") %}
-              <p>
-                <strong class="is-size-7">CCEW Charity number</strong><br>
-                <a class="link dark-blue underline-hover f4" href="http://beta.charitycommission.gov.uk/charity-details/?regid={{ v.replace('GB-CHC-', '') }}&subid=0" target="_blank">{{ v.replace('GB-CHC-', '') }}</a>
-              </p>
-            {% endif %}
-            {% if v.startswith("GB-NIC-") %}
-              <p>
-                <strong class="is-size-7">CCNI Charity number</strong><br>
-                <a class="link dark-blue underline-hover f4" href="http://www.charitycommissionni.org.uk/charity-details/?regid={{ v.replace('GB-NIC-', '').replace('NIC', '')}}&subid=0" target="_blank">{{ v.replace('GB-NIC-', '') }}</a>
-              </p>
-            {% endif %}
-            {% if v.startswith("GB-SC-") %}
-              <p>
-                <strong class="is-size-7">OSCR Charity number</strong><br>
-                <a class="link dark-blue underline-hover f4" href="https://www.oscr.org.uk/about-charities/search-the-register/charity-details?number={{ v.replace('GB-SC-', '') }}" target="_blank">{{ v.replace('GB-SC-', '') }}</a>
-              </p>
-            {% endif %}
-          {% endfor %}
-          <p>
-            <strong class="is-size-7">
-              Identifiers 
-              <span class="is-size-7">(using <a class="link underline-hover blue" href="http://org-id.guide/about" target="_blank" class="">org-id</a>)</span>
-            </strong><br>
-            <ul class="list ma0 pa0">
-            {% for orgid in org.orgIDs|prioritise %}
-              <li class="dib bg-dark-blue white f6 pv0 ph1 br1 code mr1 mb1">{{orgid}}</li>
-            {% endfor %}
-            </ul>
-          </p>
-          {% if org.dateRegistered %}
-          <p>
-            <strong class="is-size-7">Registered</strong><br>
-            {{ "{:%d %B %Y}".format(org.dateRegistered) }}
-          </p>
-          {% endif %}
-          {% if org.dateRemoved %}
-          <p>
-            <strong class="is-size-7">Removed</strong><br>
-            {{ "{:%d %B %Y}".format(org.dateRemoved) }}
-          </p>
-          {% endif %}
-          {% if org.postalCode %}
-          <p>
-            <strong class="is-size-7">Postcode</strong><br>
-            <span>{{ org.postalCode }}</span>
-          </p>
-          {% endif %}
-          {% if org.url %}
-          <p>
-            <strong class="is-size-7">Website</strong><br>
-            <a href="{{ org.url }}" class="link underline-hover blue">{{ org.url|replace("http://", "")|replace("https://", "") }}</a>
-          </p>
-          {% endif %}
-          {% if org.domain %}
-          <p>
-            <strong class="is-size-7">Domain</strong><br>
-            <code>{{ org.domain }}</code>
-          </p>
-          {% endif %}
-          {% if org.latestIncome %}
-          <p>
-            <strong class="is-size-7">Latest income</strong><br>
-            &pound;{{ "{:,.0f}".format( org.latestIncome )}}
-            {% if org.latestIncomeDate %}
-            {{ org.latestIncomeDate }}
-            {% endif %}
-          </p>
-          {% endif %}
-        </div>
-      </div>
-      <br>
-      {# {% if charity["geo"]["location"] %}
-      <div class="card">
-        <header class="card-header">
-          <p class="card-header-title">Location</p>
-        </header>
-        <div class="card-content">
-          <div class="content">
-            <table class="table">
-              <tbody>
-                {% if charity.get("geo", {}).get("location") %}
-                <tr>
-                  <th>Latitude/longitude</th>
-                  <td>
-                    <a href="#">
-                      {{ charity.get("geo", {}).get("location",{}).get("lat") }},
-                      {{ charity.get("geo", {}).get("location",{}).get("lon") }}
-                    </a>
-                  </td>
-                </tr>
-                {% endif %}
-                <!--<tr><th>Local Authority</th><td>{{ charity.get("geo", {}).get("areas",[]) }}</td></tr>-->
-                <tr><th>Postcode</th><td>{{ charity.get("geo", {}).get("postcode") }}</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      {% endif %} #}
-
-
+    {{ org_record(record, sources) }}
     </div>
     {% endfor %}
   </div>
+
 </div>
+
 
 <div class="w-100 w-20-l fl">
 
-  {% if orgs.data.url or orgs.links %}
   <article class="message is-info">
     <h4 class="ma0 pa0">More about this organisation</h4>
     <p class="f6 gray">Find that Charity is not responsible for the content of external websites</p>
     <div class="message-body">
       <ul class="mb4 mt2 list mh0 pa0 f5">
-        {% for k, v in orgs.data.url.items() %}
-        <li class="w-100 mb2"><a class="link dark-blue underline" href="{{ v.value }}" target="_blank">Organisation website</a> {{ show_sources(v) }}</li>
-        {% endfor %}
-        {% for link, text in orgs.links %}
+        {# <li class="w-100 mb2"><a class="link dark-blue underline" href="{{ v.value }}" target="_blank">Organisation website</a> {{ show_sources(v) }}</li>
+        {% endfor %} #}
+        {% for link, text in org.main.get_links() %}
         <li class="w-100 mb2"><a class="link dark-blue underline" href="{{ link }}" target="_blank">{{ text }}</a></li>
         {% endfor %}
       </ul>
     </div>
   </article>
-  {% endif %}
   
-  {% if orgs.data.location.keys()|length %}
+  {# {% if org.location.keys()|length %}
   <article class="message is-info">
     <h4 class="ma0 pa0">Locations</h4>
     <div class="message-body">
       <ul class="mb4 mt2 list mh0 pa0 f5">
-      {% for k, v in orgs.data.location.items() %}
+      {% for k, v in org.location.items() %}
         {% if v.value.geoCode and v.value.geoCode|regex_search("[ENWS][0-9]{8}") %}
         <li class="w-100 mb2">
           <a class="link dark-blue underline-hover" href="https://findthatpostcode.uk/areas/{{ v.value.geoCode }}.html" target="_blank">{{ v.value.name }}</a>
@@ -289,16 +158,16 @@
       </ul>
     </div>
   </article>
-  {% endif %}
+  {% endif %} #}
   
-  {% if orgs.data.parent.keys()|length %}
+  {# {% if org.parent.keys()|length %}
   <article class="message is-info">
     <h4 class="ma0 pa0">Parent organisations</h4>
     <div class="message-body">
       <ul class="mb4 mt2 list mh0 pa0 f5">
-      {% for k, v in orgs.data.parent.items() %}
+      {% for k, v in org.parent.items() %}
         {% if v.value in parent_orgs %}
-        <li class="w-100 mb2"><a class="link dark-blue underline-hover" href="/orgid/{{ v.value }}" target="_blank">{{ parent_orgs[v.value].name }}</a> {{ show_sources(v) }}</li>
+        <li class="w-100 mb2"><a class="link dark-blue underline-hover" href="/orgid/{{ v.value }}" target="_blank">{{ parent_org[v.value].name }}</a> {{ show_sources(v) }}</li>
         {% else %}
         <li class="w-100 mb2"><a class="link dark-blue underline-hover" href="/orgid/{{ v.value }}" target="_blank">{{ v.value }}</a> {{ show_sources(v) }}</li>
         {% endif %}
@@ -319,42 +188,15 @@
       </ul>
     </div>
   </article>
-  {% endif %}
+  {% endif %} #}
 
 </div>
 
 <div class="w-100 cf fl">
   <h3 class="ma0 pa0">Data sources</h3>
-  {% for s in orgs.sources if sources.get(s) %}
-  <div class="mt4 measure-wide">
-    <h4 class="ma0 pa0" id='data-source-{{s}}'><a class="link dark-blue underline-hover" href="{{ sources[s].publisher.website }}">{{ sources[s].publisher.name }}</a></h4>
-    {% if sources[s].title != sources[s].publisher.name %}
-    <p class="ma0 pa0 f5">{{ sources[s].title }}</p>
-    {% endif %}
-    {% if sources[s].description %}
-    <p class="mv1 pa0 dark-gray f5">{{ sources[s].description }}</p>
-    {% endif %}
-    <p class="mv1 pa0 f5"><strong>Last updated:</strong> {{ "{:%Y-%m-%d}".format(sources[s].modified) }}</p>
-    <p class="mv1 pa0 f5">
-      <a class="link underline dark-blue" href="{{ sources[s].license }}">{{ sources[s].license_name }}</a>
-      {% if sources[s].distribution|length == 1 %}
-      | <a class="link underline dark-blue" href="{{ sources[s].distribution[0].accessURL }}">Access data</a>
-      | <a class="link underline dark-blue" href="{{ sources[s].distribution[0].downloadURL }}" title="Download links may be large files">
-          Download data {{ get_filetype(sources[s].distribution[0].downloadURL) }}
-        </a><br>
-      {% endif %}
-    </p>
-      {% if sources[s].distribution|length > 1 %}
-      <ul class="f5">
-      {% for d in sources[s].distribution %}
-        <li class="">
-          <a class="link underline dark-blue" href="{{ d.accessURL }}">{{ d.title }}</a>
-          <a class="link underline dark-blue" href="{{ d.downloadURL }}" title="Download links may be large files">Download data {{ get_filetype(d.downloadURL) }}</a>
-        </li>
-      {% endfor %}
-      </ul>
-      {% endif %}
-  </div>
+
+  {% for s in org.sources if sources.get(s) %}
+  {{ data_source(sources[s], org) }}
   {% endfor %}
 </div>
 {% endblock %}
