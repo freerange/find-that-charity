@@ -8,7 +8,7 @@ from .queries import search_query, random_query
 from .db import es, fetch_all_sources, ORGTYPES
 from . import settings
 from .utils import JSONResponseDate as JSONResponse, pagination, pagination_request, slugify
-from .apps import randcharity, reconcile, charity, autocomplete, orgid, feeds, csvdata
+from .apps import randcharity, reconcile, charity, autocomplete, orgid, feeds, csvdata, admin
 from .templates import templates
 from .classes.org import Org
 
@@ -101,6 +101,7 @@ routes = [
     Mount('/feeds', feeds.app),
     Mount('/orgid', routes=orgid.routes, name='orgid'),
     Mount('/adddata', csvdata.app),
+    Mount('/admin', routes=admin.routes, name='admin'),
 ]
 middleware = [
     Middleware(
