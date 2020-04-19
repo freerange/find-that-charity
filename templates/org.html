@@ -121,6 +121,8 @@
 
 <div class="w-100 w-20-l fl">
 
+  {% set links = org.main.get_links()|list %}
+  {% if links %}
   <article class="message is-info">
     <h4 class="ma0 pa0">More about this organisation</h4>
     <p class="f6 gray">Find that Charity is not responsible for the content of external websites</p>
@@ -128,37 +130,38 @@
       <ul class="mb4 mt2 list mh0 pa0 f5">
         {# <li class="w-100 mb2"><a class="link dark-blue underline" href="{{ v.value }}" target="_blank">Organisation website</a> {{ show_sources(v) }}</li>
         {% endfor %} #}
-        {% for link, text in org.main.get_links() %}
+        {% for link, text in links %}
         <li class="w-100 mb2"><a class="link dark-blue underline" href="{{ link }}" target="_blank">{{ text }}</a></li>
         {% endfor %}
       </ul>
     </div>
   </article>
+  {% endif %}
   
-  {# {% if org.location.keys()|length %}
+  {% if org.main.location|length %}
   <article class="message is-info">
     <h4 class="ma0 pa0">Locations</h4>
     <div class="message-body">
       <ul class="mb4 mt2 list mh0 pa0 f5">
-      {% for k, v in org.location.items() %}
-        {% if v.value.geoCode and v.value.geoCode|regex_search("[ENWS][0-9]{8}") %}
+      {% for v in org.main.location %}
+        {% if v.geoCode and v.geoCode|regex_search("[ENWS][0-9]{8}") %}
         <li class="w-100 mb2">
-          <a class="link dark-blue underline-hover" href="https://findthatpostcode.uk/areas/{{ v.value.geoCode }}.html" target="_blank">{{ v.value.name }}</a>
-          {% if v.value.geoCodeType %}({{ v.value.geoCodeType }}){% endif %}
-          {{ show_sources(v) }}
+          <a class="link dark-blue underline-hover" href="https://findthatpostcode.uk/areas/{{ v.geoCode }}.html" target="_blank">{{ v.name }}</a>
+          {% if v.geoCodeType %}({{ v.geoCodeType }}){% endif %}
+          {# {{ show_sources(v) }} #}
         </li>
         {% else %}
         <li class="w-100 mb2">
-          {{ v.value.name }}
-          {% if v.value.geoCodeType %}({{ v.value.geoCodeType }}){% endif %}
-          {{ show_sources(v) }}
+          {{ v.name }}
+          {% if v.geoCodeType %}({{ v.geoCodeType }}){% endif %}
+          {# {{ show_sources(v) }} #}
         </li>
         {% endif %}
       {% endfor %}
       </ul>
     </div>
   </article>
-  {% endif %} #}
+  {% endif %}
   
   {# {% if org.parent.keys()|length %}
   <article class="message is-info">

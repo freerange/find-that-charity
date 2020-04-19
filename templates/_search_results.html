@@ -26,10 +26,12 @@
         {% if not result.active %}<span class="tag is-danger is-small f6 pa2 br1 bg-red white">Inactive</span>{% endif %}
     </h3>
     <h4 class="subtitle mt0 mb2 pa0 f5 mid-gray normal">
-        <a class="link mid-gray underline-hover" href="/orgid/type/{{result.organisationType[0]}}">
-            {{ result.organisationType[0] }}
-        </a>
-        {% for o  in result.orgIDs|prioritise %}
+        {% for k, v in result.organisationType.items() %}
+        {% if loop.first %}
+        <a class="link mid-gray underline-hover" href="/orgid/type/{{ k }}">{{ v }}</a>
+        {% endif %}
+        {% endfor %}
+        {% for o in result.orgIDs %}
         {% if loop.first %}
         <span class="dib bg-dark-blue white f6 pv0 ph1 br1 code ml2 mr2 mb2">{{ o }}</span>
         {% else %}
@@ -38,9 +40,9 @@
         {% endfor %}
     </h4>
     <div class="cf">
-        {% for t in result.organisationType %}
-        {% if not loop.first and t %}
-        <a class="f6 bg-light-gray br1 pv1 ph2 link near-black dib mr2 mb2 fl" href="/orgid/type/{{t}}">{{ t }}</a>
+        {% for k, v in result.organisationType.items() %}
+        {% if not loop.first %}
+        <a class="f6 bg-light-gray br1 pv1 ph2 link near-black dib mr2 mb2 fl" href="/orgid/type/{{k}}">{{ v }}</a>
         {% endif %}
         {% endfor %}
     </div>

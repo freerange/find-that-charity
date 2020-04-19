@@ -7,6 +7,7 @@ from sqlalchemy import select, or_
 from ..utils import slugify
 
 from ..db import organisation, organisation_links
+from ..settings import PRIORITIES
 
 EXTERNAL_LINKS = {
     "GB-CHC": [
@@ -70,7 +71,8 @@ class Org:
         self.id = id
         for f in self.fields:
             setattr(self, f, kwargs.get(f))
-        self.organisationType = {slugify(t): t for t in self.organisationType}
+        self.organisationType = {slugify(t): t for t in self.organisationType if t}
+        self._prioritise_orgids()
         self.records = []
 
     def __repr__(self):
@@ -90,6 +92,15 @@ class Org:
     def _sort_records(self):
         self.records = [o for o in self.records if o.active] + \
             [o for o in self.records if not o.active]
+
+    def _prioritise_orgids(self):
+        orgids = self.orgIDs
+        if len(orgids)==1:
+            return orgids
+        prefixes = ["-".join(o.split("-")[0:2]) for o in orgids]
+        order = [PRIORITIES.index(p) if p in PRIORITIES else len(PRIORITIES) + 1 for p in prefixes]
+        self.orgIDs = [x for _,x in sorted(zip(order,orgids))]
+        return self.orgIDs
 
     def fetch_records(self, db, table):
         records = db.execute(

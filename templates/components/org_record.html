@@ -58,7 +58,7 @@
               <span class="is-size-7">(using <a class="link underline-hover blue" href="http://org-id.guide/about" target="_blank" class="">org-id</a>)</span>
             </strong><br>
             <ul class="list ma0 pa0">
-            {% for orgid in record.orgIDs|prioritise %}
+            {% for orgid in record.orgIDs %}
               <li class="dib bg-dark-blue white f6 pv0 ph1 br1 code mr1 mb1">{{orgid}}</li>
             {% endfor %}
             </ul>
