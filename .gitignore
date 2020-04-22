@@ -1,5 +1,5 @@
 # data
-data/
+/data/
 
 # python files
 __pycache__/
@@ -15,7 +15,11 @@ node_modules/
 # IDE metadata
 .idea/
 
-# include static dist folder
+# exclude static dist folder
 !static/dist/
+
+# exclude static data folder
+static/data/*
+!static/data/.keep
 
 *.ipynb
