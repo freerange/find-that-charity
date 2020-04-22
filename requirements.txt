@@ -8,7 +8,6 @@ Click==7.0
 cssselect==1.1.0
 elasticsearch==6.4.0
 fake-useragent==0.1.11
--e git+https://github.com/drkane/find-that-charity.git@c63a78e384fa09fb2f15196aa58e01c5ba63883d#egg=findthatcharity
 h11==0.9.0
 idna==2.8
 Jinja2==2.10.3
