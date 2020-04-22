@@ -1,20 +1,21 @@
 {% macro orgid_classname(large=False) %}
 {% if large %}
-bg-dark-blue white f4 pv1 ph2 br2 code mr2 mb2
+f4 pv1 ph2 br2 mr2 mb2
 {% else %}
-bg-dark-blue white f6 pv0 ph1 br1 code mr1 mb1
+f6 pv0 ph1 br1 mr1 mb1
 {% endif %}
 {% endmacro %}
 
 {% macro orgid_link(id, request, large=false) %}
-<a href="{{ request.url_for('orgid_html', orgid=id) }}" class="link dib {{orgid_classname(large)}}">{{id}}</a>
+<a href="{{ request.url_for('orgid_html', orgid=id) }}"
+   class="link dib bg-dark-blue white code underline-hover {{orgid_classname(large)}}">{{id}}</a>
 {% endmacro %}
 
 {% macro orgid_connection(id_a, id_b, request, large=false) %}
-<span class="dib {{orgid_classname(large)}}">
-    <a href="/orgid/{{ id_a }}" class="link di white">{{- id_a -}}</a>
+<span class="dib bg-dark-blue white code {{orgid_classname(large)}}">
+    <a href="/orgid/{{ id_a }}" class="link di white underline-hover">{{- id_a -}}</a>
     <span class="bg-lightest-blue dark-blue ph2 dib">to</span> 
-    <a href="/orgid/{{ id_b }}" class="link di white">{{- id_b -}}</a>
+    <a href="/orgid/{{ id_b }}" class="link di white underline-hover">{{- id_b -}}</a>
 </span>
 {% endmacro %}
 
