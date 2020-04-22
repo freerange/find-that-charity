@@ -138,6 +138,20 @@ async def orgid_json(request):
     }, 404)
 
 
+async def get_orgid_by_hash(request):
+    """
+    Fetch json representation based on a org-id for a record
+    """
+    orgid = request.path_params['orgid']
+    orgs = get_orgs_from_orgid(orgid)
+    if orgs:
+        return JSONResponse(orgs)
+    return JSONResponse({
+        "error": 'Orgid {} not found.'.format(orgid),
+        "query": {"orgid": orgid}
+    }, 404)
+
+
 async def orgid_html(request):
     """
     Find a record based on the org-id
@@ -224,4 +238,5 @@ routes = [
     Route('/{orgid}.json', orgid_json),
     Route('/{orgid:path}.html', orgid_html),
     Route('/{orgid:path}', orgid_html, name='orgid_html'),
+    Route('/hash/{hash}', get_orgid_by_hash, name='get_orgid_by_hash'),
 ]
