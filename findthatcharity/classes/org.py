@@ -209,3 +209,27 @@ class OrgRecord:
                     regno = o.replace(prefix + "-", "")
                     for l in ls:
                         yield (l[0].format(regno), l[1])
+
+    @staticmethod
+    def clean_regno(regno, to_orgid=True):
+        """
+        Clean up a charity registration number
+        """
+        if regno.startswith("GB-"):
+            return regno
+
+        regno = str(regno)
+        regno = regno.upper()
+        regno = re.sub(r'^[^0-9SCNI]+|[^0-9]+$', '', regno)
+
+        if regno.startswith("S"):
+            orgid_scheme = 'GB-SC'
+        elif regno.startswith("N"):
+            orgid_scheme = 'GB-NIC'
+            regno = re.sub(r'^[^0-9]+|[^0-9]+$', '', regno)
+        else:
+            orgid_scheme = 'GB-CHC'
+
+        if to_orgid:
+            return "{}-{}".format(orgid_scheme, regno)
+        return regno

@@ -2,7 +2,7 @@
 
 
 {% macro data_source(source, org) %}
-  <div class="mt4 measure-wide">
+  <div class="mt4 measure-wide bb b--light-gray pb3 bw3">
     <h4 class="ma0 pa0" id='data-source-{{source.identifier}}'><a class="link near-black underline-hover" href="{{ source.publisher.website }}">{{ source.publisher.name }}</a></h4>
     {% if source.title != source.publisher.name %}
     <h5 class="ma0 pa0 f5 b">{{ source.title }}</h5>
@@ -37,7 +37,7 @@
         <p class="mt1 mb0 pa0 f6"><strong>Source for records: </strong></p>
         <ul class="mt1 mb1 pa0 list">
         {% endif %}
-            <li class="">{{ orgid_link(r.id) }}</li>
+            <li class="dib mr2">{{ orgid_link(r.id) }}</li>
         {% if loop.last %}
         </ul>
         {% endif %}

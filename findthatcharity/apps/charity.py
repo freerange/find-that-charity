@@ -1,6 +1,6 @@
 from starlette.applications import Starlette
 
-from ..db import es
+from ..db import es, ORGTYPES, db_con, organisation
 from ..utils import JSONResponseDate as JSONResponse
 from .. import settings
 from .orgid import get_orgs_from_orgid
@@ -16,20 +16,25 @@ async def index(request):
     regno = request.path_params['regno']
     filetype = request.path_params.get('filetype', 'html')
 
-    orgid = Org.clean_regno(regno)
+    orgid = OrgRecord.clean_regno(regno)
 
     template = 'org.html'
     if str(request.url).endswith("/preview"):
         template = 'org_preview.html'
     
-    orgs = get_orgs_from_orgid(orgid)
-    if orgs:
+    org = Org.from_es(orgid, es, settings.ES_INDEX, settings.ES_TYPE)
+    if org:
+        org.fetch_records(db_con, organisation)
+        org.fetch_org_links(db_con)
         if filetype == "html":
             return templates.TemplateResponse(template, {
                 'request': request,
-                'orgs': orgs
+                'org': org,
+                'key_types': settings.KEY_TYPES,
+                # 'parent_orgs': get_parents(orgs),
+                # 'child_orgs': get_children(orgs),
             })
-        return JSONResponse(orgs.as_charity())
+        return JSONResponse(org.as_charity())
     
     # @TODO: this should be a proper 404 page
     return JSONResponse({

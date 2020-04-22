@@ -1,5 +1,6 @@
 {% set frontpage = true %}
 {% extends 'base.html' %}
+{% from 'components/org_id.html' import orgid_link %}
 
 {% block content %}
 <div class="w-60-l w-100 center">
@@ -29,9 +30,18 @@
     </p>
     <p>Lookup other types of organisations with an <a class="underline dark-blue f4" href="http://org-id.guide/" target="_blank">OrgID</a>:
         <ul>
-            <li>Community Interest Company: <a class="underline dark-blue f4" href="/orgid/{{ examples['community-interest-company'] }}">/orgid/{{ examples['community-interest-company'] }}</a></li>
-            <li>Local Authority: <a class="underline dark-blue f4" href="/orgid/{{ examples['local-authority'] }}">/orgid/{{ examples['local-authority'] }}</a></li>
-            <li>University: <a class="underline dark-blue f4" href="/orgid/{{ examples['universities'] }}">/orgid/{{ examples['universities'] }}</a></li>
+            <li>
+                Community Interest Company: 
+                {{ orgid_link(examples['community-interest-company'], large=true) }}
+            </li>
+            <li>
+                Local Authority: 
+                {{ orgid_link(examples['local-authority'], large=true) }}
+            </li>
+            <li>
+                University: 
+                {{ orgid_link(examples['universities'], large=true) }}
+            </li>
         </ul>
         These can also be accessed as json data by adding <code>.json</code> to the end of the url
     </p>
