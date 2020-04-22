@@ -8,9 +8,8 @@ from math import ceil
 from dateutil import parser
 from starlette.responses import JSONResponse
 
+from .settings import DEFAULT_PAGE, DEFAULT_SIZE
 
-DEFAULT_PAGE = 1
-DEFAULT_SIZE = 10
 
 def clean_regno(regno):
     """
