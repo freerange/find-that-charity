@@ -7,7 +7,7 @@ from sqlalchemy import select, or_
 from ..utils import slugify
 
 from ..db import organisation, organisation_links
-from ..settings import PRIORITIES
+from ..settings import PRIORITIES, DEFAULT_SIZE, DEFAULT_PAGE
 from ..queries import orgid_query, random_query, search_query
 
 EXTERNAL_LINKS = {
@@ -95,6 +95,27 @@ class Org:
         if res.get("hits", {}).get("hits", []):
             o = res["hits"]["hits"][0]
             return cls(o["_id"], **o["_source"])
+
+    @classmethod
+    def search(cls, query, es, es_index, es_type='_doc', orgtype=None, size=DEFAULT_SIZE, p=DEFAULT_PAGE):
+
+        # do the first search for orgids
+        res = es.search_template(
+            index=es_index,
+            doc_type=es_type,
+            body=search_query(
+                query,
+                orgtype=orgtype,
+                p=p,
+                size=size,
+            ),
+            ignore=[404],
+        )
+
+        return {
+            "hits": [cls(o["_id"], **o["_source"]) for o in res.get("hits", {}).get("hits", [])],
+            "total": res.get("hits", {}).get("total"),
+        }
 
     def _sort_records(self):
         self.records = [o for o in self.records if o.active] + \
@@ -210,6 +231,8 @@ class OrgRecord:
         return cls(record['id'], **record)
                 
     def get_links(self):
+        if self.url:
+            yield (self.url, 'Organisation Website')
         for o in self.orgIDs:
             for prefix, ls in EXTERNAL_LINKS.items():
                 if o.startswith(prefix + "-"):

@@ -65,26 +65,20 @@ def search_return(query, request):
     """
     p = pagination_request(request)
     orgtype = ORGTYPES.get(slugify(request.query_params.get("orgtype")), {})
-    res = es.search_template(
-        index=settings.ES_INDEX,
-        doc_type=settings.ES_TYPE,
-        body=search_query(
-            query,
-            orgtype=orgtype.get('key'),
-            p=p['p'],
-            size=p['size'],
-        ),
-        ignore=[404],
+    res = Org.search(
+        query,
+        es,
+        settings.ES_INDEX,
+        orgtype=orgtype.get('key'),
+        p=p['p'],
+        size=p['size'],
     )
     
     return templates.TemplateResponse('search.html', {
         'request': request,
-        'res': {
-            "hits": [Org(o["_id"], **o["_source"]) for o in res.get("hits", {}).get("hits", [])],
-            "total": res.get("hits", {}).get("total"),
-        },
+        'res': res,
         'term': request.query_params.get("q"),
-        'pages': pagination(p["p"], p["size"], res.get("hits", {}).get("total")),
+        'pages': pagination(p["p"], p["size"], res.get("total")),
         'selected_org_type': orgtype.get('slug'),
     })
 
