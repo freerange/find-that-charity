@@ -40,7 +40,38 @@ def export_data(outfile,
     # create the linked_organisations view
     click.echo(f"Fetch all organisation")
     result = conn.execute(
-        organisation.select(limit=limit, order_by=organisation.c.id)
+        sqlalchemy.select(
+            columns=[
+                organisation.c.id,
+                organisation.c.name,
+                organisation.c.charityNumber,
+                organisation.c.companyNumber,
+                # organisation.c.addressLocality,
+                # organisation.c.addressRegion,
+                # organisation.c.addressCountry,
+                organisation.c.postalCode,
+                # organisation.c.telephone,
+                # organisation.c.email,
+                # organisation.c.description,
+                organisation.c.url,
+                organisation.c.latestIncome,
+                organisation.c.latestIncomeDate,
+                organisation.c.dateRegistered,
+                organisation.c.dateRemoved,
+                organisation.c.active,
+                # organisation.c.status,
+                # organisation.c.parent,
+                organisation.c.dateModified,
+                # organisation.c.location,
+                organisation.c.orgIDs,
+                # organisation.c.alternateName,
+                organisation.c.organisationType,
+                # organisation.c.organisationTypePrimary,
+                organisation.c.source,
+            ],
+            limit=limit,
+            order_by=organisation.c.id
+        )
     )
 
     fields = list(result.keys()) + ['canonical_orgid']
