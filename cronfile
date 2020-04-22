@@ -1,0 +1,21 @@
+# server cron jobs
+PATH=/usr/local/bin:/usr/bin:/bin
+SHELL=/bin/bash
+
+# m   h   dom mon dow   username command
+# *   *   *   *   *     dokku    command to be executed
+# -   -   -   -   -
+# |   |   |   |   |
+# |   |   |   |   +----- day of week (0 - 6) (Sunday=0)
+# |   |   |   +------- month (1 - 12)
+# |   |   +--------- day of month (1 - 31)
+# |   +----------- hour (0 - 23)
+# +----------- min (0 - 59)
+
+### PLACE ALL CRON TASKS BELOW
+
+10 0 * * 0,3 dokku dokku --rm enter ftc-scrapers cron sh ./crawl_all.sh
+0 2 * * 0,3 dokku dokku run ftc python findthatcharity/manage.py create-index
+10 2 * * 0,3 dokku dokku run ftc python findthatcharity/manage.py import-data
+
+### PLACE ALL CRON TASKS ABOVE, DO NOT REMOVE THE WHITESPACE AFTER THIS LINE
