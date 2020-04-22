@@ -14,19 +14,19 @@ def cli():
     pass
 
 @cli.command()
-@click.argument('outfile')
+@click.option('--outfile', help="File to output", default=settings.OUTPUT_DOWNLOAD)
 @click.option('--es-url', help='Elasticsearch connection', default=settings.ES_URL)
 @click.option('--db-url', help='Database connection', default=settings.DB_URI)
 @click.option('--es-index', help='Elasticsearch type', default=settings.ES_INDEX)
 @click.option('--es-type', help='Elasticsearch type', default=settings.ES_TYPE)
-@click.option('--gzip/--no-gzip', 'usegzip', help='Whether to GZIP the result', default=False)
+@click.option('--gzip/--no-gzip', 'usegzip', help='Whether to GZIP the result', default=True)
 @click.option('--limit', help='Limit the number of rows output', default=None, type=int)
 def export_data(outfile,
                es_url=settings.ES_URL, 
                db_url=settings.DB_URI,
                es_index=settings.ES_INDEX,
                es_type=settings.ES_TYPE,
-               usegzip=False,
+               usegzip=True,
                limit=None):
     """Create a CSV file with all the data in"""
     
@@ -62,5 +62,5 @@ def export_data(outfile,
             r['canonical_orgid'] = canon.id
         else:
             r['canonical_orgid'] = r['id']
-        writer.writerow(dict(r))
+        writer.writerow(r)
     click.echo(f"Output file created")

@@ -15,6 +15,11 @@ ES_BULK_LIMIT = config('ES_BULK_LIMIT', cast=int, default=500)
 
 DB_URI = config('DB_URI', cast=URL)
 
+OUTPUT_DOWNLOAD = config('OUTPUT_DOWNLOAD', default='static/data/organisations.csv.gz')
+
+DEFAULT_PAGE = 1
+DEFAULT_SIZE = 10
+
 ORGID_JSON = config('ORGID_JSON', default='http://org-id.guide/download.json')
 
 # key organisation types to highlight
