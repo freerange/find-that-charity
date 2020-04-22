@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from 'components/org_id.html' import orgid_link %}
 {% from 'components/org_record.html' import org_record %}
 {% from 'components/data_source.html' import data_source %}
 {% set heading = org["name"] %} 
@@ -52,12 +53,12 @@
 {% block header %}
 <header class="fl w-100 ph3 ph5-ns entry-content lh-copy f4">
   <h2 class="f2-ns mt4 mb0 f3 lh-solid normal">
-      {{ org["name"] }}
+      {{ org.name }}
   </h2>
   <div class="mv3 w-100">
-    <a href="/orgid/{{ org.id }}" class="link dib bg-dark-blue white f4 pv1 ph2 br2 code mr2 mb2">{{ org.id }}</a>
+    {{ orgid_link(org.id, true) }}
     {% for v in org.get_orgids() if v.value != org.id %}
-    <a href="/orgid/{{ v.value }}" class="link dib bg-light-blue dark-blue f4 pv1 ph2 br2 code mr2 mb2">{{ v.value }}</a>
+    {{ orgid_link(v.value, true) }}
     {% endfor %}
     <a href="#" class="blue link underline-hover f7">[What are these?]</a>
   </div>

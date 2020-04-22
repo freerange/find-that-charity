@@ -1,3 +1,5 @@
+{% from 'components/org_id.html' import orgid_link %}
+
 {% if res.total > 0 and term %}
 <article class="message is-success pa2 bg-washed-green mb4">
     <div class="message-body">
@@ -21,29 +23,29 @@
 
 {% for result in res.hits %}
 <div class="content measure-wide mb4">
-    <h3 class="title ma0 pa0">
+    <h3 class="title pa0 mb1 mt0 mh0">
+        {% if result.active %}
         <a href="/orgid/{{ result.id }}" class="dark-blue link underline-hover tracked-tight lh-copy normal">{{result.name }}</a>
-        {% if not result.active %}<span class="tag is-danger is-small f6 pa2 br1 bg-red white">Inactive</span>{% endif %}
+        {% else %}
+        <a href="/orgid/{{ result.id }}" class="blue link underline-hover tracked-tight lh-copy normal">{{result.name }}</a>
+        <span class="red tracked-tight lh-copy normal ml2">(Inactive)</span>
+        {% endif %}
     </h3>
     <h4 class="subtitle mt0 mb2 pa0 f5 mid-gray normal">
-        {% for k, v in result.organisationType.items() %}
+        {# {% for k, v in result.organisationType.items() %}
         {% if loop.first %}
         <a class="link mid-gray underline-hover" href="/orgid/type/{{ k }}">{{ v }}</a>
         {% endif %}
-        {% endfor %}
+        {% endfor %} #}
         {% for o in result.orgIDs %}
-        {% if loop.first %}
-        <span class="dib bg-dark-blue white f6 pv0 ph1 br1 code ml2 mr2 mb2">{{ o }}</span>
-        {% else %}
-        <span class="dib bg-washed-blue f6 pv0 ph1 br1 code mr2 mb2">{{ o }}</span>
-        {% endif %}
+        {{ orgid_link(o) }}
         {% endfor %}
     </h4>
     <div class="cf">
         {% for k, v in result.organisationType.items() %}
-        {% if not loop.first %}
+        {# {% if not loop.first %} #}
         <a class="f6 bg-light-gray br1 pv1 ph2 link near-black dib mr2 mb2 fl" href="/orgid/type/{{k}}">{{ v }}</a>
-        {% endif %}
+        {# {% endif %} #}
         {% endfor %}
     </div>
 </div>

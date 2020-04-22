@@ -1,91 +1,101 @@
+{% from 'components/org_id.html' import orgid_link %}
 <html>
 <head>
   <link rel="stylesheet" href="https://unpkg.com/tachyons@4.9.1/css/tachyons.min.css" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Archivo:400,700|Raleway:400,700">
   <link rel="stylesheet" href="https://dkane.net/theme/css/style.css" />
   <link rel="stylesheet" href="https://dkane.net/theme/css/pygment.css" />
+  <title>{{ org.name }} | Find that Charity</title>
 </head>
   <body class="w-100 sans-serif near-black base-font f6">
     <div class="content is-small" style="padding: 5px;">
       {% if not hide_title %}
       <h3 class="mt0 mb2 f6">
-        {{ orgs.name }}
+        {{ org.name }}
       </h3>
+      <ul class="list mt2 pa0">
+        {% for orgid in org.get_orgids() %}
+          {% set v = orgid.value %}
+          <li class="dib">
+            {{ orgid_link(v) }}
+          </li>
+        {% endfor %}
+      </ul>
       {% endif %}
       <p class="mt2 mb0 f6">
-        {% if orgs.active %}
+        {% if org.active %}
         <strong>Active</strong>
         {% else %}
         <strong>Inactive</strong>
         {% endif %}
          |
-        <a href='/orgid/{{ orgs.id }}' target="_blank">
+        <a href='/orgid/{{ org.id }}' target="_blank">
           View full profile</a>
-        {% for u in orgs.data.url.items() %}
-        {% if loop.first %}
-        | 
-        <a href="{{ u[1].value }}" target="_blank">
-          {{ u[1].value|replace("http://", "")|replace("https://", "") }}</a>
+        {% if org.main.url %}
+         |
+        <a href="{{ org.main.url }}" target="_blank">
+          {{ org.main.url|replace("http://", "")|replace("https://", "") }}</a>
         {% endif %}
-        {% endfor %}
       </p>
       <p class="mt2 mb0 f6">
-        {% for k, v in orgs.data.organisationType.items() %}
-         {% if not loop.first %}|{% endif %} <span class="dib">{{ v.value }}</span>
+        {% for k, v in org.organisationType.items() %}
+          {% if not loop.first %}|{% endif %} <span class="dib">{{ v }}</span>
         {% endfor %}
       </p>
       <h5 class="mt2 mb0 f6"><strong>Identifiers</strong></h5>
-      <ul class="ma0">
-        {% for k, orgid in orgs.data.orgIDs.items() %}
+      <table class="collapse ba br2 b--black-10 pv2 ph3 f6 mt2">
+        {% for orgid in org.get_orgids() %}
           {% set v = orgid.value %}
           {% if v.startswith("GB-CHC-") %}
-          <li>
-            <strong>Charity Number (CCEW):</strong>
+          <tr class="striped--light-gray">
+            <th class="tl pa1">Charity Number (CCEW)</th>
+            <td class="tr pa1">
             <a href="http://beta.charitycommission.gov.uk/charity-details/?regid={{ v.replace('GB-CHC-', '') }}&subid=0" target="_blank">{{ v.replace('GB-CHC-', '') }}</a>
-          </li>
+            </td>
+          </tr>
           {% elif v.startswith("GB-NIC-") %}
-          <li>
-            <strong>Charity Number (CCNI):</strong>
+          <tr class="striped--light-gray">
+            <th class="tl pa1">Charity Number (CCNI)</th>
+            <td class="tr pa1">
             <a href="http://www.charitycommissionni.org.uk/charity-details/?regid={{ v.replace('GB-NIC-', '').replace('NIC', '')}}&subid=0" target="_blank">{{ v.replace('GB-NIC-', '') }}</a>
-          </li>
+          </td>
+          </tr>
           {% elif v.startswith("GB-SC-") %}
-          <li>
-            <strong>Charity Number (OSCR):</strong>
+          <tr class="striped--light-gray">
+            <th class="tl pa1">Charity Number (OSCR)</th>
+            <td class="tr pa1">
             <a href="https://www.oscr.org.uk/about-charities/search-the-register/charity-details?number={{ v.replace('GB-SC-', '') }}" target="_blank">{{ v.replace('GB-SC-', '') }}</a>
-          </li>
+          </td>
+          </tr>
           {% elif v.startswith("GB-COH-") %}
-          <li>
-            <strong>Company Number:</strong>
+          <tr class="striped--light-gray">
+            <th class="tl pa1">Company Number</th>
+            <td class="tr pa1">
             <a href="https://beta.companieshouse.gov.uk/company/{{ v.replace('GB-COH-', '') }}" target="_blank">{{ v.replace('GB-COH-', '') }}</a>
-          </li>
+          </td>
+          </tr>
           {% endif %}
         {% endfor %}
-        {% for k, orgid in orgs.data.orgIDs.items() %}
-          {% set v = orgid.value %}
-          <li>
-            {{ v }}
-          </li>
-        {% endfor %}
-      </ul>
+      </table>
       <p class="mt2 mb0 f6"><strong>Location:</strong>
-      {% if orgs.orgs[0]["postalCode"] %}
-        {{ orgs.orgs[0]["postalCode"] }}, 
+      {% if org.main.postalCode %}
+        {{ org.main.postalCode }}
       {% endif %}
-      {% for k, v in orgs.data.location.items() %}
+      {# {% for k, v in org.data.location.items() %}
         {{v.value.name|title}}{% if not loop.last %},{% endif %}
-      {% endfor %}
+      {% endfor %} #}
       </p>
-      {% for org in orgs.orgs if org.latestIncome %}
-      {# {% if loop.first %} #}
+      {% for record in org.records if record.latestIncome %}
+      {% if loop.first %}
       <p class="mt2 mb0 f6"><strong>Latest Income:</strong>
-        &pound;{{ "{:,.0f}".format( org.latestIncome )}}
+        &pound;{{ "{:,.0f}".format( record.latestIncome )}}
       </p>
-      {# {% endif %} #}
+      {% endif %}
       {% endfor %}
-      {% if orgs.names %}
+      {% if org.names %}
       <h5 class="mt2 mb0 f6"><strong>Other Names:</strong></h5>
       <ul class="ma0">
-        {% for k, v in orgs.names.items() %}
+        {% for k, v in org.names.items() %}
           <li>{{ v.value }}{# <br><small class="has-text-grey">({{ show_sources(v) }})</small> #}</li>
         {% endfor %}
       </ul>
