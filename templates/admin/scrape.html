@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% set heading = 'Scrape ' + scrape.id %}
+
+{% block content %}
+<a href="{{ request.url_for('get_scrapes') }}" class="blue link underline">&lt; Back to scrapes</a>
+<h3>{{ scrape.spider }}</h3>
+<table class="collapse ba br2 b--black-10 pv2 ph3 mt4 f5">
+    <tr class="striped--near-white">
+        <th class="pv2 ph3 tl" colspan="2">Started</th>
+        <td class="pv2 ph3 tr">{{ scrape.start_time.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+    </tr>
+    {% if scrape.finish_time %}
+    <tr class="striped--near-white">
+        <th class="pv2 ph3 tl" colspan="2">Finished</th>
+        <td class="pv2 ph3 tr">{{ scrape.finish_time.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+    </tr>
+    <tr class="striped--near-white">
+        <th class="pv2 ph3 tl" colspan="2">Time taken</th>
+        <td class="pv2 ph3 tr">{{ (scrape.finish_time - scrape.start_time)|naturaldelta }}</td>
+    </tr>
+    {% else %}
+    <tr class="striped--near-white">
+        <th class="pv2 ph3 tl" colspan="2">Finished</th>
+        <td class="pv2 ph3 tr">Did not finish</td>
+    </tr>
+    {% endif %}
+    <tr class="striped--near-white">
+        <th class="pv2 ph3 tl" colspan="2">Items</th>
+        <td class="pv2 ph3 tr">{{ "{:,.0f}".format(scrape["items"]) }}</td>
+    </tr>
+    <tr class="striped--near-white">
+        <th class="pv2 ph3 tl" colspan="2">Errors</th>
+        <td class="pv2 ph3 tr">{{ "{:,.0f}".format(scrape["errors"]) }}</td>
+    </tr>
+    {% for statname, stat in scrape.stats.items()|sort %}
+    <tr class="striped--near-white">
+        {% if loop.first %}
+        <th class="pv2 ph3 tl v-top" rowspan="{{ scrape.stats|length }}">Scraper stats</th>
+        {% endif %}
+        <th class="pv2 ph3 tl">{{ statname }}</th>
+        <td class="pv2 ph3 tr">{{ stat }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% set heading = 'Scrapes' %}
+
+{% block content %}
+{# <pre>{{ scrapes|tojson(indent=4) }}</pre> #}
+<table class="collapse ba br2 b--black-10 pv2 ph3 mt4 f6">
+    <thead>
+        <tr class="bg-near-white ">
+            <th class="pv2 ph3 tl f6 fw6 ttu">Scrape ID</th>
+            <th class="tr ttu fw6 pv2 ph3">Spider</th>
+            <th class="tr ttu fw6 pv2 ph3">Items collected</th>
+            <th class="tr ttu fw6 pv2 ph3">Errors</th>
+            <th class="tr ttu fw6 pv2 ph3">Start time</th>
+            <th class="tr ttu fw6 pv2 ph3">Finish time</th>
+            <th class="tr ttu fw6 pv2 ph3">Time taken</th>
+            <th class="tr ttu fw6 pv2 ph3">Finish reason</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for d, date_group in scrapes|groupby('start_date')|sort(reverse=true) %}
+        <tr class="bg-near-white">
+            <td class="pv2 ph3 f5 b" colspan="8">{{ d.strftime("%d %B %Y") }}</td>
+        </tr>
+        {% for s in date_group %}
+        <tr class="{% if s.errors %}bg-washed-red{% else %}striped--near-white{% endif %} ">
+            <td class="pv2 ph3">
+                <a href="{{ request.url_for('get_scrape', scrape_id=s.id) }}">
+                    <code>{{ s.id }}</code>
+                </a>
+            </td>
+            <td class="pv2 ph3 tr">{{ s.spider }}</td>
+            <td class="pv2 ph3 tr">{{ "{:,.0f}".format(s["items"]) }}</td>
+            <td class="pv2 ph3 tr">{{ "{:,.0f}".format(s.errors) }}</td>
+            <td class="pv2 ph3 tr">{{ s.start_time.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+            <td class="pv2 ph3 tr">
+                {% if s.finish_time %}
+                    {{ s.finish_time.strftime("%Y-%m-%d %H:%M:%S") }}
+                {% endif %}
+            </td>
+            <td class="pv2 ph3 tr">
+                {% if s.finish_time %}
+                    {{ (s.finish_time - s.start_time)|naturaldelta }}
+                {% endif %}
+            </td>
+            <td class="pv2 ph3 tr">{{ s.finish_reason }}</td>
+        </tr>
+        {% endfor %}
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

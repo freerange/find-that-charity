@@ -101,7 +101,7 @@ routes = [
     Mount('/feeds', feeds.app),
     Mount('/orgid', routes=orgid.routes),
     Mount('/adddata', csvdata.app),
-    Mount('/admin', routes=admin.routes, name='admin'),
+    Mount('/admin', routes=admin.routes),
 ]
 middleware = [
     Middleware(
