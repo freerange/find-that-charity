@@ -85,9 +85,9 @@ def search_return(query, request):
 routes = [
     Route('/', index),
     Route('/about', about),
-    Route('/random', randcharity.random),
+    Route('/random', randcharity.random, name='random_org'),
     Route('/random.{filetype}', randcharity.random),
-    Route('/reconcile', reconcile.index, methods=['GET', 'POST']),
+    Route('/reconcile', reconcile.reconcile_index, methods=['GET', 'POST']),
     Mount('/static', StaticFiles(directory="static"), name='static'),
     Mount('/reconcile', reconcile.app),
     Mount('/charity', charity.app),

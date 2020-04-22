@@ -25,16 +25,16 @@
 <div class="content measure-wide mb4">
     <h3 class="title pa0 mb1 mt0 mh0">
         {% if result.active %}
-        <a href="/orgid/{{ result.id }}" class="dark-blue link underline-hover tracked-tight lh-copy normal">{{result.name }}</a>
+        <a href="{{ request.url_for('orgid_html', orgid=result.id) }}" class="dark-blue link underline-hover tracked-tight lh-copy normal">{{result.name }}</a>
         {% else %}
-        <a href="/orgid/{{ result.id }}" class="blue link underline-hover tracked-tight lh-copy normal">{{result.name }}</a>
+        <a href="{{ request.url_for('orgid_html', orgid=result.id) }}" class="blue link underline-hover tracked-tight lh-copy normal">{{result.name }}</a>
         <span class="red tracked-tight lh-copy normal ml2">(Inactive)</span>
         {% endif %}
     </h3>
     <h4 class="subtitle mt0 mb2 pa0 f5 mid-gray normal">
         {# {% for k, v in result.organisationType.items() %}
         {% if loop.first %}
-        <a class="link mid-gray underline-hover" href="/orgid/type/{{ k }}">{{ v }}</a>
+        <a class="link mid-gray underline-hover" href="{{ request.url_for('orgid_type', orgtype=k) }}">{{ v }}</a>
         {% endif %}
         {% endfor %} #}
         {% for o in result.orgIDs %}
@@ -44,7 +44,7 @@
     <div class="cf">
         {% for k, v in result.organisationType.items() %}
         {# {% if not loop.first %} #}
-        <a class="f6 bg-light-gray br1 pv1 ph2 link near-black dib mr2 mb2 fl" href="/orgid/type/{{k}}">{{ v }}</a>
+        <a class="f6 bg-light-gray br1 pv1 ph2 link near-black dib mr2 mb2 fl" href="{{ request.url_for('orgid_type', orgtype=k) }}">{{ v }}</a>
         {# {% endif %} #}
         {% endfor %}
     </div>

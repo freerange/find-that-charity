@@ -28,13 +28,13 @@
       <p>
         As well as a search engine, you can also as an
         <a class="underline dark-blue" href="https://github.com/OpenRefine/OpenRefine/wiki/Reconciliation">OpenRefine reconciliation service</a>.
-        Access this using <a class="underline dark-blue" href="/reconcile"><code>/reconcile</code></a> endpoint.
+        Access this using <a class="underline dark-blue" href="{{ request.url_for('reconcile_index') }}"><code>/reconcile</code></a> endpoint.
       </p>
       <p>
         You can access data about any charity in json format by adding <code>.json</code> to the end of the URL.
       </p>
       <p>
-        Find a <a class="underline dark-blue" href="/random">random charity record</a>. Or add <a class="underline dark-blue" href="/random?active=true"><code>?active=true</code></a>
+        Find a <a class="underline dark-blue" href="{{ request.url_for('random_org') }}">random charity record</a>. Or add <a class="underline dark-blue" href="{{ request.url_for('random_org') }}?active=true"><code>?active=true</code></a>
         to the end to restrict the random search to only active charities. This powers the 
         <a class="underline dark-blue" href="https://twitter.com/CharityRandom">@CharityRandom</a> twitter feed.
       </p>
@@ -71,7 +71,7 @@
       <h2>Other acknowledgements</h2>
       <ul>
         <li><a class="underline dark-blue" href="https://github.com/edent/SuperTinyIcons/" target="_blank">Github icon from @edent's SuperTinyIcons</a></li>
-        <li>Styles from <a class="underline dark-blue" href="https://bulma.io/" target="_blank">Bulma</a></li>
+        <li>Styles from <a class="underline dark-blue" href="http://tachyons.io/" target="_blank">Tachyons</a></li>
         <li>Powered by
           <a class="underline dark-blue" href="https://www.python.org/" target="_blank">Python</a>, 
           <a class="underline dark-blue" href="https://www.starlette.io/" target="_blank">Starlette</a>,

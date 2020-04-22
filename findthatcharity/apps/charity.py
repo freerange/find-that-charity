@@ -10,7 +10,7 @@ from ..classes.org import OrgRecord, Org
 app = Starlette()
 
 @app.route('/{regno}/preview')
-@app.route('/{regno}')
+@app.route('/{regno}', name="charity_index")
 @app.route('/{regno}\.{filetype}')
 async def index(request):
     regno = request.path_params['regno']

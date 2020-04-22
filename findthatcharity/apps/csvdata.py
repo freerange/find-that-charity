@@ -4,7 +4,7 @@ from ..templates import templates
 
 app = Starlette()
 
-@app.route('/')
+@app.route('/', name='csvtool')
 async def index(request):
     """
     Form for uploading CSV

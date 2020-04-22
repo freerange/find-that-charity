@@ -25,5 +25,5 @@ def random(request):
 
     if char:
         if filetype == "html":
-            return RedirectResponse('/orgid/{}'.format(char["_id"]))
+            return RedirectResponse(request.url_for('orgid_html', orgid=char["_id"]))
     return JSONResponse(char["_source"])

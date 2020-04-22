@@ -121,7 +121,7 @@ async def propose_properties(request):
 
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/{orgtype}', methods=['GET', 'POST'])
-async def index(request):
+async def reconcile_index(request):
 
     orgtypes = request.path_params.get("orgtype", "charity")
     if orgtypes == 'all':
@@ -158,12 +158,6 @@ async def index(request):
         callback = form["callback"]
     elif "callback" in  request.query_params:
         callback = request.query_params["callback"]
-
-
-    service_url = "{}://{}".format(
-        request.url.scheme,
-        request.url.netloc,
-    )
         
     if queries:
         result = {}
@@ -187,7 +181,7 @@ async def index(request):
     elif extend:
         result = extend_with_fields(extend["ids"], extend["properties"])
     else:
-        result = service_spec(service_url, orgtypes)
+        result = service_spec(request, orgtypes)
 
     # if we're doing a callback request then do that
     if callback:
@@ -195,10 +189,15 @@ async def index(request):
     return JSONResponse(result)
 
 
-def service_spec(service_url, orgtypes=None):
+def service_spec(request, orgtypes=None):
     """Return the default service specification
     Specification found here: https://github.com/OpenRefine/OpenRefine/wiki/Reconciliation-Service-API#service-metadata
     """
+    service_url = "{}://{}".format(
+        request.url.scheme,
+        request.url.netloc,
+    )
+
     if orgtypes:
         orgtypes = [{
             "id": "/{}".format(s["slug"]),
@@ -215,10 +214,10 @@ def service_spec(service_url, orgtypes=None):
         "identifierSpace": "http://rdf.freebase.com/ns/type.object.id",
         "schemaSpace": "http://rdf.freebase.com/ns/type.object.id",
         "view": {
-            "url": service_url + "/orgid/{{id}}"
+            "url": request.url_for('orgid_html', orgid="{{id}}"),
         },
         "preview": {
-            "url": service_url + "/orgid/{{id}}/preview",
+            "url": request.url_for('orgid_html', orgid="{{id}}/preview"),
             "width": 430,
             "height": 300
         },

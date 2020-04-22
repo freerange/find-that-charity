@@ -11,17 +11,17 @@
     <p>Lookup individual charities based on their charity number:
         <ul>
             <li>Charity registered in England and Wales: 
-                <a class="underline dark-blue f4" href="/charity/{{ examples['registered-charity-england-and-wales']|replace('GB-CHC-', '') }}">
+                <a class="underline dark-blue f4" href="{{ request.url_for('charity_index', regno=examples['registered-charity-england-and-wales']|replace('GB-CHC-', '')) }}">
                     /charity/{{ examples['registered-charity-england-and-wales']|replace('GB-CHC-', '') }}
                 </a>
             </li>
             <li>Charity registered in Scotland: 
-                <a class="underline dark-blue f4" href="/charity/{{ examples['registered-charity-scotland']|replace('GB-SC-', '') }}">
+                <a class="underline dark-blue f4" href="{{ request.url_for('charity_index', regno=examples['registered-charity-scotland']|replace('GB-SC-', '')) }}">
                     /charity/{{ examples['registered-charity-scotland']|replace('GB-SC-', '') }}
                 </a>
             </li>
             <li>Charity registered in Northern Ireland:
-                <a class="underline dark-blue f4" href="/charity/{{ examples['registered-charity-northern-ireland']|replace('GB-NIC-', 'NIC') }}">
+                <a class="underline dark-blue f4" href="{{ request.url_for('charity_index', regno=examples['registered-charity-northern-ireland']|replace('GB-NIC-', 'NIC')) }}">
                     /charity/{{ examples['registered-charity-northern-ireland']|replace('GB-NIC-', 'NIC') }}
                 </a>
             </li>
@@ -46,19 +46,19 @@
         These can also be accessed as json data by adding <code>.json</code> to the end of the url
     </p>
     <p>
-        <a class="underline dark-blue f4" href="/adddata/">
+        <a class="underline dark-blue f4" href="{{ request.url_for('csvtool') }}">
             Add data about organisations to a CSV file
         </a>    
     </p>
     <p>As an <a class="underline dark-blue f4" href="https://github.com/OpenRefine/OpenRefine/wiki/Reconciliation">OpenRefine
             reconciliation service</a> via <code>/reconcile</code>.</p>
-    <p>Find a <a class="underline dark-blue f4" href="/random?active=true">random charity</a>.</p>
+    <p>Find a <a class="underline dark-blue f4" href="{{ request.url_for('random_org') }}?active=true">random charity</a>.</p>
     <div class="mv5 cf">
         <h3>Types of organisation available</h3>
         <div class="">
         {% for ot, o in org_types.items() if o.key in key_types %}
             <div class="bg-light-gray near-black fl dib mb2 mr2 f5">
-                <a href="/orgid/type/{{ ot }}" class="link near-black underline-hover pa2 dib fl">{{ o.key }}</a>
+                <a href="{{ request.url_for('orgid_type', orgtype=ot) }}" class="link near-black underline-hover pa2 dib fl">{{ o.key }}</a>
                 <span class="pa2 bg-blue white fl">{{ "{:,.0f}".format(o.doc_count) }}</span>
             </div>
         {% endfor %}
@@ -69,7 +69,7 @@
         <div class="">
         {% for o in sources_count %}
             <div class="bg-light-gray near-black fl dib mb2 mr2 f5">
-                <a href="/orgid/source/{{ o.key }}" class="link near-black underline-hover pa2 dib fl">
+                <a href="{{ request.url_for('orgid_source', source=o.key) }}" class="link near-black underline-hover pa2 dib fl">
                 {{ sources.get(o.key, {}).get("publisher", {}).get("name", o.key) }}
                 {% if sources.get(o.key, {}).get("publisher", {}).get("duplicate", False) %}
                     <br><span class="is-size-7">({{ sources.get(o.key, {}).get("title") }})</span>

@@ -29,7 +29,7 @@
         <strong>Inactive</strong>
         {% endif %}
          |
-        <a href='/orgid/{{ org.id }}' target="_blank">
+        <a href='{{ request.url_for("orgid_html", orgid=org.id) }}' target="_blank">
           View full profile</a>
         {% if org.main.url %}
          |

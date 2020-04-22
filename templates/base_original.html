@@ -21,7 +21,7 @@
         <div class="hero-body">
             <div class="container">
                 <h1 class="title">
-                    <a href="/">{% block title %}Find that charity{% endblock %}</a>
+                    <a href="{{ url_for('index') }}">{% block title %}Find that charity{% endblock %}</a>
                 </h1>
             </div>
         </div>
@@ -50,9 +50,9 @@
             <div class="content has-text-centered">
                 <p>
                     <strong>Find that Charity</strong>
-                    | <a href="/about">About</a>
-                    | <a href="/about#data-sources">Data sources</a>
-                    | <a href="/about#privacy">Privacy</a>
+                    | <a href="{{ url_for('about') }}">About</a>
+                    | <a href="{{ url_for('about') }}#data-sources">Data sources</a>
+                    | <a href="{{ url_for('about') }}#privacy">Privacy</a>
                 </p>
                 <p>
                     Supported by <a href="http://www.threesixtygiving.org/" target="_blank">360Giving</a>

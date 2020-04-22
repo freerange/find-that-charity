@@ -220,7 +220,7 @@ routes = [
     Route('/type/{orgtype}', orgid_type, name='orgid_type'),
     Route('/source/{source}.csv', orgid_type_download),
     Route('/source/{source}.html', orgid_type),
-    Route('/source/{source}', orgid_type),
+    Route('/source/{source}', orgid_type, name='orgid_source'),
     Route('/{orgid}.json', orgid_json),
     Route('/{orgid:path}.html', orgid_html),
     Route('/{orgid:path}', orgid_html, name='orgid_html'),
