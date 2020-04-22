@@ -8,6 +8,7 @@ from ..utils import slugify
 
 from ..db import organisation, organisation_links
 from ..settings import PRIORITIES
+from ..queries import orgid_query, random_query, search_query
 
 EXTERNAL_LINKS = {
     "GB-CHC": [
@@ -80,14 +81,20 @@ class Org:
 
     @classmethod
     def from_es(cls, id, es, es_index, es_type='_doc'):
-        record = es.get(
+
+        # do the first search for orgids
+        res = es.search(
             index=es_index,
             doc_type=es_type,
-            id=id,
+            body=orgid_query(id),
             _source_includes=cls.fields,
             ignore=[404]
         )
-        return cls(record.get('_id'), **record.get("_source"))
+
+        orgids = set()
+        if res.get("hits", {}).get("hits", []):
+            o = res["hits"]["hits"][0]
+            return cls(o["_id"], **o["_source"])
 
     def _sort_records(self):
         self.records = [o for o in self.records if o.active] + \

@@ -6,11 +6,11 @@ bg-dark-blue white f6 pv0 ph1 br1 code mr1 mb1
 {% endif %}
 {% endmacro %}
 
-{% macro orgid_link(id, large=false) %}
-<a href="/orgid/{{ id }}" class="link dib {{orgid_classname(large)}}">{{id}}</a>
+{% macro orgid_link(id, request, large=false) %}
+<a href="{{ request.url_for('orgid_html', orgid=id) }}" class="link dib {{orgid_classname(large)}}">{{id}}</a>
 {% endmacro %}
 
-{% macro orgid_connection(id_a, id_b, large=false) %}
+{% macro orgid_connection(id_a, id_b, request, large=false) %}
 <span class="dib {{orgid_classname(large)}}">
     <a href="/orgid/{{ id_a }}" class="link di white">{{- id_a -}}</a>
     <span class="bg-lightest-blue dark-blue ph2 dib">to</span> 

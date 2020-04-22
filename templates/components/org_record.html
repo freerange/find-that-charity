@@ -1,6 +1,6 @@
 {% from 'components/org_id.html' import orgid_link %}
 
-{% macro org_record(record, sources) %}
+{% macro org_record(record, sources, request) %}
       <div class="br2 b--light-gray ba bw1 h-100 {% if not record.active %}silver bg-washed-yellow{% endif %}">
         <header class="bb b--light-gray bw1 pa3">
           <h3 class="ma0 pa0 header-font tracked-tight">
@@ -61,7 +61,7 @@
             </strong><br>
             <ul class="list ma0 pa0">
             {% for orgid in record.orgIDs %}
-              <li class="">{{orgid_link(orgid)}}</li>
+              <li class="">{{orgid_link(orgid, request)}}</li>
             {% endfor %}
             </ul>
           </p>

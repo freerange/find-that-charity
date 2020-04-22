@@ -223,5 +223,5 @@ routes = [
     Route('/source/{source}', orgid_type),
     Route('/{orgid}.json', orgid_json),
     Route('/{orgid:path}.html', orgid_html),
-    Route('/{orgid:path}', orgid_html),
+    Route('/{orgid:path}', orgid_html, name='orgid_html'),
 ]

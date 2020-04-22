@@ -99,7 +99,7 @@ routes = [
     Mount('/charity', charity.app),
     Mount('/autocomplete', autocomplete.app),
     Mount('/feeds', feeds.app),
-    Mount('/orgid', routes=orgid.routes, name='orgid'),
+    Mount('/orgid', routes=orgid.routes),
     Mount('/adddata', csvdata.app),
     Mount('/admin', routes=admin.routes, name='admin'),
 ]

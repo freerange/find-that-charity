@@ -17,7 +17,7 @@
         {% for orgid in org.get_orgids() %}
           {% set v = orgid.value %}
           <li class="dib">
-            {{ orgid_link(v) }}
+            {{ orgid_link(v, request) }}
           </li>
         {% endfor %}
       </ul>

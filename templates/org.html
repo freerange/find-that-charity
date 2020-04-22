@@ -51,14 +51,14 @@
 {% endblock %}
 
 {% block header %}
-<header class="fl w-100 ph3 ph5-ns entry-content lh-copy f4">
+<header class="fl w-100 w-50-l ph3 ph5-ns entry-content lh-copy f4">
   <h2 class="f2-ns mt4 mb0 f3 lh-solid normal">
       {{ org.name }}
   </h2>
   <div class="mv3 w-100">
-    {{ orgid_link(org.id, true) }}
+    {{ orgid_link(org.id, request, true) }}
     {% for v in org.get_orgids() if v.value != org.id %}
-    {{ orgid_link(v.value, true) }}
+    {{ orgid_link(v.value, request, true) }}
     {% endfor %}
     <a href="#" class="blue link underline-hover f7">[What are these?]</a>
   </div>
@@ -69,10 +69,10 @@
     <span class="pv1 ph2 br2 bg-green white dib mr2 mb2">Inactive</span>
     {% endif %}
     {% for k, v in org.organisationType.items() if v in key_types %}
-    <a class="pv1 ph2 br2 bg-light-gray near-black dib mr2 mb2 link" href="/orgid/type/{{ k }}">{{ v }}</a>
+    <a class="pv1 ph2 br2 bg-light-gray near-black dib mr2 mb2 link" href="{{ request.url_for('orgid_type', orgtype=k) }}">{{ v }}</a>
     {% endfor %}
     {% for k, v in org.organisationType.items() if v not in key_types %}
-    <a class="pv1 ph2 br1 bg-light-gray near-black dib mr2 mb2 link f5" href="/orgid/type/{{ k }}">{{ v }}</a>
+    <a class="pv1 ph2 br1 bg-light-gray near-black dib mr2 mb2 link f5" href="{{ request.url_for('orgid_type', orgtype=k) }}">{{ v }}</a>
     {% endfor %}
   </div>
 </header>
@@ -112,7 +112,7 @@
   <div class="w-100 flex flex-wrap">
     {% for record in org.records %}
     <div class="w-third-l w-50-m w-100 f5 pr3 pb3">
-    {{ org_record(record, sources) }}
+    {{ org_record(record, sources, request) }}
     </div>
     {% endfor %}
   </div>
@@ -200,7 +200,7 @@
   <h3 class="ma0 pa0">Data sources</h3>
 
   {% for s in org.sources if sources.get(s) %}
-  {{ data_source(sources[s], org) }}
+  {{ data_source(sources[s], org, request) }}
   {% endfor %}
 </div>
 {% endblock %}
