@@ -106,7 +106,7 @@ async def orgid_type_download(request):
     writer.writerow(list(res.keys()))
     for r in res:
         writer.writerow(r)
-    return Response(output.getvalue(), media_type='text/plain')
+    return Response(output.getvalue(), media_type='text/csv')
 
 
 async def orgid_type(request):
