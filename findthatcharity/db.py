@@ -1,7 +1,8 @@
 from collections import Counter
 
 from elasticsearch import Elasticsearch
-from sqlalchemy import create_engine, MetaData, Table, Column, String, Text, BigInteger, Integer, DateTime, JSON, Date, Boolean, select
+from sqlalchemy import create_engine, MetaData, Table, Column, String, Text, BigInteger, Integer, DateTime, Date, Boolean, select
+from sqlalchemy.dialects.postgresql import JSONB
 
 from . import settings
 from .utils import sort_out_date, sort_out_orgtypes
@@ -109,10 +110,10 @@ organisation = Table('organisation', metadata,
     Column("status", String),
     Column("parent", String),
     Column("dateModified", DateTime),
-    Column("location", JSON),
-    Column("orgIDs", JSON),
-    Column("alternateName", JSON),
-    Column("organisationType", JSON),
+    Column("location", JSONB),
+    Column("orgIDs", JSONB),
+    Column("alternateName", JSONB),
+    Column("organisationType", JSONB),
     Column("organisationTypePrimary", String),
     Column("source", String),
 )
@@ -127,7 +128,7 @@ source = Table('source', metadata,
     Column("modified", DateTime),
     Column("publisher_name", String),
     Column("publisher_website", String),
-    Column("distribution", JSON),
+    Column("distribution", JSONB),
 )
 
 organisation_links = Table('organisation_links', metadata,

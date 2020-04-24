@@ -5,6 +5,7 @@ import csv
 from starlette.routing import Route
 from starlette.responses import RedirectResponse, Response
 from elasticsearch.helpers import scan
+import sqlalchemy
 
 from ..queries import orgid_query, random_query, search_query
 from ..db import es, ORGTYPES, db_con, organisation
@@ -26,49 +27,86 @@ async def orgid_type_download(request):
         if o
     ]
     base_source = [o for o in request.path_params.get('source', "").split("+") if o]
+    query_source = request.query_params.getlist('source')
     q = request.query_params.get('q')
+    limit = request.query_params.get('limit')
+    limit = int(limit) if (limit and limit.isdigit()) else None
     active = not request.query_params.get('inactive')
 
-    query = search_query(
-        term=q,
-        base_orgtype=base_orgtype,
-        base_source=base_source,
-        orgtype=query_orgtypes,
-        source=request.query_params.getlist('source'),
-        active=active,
-        aggregate=True,
-        size=1000,
+    whereclause = []
+    if active:
+        whereclause.append(organisation.c.active==True)
+    for o in base_orgtype:
+        whereclause.append(organisation.c.organisationType.comparator.contains([o]))
+    if query_orgtypes:
+        whereclause.append(
+            sqlalchemy.and_(*[organisation.c.organisationType.comparator.contains([o]) for o in query_orgtypes])
+        )
+    if (base_source + query_source):
+        whereclause.append(
+            sqlalchemy.and_(*[organisation.c.source==o for o in base_source + query_source])
+        )
+    whereclause = sqlalchemy.and_(*whereclause) if whereclause else None
+
+    query = sqlalchemy.select(
+        columns=[
+            organisation.c.id,
+            organisation.c.name,
+            organisation.c.charityNumber,
+            organisation.c.companyNumber,
+            # organisation.c.addressLocality,
+            # organisation.c.addressRegion,
+            # organisation.c.addressCountry,
+            organisation.c.postalCode,
+            # organisation.c.telephone,
+            # organisation.c.email,
+            # organisation.c.description,
+            organisation.c.url,
+            organisation.c.latestIncome,
+            organisation.c.latestIncomeDate,
+            organisation.c.dateRegistered,
+            organisation.c.dateRemoved,
+            organisation.c.active,
+            # organisation.c.status,
+            # organisation.c.parent,
+            organisation.c.dateModified,
+            # organisation.c.location,
+            organisation.c.orgIDs,
+            # organisation.c.alternateName,
+            organisation.c.organisationType,
+            # organisation.c.organisationTypePrimary,
+            organisation.c.source,
+        ],
+        limit=limit,
+        order_by=organisation.c.id,
+        whereclause=whereclause,
     )
-    res = es.search_template(
-        index=settings.ES_INDEX,
-        doc_type=settings.ES_TYPE,
-        body=query,
-        ignore=[404],
-        scroll='5m',
-    )
-    scroll_id = res.get('_scroll_id')
+    res = db_con.execute(query)
+
+    # query = search_query(
+    #     term=q,
+    #     base_orgtype=base_orgtype,
+    #     base_source=base_source,
+    #     orgtype=query_orgtypes,
+    #     source=request.query_params.getlist('source'),
+    #     active=active,
+    #     aggregate=True,
+    #     size=1000,
+    # )
+    # res = es.search_template(
+    #     index=settings.ES_INDEX,
+    #     doc_type=settings.ES_TYPE,
+    #     body=query,
+    #     ignore=[404],
+    #     scroll='5m',
+    # )
+    # scroll_id = res.get('_scroll_id')
     output = io.StringIO()
     writer = csv.writer(output)
-    fields = [
-        "orgID",
-        "name",
-        "active",
-        "postalCode",
-        "orgIDs",
-        "alternateName",
-    ]
-    writer.writerow(fields)
-    while len(res['hits']['hits']):
-        for o in res.get("hits", {}).get("hits", []):
-            writer.writerow([
-                o["_source"].get(f)
-                for f in fields
-            ])
-        res = es.scroll(
-            scroll_id=scroll_id,
-            scroll='5m',
-        )
-    return Response(output.getvalue(), media_type='text/csv')
+    writer.writerow(list(res.keys()))
+    for r in res:
+        writer.writerow(r)
+    return Response(output.getvalue(), media_type='text/plain')
 
 
 async def orgid_type(request):
@@ -105,7 +143,7 @@ async def orgid_type(request):
         ignore=[404],
     )
 
-    download_url = request.url.replace(path=request.url.path + '.csv')
+    download_url = request.url.replace(path=request.url.path.replace(".html", '') + '.csv')
 
     return templates.TemplateResponse('orgtype.html', {
         'term': q,
