@@ -31,7 +31,7 @@ async def orgid_type_download(request):
     q = request.query_params.get('q')
     limit = request.query_params.get('limit')
     limit = int(limit) if (limit and limit.isdigit()) else None
-    active = not request.query_params.get('inactive')
+    active = request.query_params.get('exclude_inactive') is not None
 
     whereclause = []
     if active:
