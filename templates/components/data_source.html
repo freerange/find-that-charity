@@ -50,7 +50,7 @@
         <ul class="mt1 mb1 pa0 list">
         {% endif %}
             <li class="f6">
-              {{ orgid_connection(r.organisation_id_a, r.organisation_id_b) }}
+              {{ orgid_connection(r.organisation_id_a, r.organisation_id_b, request) }}
             </li>
         {% if loop.last %}
         </ul>
