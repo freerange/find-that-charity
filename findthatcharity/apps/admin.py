@@ -1,5 +1,5 @@
 import json
-from datetime import timezone
+from datetime import timezone, datetime
 
 from starlette.routing import Route
 from starlette.responses import Response
@@ -23,7 +23,7 @@ async def get_scrapes(request):
         {
             **s,
             "stats": json.loads(s['stats']),
-            "start_date": s["start_time"].date() if s["start_time"] else None,
+            "start_date": s["start_time"].date() if s["start_time"] else datetime.now().date(),
         } for s in scrapes
     
     ]
