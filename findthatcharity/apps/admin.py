@@ -23,7 +23,7 @@ async def get_scrapes(request):
         {
             **s,
             "stats": json.loads(s['stats']),
-            "start_date": s["start_time"].date() if s.get("start_time") else None,
+            "start_date": s["start_time"].date() if "start_time" in s else None,
         } for s in scrapes
     
     ]
