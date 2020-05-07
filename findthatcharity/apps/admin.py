@@ -119,9 +119,33 @@ async def get_scrape(request):
         "scrape": scrape_
     })
 
+async def db_status(request):
+    records = db_con.execute("""
+    select o."source",
+        o.scrape_id,
+        o.spider ,
+        COUNT(*) as org_count,
+        SUM(case when o.active then 1 else 0 end) as org_active_count,
+        min(o."dateModified") as "firstModified",
+        max(o."dateModified") as "lastModified"
+    from organisation o 
+    group by o."source",
+        o.scrape_id,
+        o.spider
+    """)
+
+    return templates.TemplateResponse('admin/db_status.html', {
+        'request': request,
+        'db_status': [dict(r) for r in records]
+    })
+    return JSONResponseDate({
+        "db_status": [dict(r) for r in records]
+    })
+
 routes = [
     Route('/scrapes/feed', get_scrapes_feed),
     Route('/scrapes', get_scrapes),
     Route('/scrape/{scrape_id}', get_scrape, name='get_scrape'),
+    Route('/status', db_status, name='db_status'),
 ]
 

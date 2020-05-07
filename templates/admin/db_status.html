@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% set heading = 'Database records' %}
+
+{% block content %}
+{# <pre>{{ scrapes|tojson(indent=4) }}</pre> #}
+<table class="collapse ba br2 b--black-10 pv2 ph3 mt4 f6">
+    <thead>
+        <tr class="bg-near-white ">
+            <th class="pv2 ph3 tl f6 fw6 ttu">Source</th>
+            <th class="pv2 ph3 tl f6 fw6 ttu">Scrape ID</th>
+            <th class="tr ttu fw6 pv2 ph3">Spider</th>
+            <th class="tr ttu fw6 pv2 ph3">Records</th>
+            <th class="tr ttu fw6 pv2 ph3">Active record</th>
+            <th class="tr ttu fw6 pv2 ph3">First modified</th>
+            <th class="tr ttu fw6 pv2 ph3">Last modified</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in db_status %}
+        <tr class="{% if s.errors %}bg-washed-red{% else %}striped--near-white{% endif %} ">
+            <td class="pv2 ph3 tr">{{ s.source }}</td>
+            <td class="pv2 ph3">
+                <a href="{{ request.url_for('get_scrape', scrape_id=s.scrape_id) }}">
+                    <code>{{ s.scrape_id }}</code>
+                </a>
+            </td>
+            <td class="pv2 ph3 tr">{{ s.spider }}</td>
+            <td class="pv2 ph3 tr">{{ "{:,.0f}".format(s.org_count) }}</td>
+            <td class="pv2 ph3 tr">{{ "{:,.0f}".format(s.org_active_count) }}</td>
+            <td class="pv2 ph3 tr">{{ s.firstModified }}</td>
+            <td class="pv2 ph3 tr">{{ s.lastModified }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
