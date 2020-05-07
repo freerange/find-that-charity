@@ -32,7 +32,11 @@
             <td class="pv2 ph3 tr">{{ s.spider }}</td>
             <td class="pv2 ph3 tr">{{ "{:,.0f}".format(s["items"]) }}</td>
             <td class="pv2 ph3 tr">{{ "{:,.0f}".format(s.errors) }}</td>
-            <td class="pv2 ph3 tr">{{ s.start_time.strftime("%Y-%m-%d %H:%M:%S") }}</td>
+            <td class="pv2 ph3 tr">
+                {% if s.start_time %}
+                    {{ s.start_time.strftime("%Y-%m-%d %H:%M:%S") }}
+                {% endif %}
+            </td>
             <td class="pv2 ph3 tr">
                 {% if s.finish_time %}
                     {{ s.finish_time.strftime("%Y-%m-%d %H:%M:%S") }}
