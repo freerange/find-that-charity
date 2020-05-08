@@ -6,9 +6,10 @@ from starlette.responses import Response
 from sqlalchemy import select, desc
 from feedgen.feed import FeedGenerator
 
-from ..db import db_con, scrape
+from ..db import db_con, scrape, es
 from ..utils import JSONResponseDate
 from ..templates import templates
+from .. import settings
 
 async def get_scrapes(request):
     scrapes = db_con.execute(
@@ -134,12 +135,40 @@ async def db_status(request):
         o.spider
     """)
 
+    db_results = {
+        "total": 0,
+        "records": [dict(r) for r in records],
+    }
+    db_results["total"] = sum([r['org_count'] for r in db_results["records"]])
+
+    es_results = es.search(
+        index=settings.ES_INDEX,
+        doc_type=settings.ES_TYPE,
+        size=0,
+        body={
+            "aggs" : {
+                "sources" : {
+                    "terms" : { "field" : "sources.keyword" } 
+                }
+            },
+        }
+    )
+    es_results = {
+        "total": es_results['hits']['total'],
+        "sources": {
+            b['key']: b['doc_count']
+            for b in es_results['aggregations']['sources']['buckets']
+        }
+    }
+
     return templates.TemplateResponse('admin/db_status.html', {
         'request': request,
-        'db_status': [dict(r) for r in records]
+        'db_status': db_results,
+        "es_status": es_results,
     })
     return JSONResponseDate({
-        "db_status": [dict(r) for r in records]
+        "db_status": db_results,
+        "es_status": es_results,
     })
 
 routes = [
