@@ -23,7 +23,7 @@
             <td class="pv2 ph3 f5 b" colspan="8">{{ d.strftime("%d %B %Y") }}</td>
         </tr>
         {% for s in date_group %}
-        <tr class="{% if s.errors %}bg-washed-red{% else %}striped--near-white{% endif %} ">
+        <tr class="{% if s.errors or (s['items'] < 1) or (s.finish_reason=='errors') %}bg-washed-red{% else %}striped--near-white{% endif %} ">
             <td class="pv2 ph3">
                 <a href="{{ request.url_for('get_scrape', scrape_id=s.id) }}">
                     <code>{{ s.id }}</code>
