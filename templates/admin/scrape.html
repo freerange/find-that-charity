@@ -6,10 +6,12 @@
 <a href="{{ request.url_for('get_scrapes') }}" class="blue link underline">&lt; Back to scrapes</a>
 <h3>{{ scrape.spider }}</h3>
 <table class="collapse ba br2 b--black-10 pv2 ph3 mt4 f5">
+    {% if scrape.start_time %}
     <tr class="striped--near-white">
         <th class="pv2 ph3 tl" colspan="2">Started</th>
         <td class="pv2 ph3 tr">{{ scrape.start_time.strftime("%Y-%m-%d %H:%M:%S") }}</td>
     </tr>
+    {% endif %}
     {% if scrape.finish_time %}
     <tr class="striped--near-white">
         <th class="pv2 ph3 tl" colspan="2">Finished</th>
@@ -43,4 +45,6 @@
     </tr>
     {% endfor %}
 </table>
+<h4>Log</h4>
+<pre class="ws-normal f6 pa2 bg-near-black yellow b" style="white-space: pre-line;word-wrap: break-word;">{{ scrape.log }}</pre>
 {% endblock %}

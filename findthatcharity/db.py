@@ -197,4 +197,5 @@ scrape = Table('scrape', metadata,
     Column("errors", Integer),
     Column("start_time", DateTime),
     Column("finish_time", DateTime),
+    Column("log", Text),
 )

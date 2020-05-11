@@ -15,12 +15,13 @@
             <th class="tr ttu fw6 pv2 ph3">Finish time</th>
             <th class="tr ttu fw6 pv2 ph3">Time taken</th>
             <th class="tr ttu fw6 pv2 ph3">Finish reason</th>
+            <th class="tr ttu fw6 pv2 ph3">Log length</th>
         </tr>
     </thead>
     <tbody>
         {% for d, date_group in scrapes|groupby('start_date')|sort(reverse=true) %}
         <tr class="bg-near-white">
-            <td class="pv2 ph3 f5 b" colspan="8">{{ d.strftime("%d %B %Y") }}</td>
+            <td class="pv2 ph3 f5 b" colspan="9">{{ d.strftime("%d %B %Y") }}</td>
         </tr>
         {% for s in date_group %}
         <tr class="{% if s.errors or (s['items'] < 1) or (s.finish_reason=='errors') %}bg-washed-red{% else %}striped--near-white{% endif %} ">
@@ -48,6 +49,7 @@
                 {% endif %}
             </td>
             <td class="pv2 ph3 tr">{{ s.finish_reason }}</td>
+            <td class="pv2 ph3 tr">{% if s.log %}{{ "{:,.0f}".format(s.log|length) }}{% endif %}</td>
         </tr>
         {% endfor %}
         {% endfor %}
